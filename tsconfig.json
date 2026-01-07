@@ -1,0 +1,11 @@
+{
+  "extends": "@tsconfig/node22/tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "noEmit": true,
+    "isolatedDeclarations": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["packages/*/src", "packages/*/test"],
+  "exclude": ["**/dist", "**/node_modules"]
+}

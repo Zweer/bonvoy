@@ -25,6 +25,7 @@ Existing release tools have frustrating limitations:
 - ⚡ **Zero config** - Works immediately for npm + GitHub
 - 🏷️ **Independent versioning** - Each package has its own version
 - 📝 **Conventional commits** - Automatic changelog from commit messages
+- 🛡️ **Runtime validation** - Config validated with Zod for type safety
 
 ## Installation
 
@@ -77,14 +78,22 @@ export default {
   commitMessage: 'chore: release {packages}',
   tagFormat: '{name}@{version}',
   changelog: {
+    global: false,  // Generate global changelog at repo root
     sections: {
       feat: '✨ Features',
       fix: '🐛 Bug Fixes',
       perf: '⚡ Performance',
+      docs: '📚 Documentation',
+      breaking: '💥 Breaking Changes',
     },
   },
+  workflow: 'direct',  // or 'pr'
+  baseBranch: 'main',
+  plugins: [],  // Additional plugins
 };
 ```
+
+Configuration is validated at runtime using [Zod](https://zod.dev) for type safety and helpful error messages.
 
 ## GitHub Actions
 
@@ -121,7 +130,7 @@ jobs:
 
 | Package | Description |
 |---------|-------------|
-| `@bonvoy/core` | Hook system, CLI, config loading |
+| `@bonvoy/core` | Hook system, CLI, config loading, schema validation |
 | `@bonvoy/plugin-conventional` | Conventional commits parser (default) |
 | `@bonvoy/plugin-git` | Git commit, tag, push (default) |
 | `@bonvoy/plugin-npm` | npm publish with OIDC (default) |

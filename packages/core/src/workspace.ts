@@ -1,6 +1,6 @@
 import { relative, resolve } from 'node:path';
 
-import type { Package } from './types.js';
+import type { Package } from './schema.js';
 
 export function assignCommitsToPackages(
   commits: Array<{ files: string[] }>,

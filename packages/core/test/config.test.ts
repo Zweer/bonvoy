@@ -151,6 +151,19 @@ describe('config', () => {
       expect(mockExplorer.search).toHaveBeenCalledWith('/custom/path');
     });
 
+    it('should throw error for invalid config with Zod validation', async () => {
+      const mockExplorer = {
+        search: vi.fn().mockResolvedValue({
+          config: { versioning: 'invalid-value' }, // Invalid enum value
+          filepath: '/test/bonvoy.config.js',
+        }),
+        load: vi.fn(),
+      };
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
+
+      await expect(loadConfig('/test')).rejects.toThrow('Invalid configuration:');
+    });
+
     it('should test TOML loader function', () => {
       const mockExplorer = {
         search: vi.fn().mockResolvedValue(null),

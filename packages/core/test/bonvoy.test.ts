@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { Bonvoy } from '../src/bonvoy.js';
-import type { BonvoyPlugin } from '../src/types.js';
+import type { BonvoyPlugin } from '../src/schema.js';
 
 describe('Bonvoy', () => {
   it('should create instance with default config', () => {

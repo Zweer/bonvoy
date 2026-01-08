@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { BonvoyConfig, BonvoyPlugin, Context, Package } from '../src/types.js';
+import type { BonvoyConfig, BonvoyPlugin, Context, Package } from '../src/schema.js';
 
 describe('types', () => {
   it('should define BonvoyConfig interface', () => {

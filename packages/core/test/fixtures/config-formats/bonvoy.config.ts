@@ -1,4 +1,4 @@
-import type { BonvoyConfig } from '../../../src/types.js';
+import type { BonvoyConfig } from '../../../src/schema.js';
 
 const config: BonvoyConfig = {
   versioning: 'independent',

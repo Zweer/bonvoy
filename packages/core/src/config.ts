@@ -2,27 +2,9 @@ import { parse as parseToml } from '@iarna/toml';
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
 
-import type { BonvoyConfig } from './types.js';
+import { type BonvoyConfig, BonvoyConfigSchema } from './schema.js';
 
-const DEFAULT_CONFIG: BonvoyConfig = {
-  versioning: 'independent',
-  rootVersionStrategy: 'max',
-  commitMessage: 'chore: release {packages}',
-  tagFormat: '{name}@{version}',
-  changelog: {
-    global: false,
-    sections: {
-      feat: '✨ Features',
-      fix: '🐛 Bug Fixes',
-      perf: '⚡ Performance',
-      docs: '📚 Documentation',
-      breaking: '💥 Breaking Changes',
-    },
-  },
-  workflow: 'direct',
-  baseBranch: 'main',
-  plugins: [],
-};
+const DEFAULT_CONFIG = BonvoyConfigSchema.parse({});
 
 export async function loadConfig(
   rootPath: string = process.cwd(),
@@ -51,13 +33,20 @@ export async function loadConfig(
   try {
     const result = configPath ? await explorer.load(configPath) : await explorer.search(rootPath);
     const userConfig = result?.config || {};
-    return mergeConfig(DEFAULT_CONFIG, userConfig);
-  } catch {
-    // If any error occurs, return default config
+
+    // Validate user config with Zod
+    const validatedConfig = BonvoyConfigSchema.parse(userConfig) as BonvoyConfig;
+    return mergeConfig(DEFAULT_CONFIG, validatedConfig);
+  } catch (error) {
+    // If validation fails, throw with helpful message
+    if (error instanceof Error && 'issues' in error) {
+      throw new Error(`Invalid configuration: ${error.message}`);
+    }
+    // If any other error occurs, return default config
     return DEFAULT_CONFIG;
   }
 }
 
 export function mergeConfig(base: BonvoyConfig, override: Partial<BonvoyConfig>): BonvoyConfig {
-  return deepmerge(base, override) as BonvoyConfig;
+  return deepmerge(base, override as BonvoyConfig) as BonvoyConfig;
 }

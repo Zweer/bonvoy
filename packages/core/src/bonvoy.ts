@@ -1,6 +1,6 @@
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
-import type { BonvoyConfig, BonvoyPlugin, ReleaseHooks } from './types.js';
+import type { BonvoyConfig, BonvoyPlugin, ReleaseHooks } from './schema.js';
 
 export class Bonvoy {
   public hooks: ReleaseHooks;

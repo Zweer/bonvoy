@@ -1,11 +1,13 @@
-import path from 'node:path';
-
 import { cosmiconfig } from 'cosmiconfig';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loadConfig, mergeConfig } from '../src/config.js';
 
 vi.mock('cosmiconfig');
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: Required for test mocking
+type MockExplorer = any;
 
 describe('config', () => {
   beforeEach(() => {
@@ -23,7 +25,7 @@ describe('config', () => {
         search: vi.fn().mockResolvedValue(null),
         load: vi.fn(),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       const config = await loadConfig('/test');
 
@@ -56,7 +58,7 @@ describe('config', () => {
         }),
         load: vi.fn(),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       const config = await loadConfig('/test');
 
@@ -73,7 +75,7 @@ describe('config', () => {
           filepath: '/custom/config.js',
         }),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       const config = await loadConfig('/test', '/custom/config.js');
 
@@ -88,7 +90,7 @@ describe('config', () => {
         search: vi.fn().mockRejectedValue(new Error('Parse error')),
         load: vi.fn(),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       const config = await loadConfig('/test');
 
@@ -100,7 +102,7 @@ describe('config', () => {
         search: vi.fn(),
         load: vi.fn().mockRejectedValue(new Error('File not found')),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       const config = await loadConfig('/test', '/nonexistent/config.js');
 
@@ -112,7 +114,7 @@ describe('config', () => {
         search: vi.fn().mockResolvedValue(null),
         load: vi.fn(),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       await loadConfig('/test');
 
@@ -142,7 +144,7 @@ describe('config', () => {
         search: vi.fn().mockResolvedValue(null),
         load: vi.fn(),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       await loadConfig('/custom/path');
 
@@ -154,7 +156,7 @@ describe('config', () => {
         search: vi.fn().mockResolvedValue(null),
         load: vi.fn(),
       };
-      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
 
       loadConfig('/test');
 

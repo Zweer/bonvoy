@@ -44,7 +44,7 @@ export async function loadConfig(
       'package.json',
     ],
     loaders: {
-      '.toml': (filepath, content) => parseToml(content),
+      '.toml': (_filepath, content) => parseToml(content),
     },
   });
 

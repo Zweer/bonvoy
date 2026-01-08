@@ -1,0 +1,15 @@
+{
+  "name": "test-package",
+  "version": "1.0.0",
+  "bonvoy": {
+    "versioning": "independent",
+    "commitMessage": "chore: release {packages}",
+    "tagFormat": "{name}@{version}",
+    "changelog": {
+      "sections": {
+        "feat": "✨ Features",
+        "fix": "🐛 Bug Fixes"
+      }
+    }
+  }
+}

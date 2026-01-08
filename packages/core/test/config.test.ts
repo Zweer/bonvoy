@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { cosmiconfig } from 'cosmiconfig';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,6 +21,7 @@ describe('config', () => {
     it('should return default config when no config file exists', async () => {
       const mockExplorer = {
         search: vi.fn().mockResolvedValue(null),
+        load: vi.fn(),
       };
       vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
 
@@ -51,6 +54,7 @@ describe('config', () => {
           config: { versioning: 'fixed', workflow: 'pr' },
           filepath: '/test/bonvoy.config.js',
         }),
+        load: vi.fn(),
       };
       vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
 
@@ -61,9 +65,28 @@ describe('config', () => {
       expect(config.baseBranch).toBe('main'); // Default preserved
     });
 
+    it('should load custom config file when configPath is provided', async () => {
+      const mockExplorer = {
+        search: vi.fn(),
+        load: vi.fn().mockResolvedValue({
+          config: { versioning: 'fixed', commitMessage: 'custom: release all' },
+          filepath: '/custom/config.js',
+        }),
+      };
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+
+      const config = await loadConfig('/test', '/custom/config.js');
+
+      expect(mockExplorer.load).toHaveBeenCalledWith('/custom/config.js');
+      expect(mockExplorer.search).not.toHaveBeenCalled();
+      expect(config.versioning).toBe('fixed');
+      expect(config.commitMessage).toBe('custom: release all');
+    });
+
     it('should handle cosmiconfig errors and return default', async () => {
       const mockExplorer = {
         search: vi.fn().mockRejectedValue(new Error('Parse error')),
+        load: vi.fn(),
       };
       vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
 
@@ -72,9 +95,22 @@ describe('config', () => {
       expect(config.versioning).toBe('independent'); // Default
     });
 
+    it('should handle custom config file errors and return default', async () => {
+      const mockExplorer = {
+        search: vi.fn(),
+        load: vi.fn().mockRejectedValue(new Error('File not found')),
+      };
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
+
+      const config = await loadConfig('/test', '/nonexistent/config.js');
+
+      expect(config.versioning).toBe('independent'); // Default
+    });
+
     it('should configure cosmiconfig with all supported formats', async () => {
       const mockExplorer = {
         search: vi.fn().mockResolvedValue(null),
+        load: vi.fn(),
       };
       vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
 
@@ -104,6 +140,7 @@ describe('config', () => {
     it('should call explorer.search with correct path', async () => {
       const mockExplorer = {
         search: vi.fn().mockResolvedValue(null),
+        load: vi.fn(),
       };
       vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
 
@@ -115,6 +152,7 @@ describe('config', () => {
     it('should test TOML loader function', () => {
       const mockExplorer = {
         search: vi.fn().mockResolvedValue(null),
+        load: vi.fn(),
       };
       vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as any);
 

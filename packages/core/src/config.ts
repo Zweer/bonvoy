@@ -24,7 +24,10 @@ const DEFAULT_CONFIG: BonvoyConfig = {
   plugins: [],
 };
 
-export async function loadConfig(rootPath: string = process.cwd()): Promise<BonvoyConfig> {
+export async function loadConfig(
+  rootPath: string = process.cwd(),
+  configPath?: string,
+): Promise<BonvoyConfig> {
   const explorer = cosmiconfig('bonvoy', {
     searchPlaces: [
       'bonvoy.config.js',
@@ -46,7 +49,7 @@ export async function loadConfig(rootPath: string = process.cwd()): Promise<Bonv
   });
 
   try {
-    const result = await explorer.search(rootPath);
+    const result = configPath ? await explorer.load(configPath) : await explorer.search(rootPath);
     const userConfig = result?.config || {};
     return mergeConfig(DEFAULT_CONFIG, userConfig);
   } catch {

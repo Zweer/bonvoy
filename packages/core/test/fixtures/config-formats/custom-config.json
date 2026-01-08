@@ -1,0 +1,11 @@
+{
+  "versioning": "fixed",
+  "commitMessage": "custom: release all packages",
+  "tagFormat": "v{version}",
+  "changelog": {
+    "sections": {
+      "feat": "🚀 New Features",
+      "fix": "🔧 Fixes"
+    }
+  }
+}

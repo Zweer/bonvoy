@@ -1,0 +1,907 @@
+{
+  "type": "object",
+  "properties": {
+    "versioning": {
+      "description": "Versioning strategy for packages",
+      "default": "independent",
+      "enum": ["fixed", "independent"],
+      "type": "string",
+      "title": "versioning"
+    },
+    "rootVersionStrategy": {
+      "description": "Strategy for root package versioning",
+      "default": "max",
+      "enum": ["max", "none", "patch"],
+      "type": "string",
+      "title": "rootVersionStrategy"
+    },
+    "commitMessage": {
+      "description": "Git commit message template",
+      "default": "chore: release {packages}",
+      "type": "string",
+      "title": "commitMessage"
+    },
+    "tagFormat": {
+      "description": "Git tag format template",
+      "default": "{name}@{version}",
+      "type": "string",
+      "title": "tagFormat"
+    },
+    "changelog": {
+      "description": "Changelog configuration",
+      "type": "object",
+      "properties": {
+        "global": {
+          "description": "Generate global changelog at repo root",
+          "default": false,
+          "type": "boolean",
+          "title": "global"
+        },
+        "sections": {
+          "$ref": "#/definitions/Record%3Cstring%2Cstring%3E",
+          "description": "Changelog section mappings",
+          "title": "sections"
+        }
+      },
+      "defaultProperties": [],
+      "title": "changelog"
+    },
+    "workflow": {
+      "description": "Release workflow type",
+      "default": "direct",
+      "enum": ["direct", "pr"],
+      "type": "string",
+      "title": "workflow"
+    },
+    "baseBranch": {
+      "description": "Base branch for releases",
+      "default": "main",
+      "type": "string",
+      "title": "baseBranch"
+    },
+    "plugins": {
+      "description": "Plugin configuration",
+      "default": [],
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "array",
+            "items": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            ],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "title": "plugins"
+    },
+    "hooks": {
+      "$ref": "#/definitions/Partial%3CReleaseHooks%3E",
+      "description": "Custom hook implementations",
+      "title": "hooks"
+    }
+  },
+  "defaultProperties": [],
+  "definitions": {
+    "Record<string,string>": {
+      "title": "Record<string,string>",
+      "type": "object",
+      "defaultProperties": []
+    },
+    "Partial<ReleaseHooks>": {
+      "title": "Partial<ReleaseHooks>",
+      "type": "object",
+      "properties": {
+        "modifyConfig": {
+          "$ref": "#/definitions/Hook%3C%5BBonvoyConfig%5D%2CBonvoyConfig%2CUnsetAdditionalOptions%3E",
+          "title": "modifyConfig"
+        },
+        "beforeShipIt": {
+          "$ref": "#/definitions/Hook%3C%5BContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "beforeShipIt"
+        },
+        "validateRepo": {
+          "$ref": "#/definitions/Hook%3C%5BContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "validateRepo"
+        },
+        "getVersion": {
+          "$ref": "#/definitions/Hook%3C%5BContext%5D%2CSemverBump%2CUnsetAdditionalOptions%3E",
+          "title": "getVersion"
+        },
+        "version": {
+          "$ref": "#/definitions/Hook%3C%5BVersionContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "version"
+        },
+        "afterVersion": {
+          "$ref": "#/definitions/Hook%3C%5BVersionContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "afterVersion"
+        },
+        "beforeChangelog": {
+          "$ref": "#/definitions/Hook%3C%5BChangelogContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "beforeChangelog"
+        },
+        "generateChangelog": {
+          "$ref": "#/definitions/Hook%3C%5BChangelogContext%5D%2Cstring%2CUnsetAdditionalOptions%3E",
+          "title": "generateChangelog"
+        },
+        "afterChangelog": {
+          "$ref": "#/definitions/Hook%3C%5BChangelogContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "afterChangelog"
+        },
+        "beforePublish": {
+          "$ref": "#/definitions/Hook%3C%5BPublishContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "beforePublish"
+        },
+        "publish": {
+          "$ref": "#/definitions/Hook%3C%5BPublishContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "publish"
+        },
+        "afterPublish": {
+          "$ref": "#/definitions/Hook%3C%5BPublishContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "afterPublish"
+        },
+        "beforeRelease": {
+          "$ref": "#/definitions/Hook%3C%5BReleaseContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "beforeRelease"
+        },
+        "makeRelease": {
+          "$ref": "#/definitions/Hook%3C%5BReleaseContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "makeRelease"
+        },
+        "afterRelease": {
+          "$ref": "#/definitions/Hook%3C%5BReleaseContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "afterRelease"
+        },
+        "beforeCreatePR": {
+          "$ref": "#/definitions/Hook%3C%5BPRContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "beforeCreatePR"
+        },
+        "createPR": {
+          "$ref": "#/definitions/Hook%3C%5BPRContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "createPR"
+        },
+        "afterCreatePR": {
+          "$ref": "#/definitions/Hook%3C%5BPRContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E",
+          "title": "afterCreatePR"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[BonvoyConfig],BonvoyConfig,UnsetAdditionalOptions>": {
+      "title": "Hook<[BonvoyConfig],BonvoyConfig,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BBonvoyConfig%5D%2CBonvoyConfig%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[BonvoyConfig],BonvoyConfig,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[BonvoyConfig],BonvoyConfig,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "FullTap": {
+      "title": "FullTap",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "before": {
+              "type": "string",
+              "title": "before"
+            },
+            "stage": {
+              "type": "number",
+              "title": "stage"
+            }
+          },
+          "defaultProperties": []
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "name"
+            }
+          },
+          "defaultProperties": [],
+          "required": ["name"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": ["async", "promise", "sync"],
+              "type": "string",
+              "title": "type"
+            },
+            "fn": {
+              "$ref": "#/definitions/Function",
+              "title": "fn"
+            }
+          },
+          "defaultProperties": [],
+          "required": ["fn", "type"]
+        }
+      ]
+    },
+    "Function": {
+      "title": "Function",
+      "type": "object",
+      "properties": {
+        "prototype": {
+          "title": "prototype"
+        },
+        "length": {
+          "type": "number",
+          "title": "length"
+        },
+        "arguments": {
+          "title": "arguments"
+        },
+        "caller": {
+          "$ref": "#/definitions/Function",
+          "title": "caller"
+        },
+        "name": {
+          "type": "string",
+          "title": "name"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["arguments", "caller", "length", "name", "prototype"]
+    },
+    "Hook<[Context],void,UnsetAdditionalOptions>": {
+      "title": "Hook<[Context],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[Context],void,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[Context],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[Context],SemverBump,UnsetAdditionalOptions>": {
+      "title": "Hook<[Context],SemverBump,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BContext%5D%2CSemverBump%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[Context],SemverBump,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[Context],SemverBump,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[VersionContext],void,UnsetAdditionalOptions>": {
+      "title": "Hook<[VersionContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BVersionContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[VersionContext],void,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[VersionContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[ChangelogContext],void,UnsetAdditionalOptions>": {
+      "title": "Hook<[ChangelogContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BChangelogContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[ChangelogContext],void,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[ChangelogContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[ChangelogContext],string,UnsetAdditionalOptions>": {
+      "title": "Hook<[ChangelogContext],string,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BChangelogContext%5D%2Cstring%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[ChangelogContext],string,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[ChangelogContext],string,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[PublishContext],void,UnsetAdditionalOptions>": {
+      "title": "Hook<[PublishContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BPublishContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[PublishContext],void,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[PublishContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[ReleaseContext],void,UnsetAdditionalOptions>": {
+      "title": "Hook<[ReleaseContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BReleaseContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[ReleaseContext],void,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[ReleaseContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    },
+    "Hook<[PRContext],void,UnsetAdditionalOptions>": {
+      "title": "Hook<[PRContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "interceptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HookInterceptor%3C%5BPRContext%5D%2Cvoid%2CUnsetAdditionalOptions%3E"
+          },
+          "title": "interceptors"
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FullTap"
+          },
+          "title": "taps"
+        }
+      },
+      "defaultProperties": [],
+      "required": ["interceptors", "name", "taps"]
+    },
+    "HookInterceptor<[PRContext],void,UnsetAdditionalOptions>": {
+      "title": "HookInterceptor<[PRContext],void,UnsetAdditionalOptions>",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name"
+        },
+        "tap": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "tap"
+        },
+        "call": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "call"
+        },
+        "loop": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "loop"
+        },
+        "error": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "error"
+        },
+        "result": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "result"
+        },
+        "done": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "done"
+        },
+        "register": {
+          "type": "object",
+          "defaultProperties": [],
+          "title": "register"
+        }
+      },
+      "defaultProperties": []
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bonvoy.dev/schema.json",
+  "title": "bonvoy Configuration",
+  "description": "Configuration schema for bonvoy release automation tool"
+}

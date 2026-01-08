@@ -17,5 +17,5 @@ export async function generateSchema(outputPath: string): Promise<void> {
   schema.description = 'Configuration schema for bonvoy release automation tool';
 
   // Write schema file
-  await writeFile(outputPath, JSON.stringify(schema, null, 2));
+  await writeFile(outputPath, `${JSON.stringify(schema, null, 2)}\n`);
 }

@@ -1,15 +1,12 @@
 import { writeFile } from 'node:fs/promises';
 
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
 
 import { BonvoyConfigSchema } from './schema.js';
 
 export async function generateSchema(outputPath: string): Promise<void> {
-  // Generate JSON Schema from Zod schema
-  const schema = zodToJsonSchema(BonvoyConfigSchema as never, 'BonvoyConfig') as Record<
-    string,
-    unknown
-  >;
+  // Generate JSON Schema from Zod schema using z.toJSONSchema
+  const schema = z.toJSONSchema(BonvoyConfigSchema) as Record<string, unknown>;
 
   // Add metadata
   schema.$id = 'https://bonvoy.dev/schema.json';

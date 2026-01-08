@@ -6,6 +6,11 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary'],
       include: ['packages/**/src/**/*.ts'],
+      exclude: [
+        '**/test/fixtures/**/*',
+        'packages/cli/src/index.ts',
+        'packages/core/src/index.ts', // Re-export only file
+      ],
     },
   },
 });

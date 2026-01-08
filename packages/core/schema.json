@@ -1,9 +1,99 @@
 {
-  "$ref": "#/definitions/BonvoyConfig",
-  "definitions": {
-    "BonvoyConfig": {}
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "versioning": {
+      "default": "independent",
+      "type": "string",
+      "enum": ["independent", "fixed"]
+    },
+    "rootVersionStrategy": {
+      "default": "max",
+      "type": "string",
+      "enum": ["max", "patch", "none"]
+    },
+    "commitMessage": {
+      "default": "chore: release {packages}",
+      "type": "string"
+    },
+    "tagFormat": {
+      "default": "{name}@{version}",
+      "type": "string"
+    },
+    "changelog": {
+      "default": {
+        "global": false,
+        "sections": {
+          "feat": "✨ Features",
+          "fix": "🐛 Bug Fixes",
+          "perf": "⚡ Performance",
+          "docs": "📚 Documentation",
+          "breaking": "💥 Breaking Changes"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "global": {
+          "default": false,
+          "type": "boolean"
+        },
+        "sections": {
+          "default": {
+            "feat": "✨ Features",
+            "fix": "🐛 Bug Fixes",
+            "perf": "⚡ Performance",
+            "docs": "📚 Documentation",
+            "breaking": "💥 Breaking Changes"
+          },
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["global", "sections"],
+      "additionalProperties": false
+    },
+    "workflow": {
+      "default": "direct",
+      "type": "string",
+      "enum": ["direct", "pr"]
+    },
+    "baseBranch": {
+      "default": "main",
+      "type": "string"
+    },
+    "plugins": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            ]
+          }
+        ]
+      }
+    }
   },
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
   "$id": "https://bonvoy.dev/schema.json",
   "title": "bonvoy Configuration",
   "description": "Configuration schema for bonvoy release automation tool"

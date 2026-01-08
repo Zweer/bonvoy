@@ -164,6 +164,43 @@ describe('config', () => {
       await expect(loadConfig('/test')).rejects.toThrow('Invalid configuration:');
     });
 
+    it('should return default config for non-validation errors', async () => {
+      const mockExplorer = {
+        search: vi.fn().mockRejectedValue(new Error('Network error')),
+        load: vi.fn(),
+      };
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
+
+      const config = await loadConfig('/test');
+
+      expect(config.versioning).toBe('independent'); // Should return default
+    });
+
+    it('should return default config for non-Zod errors during parsing', async () => {
+      const mockExplorer = {
+        search: vi.fn().mockResolvedValue({
+          config: { versioning: 'independent' },
+          filepath: '/test/bonvoy.config.js',
+        }),
+        load: vi.fn(),
+      };
+      vi.mocked(cosmiconfig).mockReturnValue(mockExplorer as MockExplorer);
+
+      // Create a spy on BonvoyConfigSchema.parse to throw a non-Zod error
+      const { BonvoyConfigSchema } = await import('../src/schema.js');
+      const parseSpy = vi.spyOn(BonvoyConfigSchema, 'parse').mockImplementation(() => {
+        const error = new Error('Generic parsing error');
+        // Ensure it doesn't have 'issues' property like Zod errors do
+        delete (error as unknown as Record<string, unknown>).issues;
+        throw error;
+      });
+
+      const config = await loadConfig('/test');
+
+      expect(config.versioning).toBe('independent'); // Should return default
+      parseSpy.mockRestore();
+    });
+
     it('should test TOML loader function', () => {
       const mockExplorer = {
         search: vi.fn().mockResolvedValue(null),

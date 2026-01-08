@@ -1,25 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
 
 import { BonvoyConfigSchema } from '../src/schema.js';
 
 describe('schema generation', () => {
   it('should generate valid JSON schema from Zod schema', () => {
-    const schema = zodToJsonSchema(BonvoyConfigSchema as never, 'BonvoyConfig');
+    const schema = z.toJSONSchema(BonvoyConfigSchema);
 
     expect(schema).toBeDefined();
-    expect('$ref' in schema ? schema.$ref : undefined).toBe('#/definitions/BonvoyConfig');
-    expect(schema.definitions).toBeDefined();
-    expect(schema.definitions?.BonvoyConfig).toBeDefined();
+    expect(schema.type).toBe('object');
+    expect(schema.properties).toBeDefined();
+    expect(schema.properties?.versioning).toBeDefined();
   });
 
   it('should include schema metadata', () => {
-    const schema = zodToJsonSchema(BonvoyConfigSchema as never, 'BonvoyConfig');
+    const schema = z.toJSONSchema(BonvoyConfigSchema);
 
-    expect('$schema' in schema ? schema.$schema : undefined).toBe(
-      'http://json-schema.org/draft-07/schema#',
-    );
-    expect(schema.definitions).toBeDefined();
+    expect(schema.$schema).toBe('https://json-schema.org/draft/2020-12/schema');
+    expect(schema.type).toBe('object');
   });
 
   it('should validate correct config', () => {

@@ -69,10 +69,4 @@ describe('Bonvoy', () => {
     expect(bonvoy.hooks.createPR).toBeDefined();
     expect(bonvoy.hooks.afterCreatePR).toBeDefined();
   });
-
-  it('should throw error when run is called', async () => {
-    const bonvoy = new Bonvoy();
-
-    await expect(bonvoy.run()).rejects.toThrow('Not implemented yet');
-  });
 });

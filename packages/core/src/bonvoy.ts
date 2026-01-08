@@ -48,9 +48,4 @@ export class Bonvoy {
     this.plugins.push(plugin);
     plugin.apply(this);
   }
-
-  async run(): Promise<void> {
-    // Main execution flow - will be implemented
-    throw new Error('Not implemented yet');
-  }
 }

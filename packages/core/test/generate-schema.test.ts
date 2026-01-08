@@ -31,9 +31,9 @@ describe('generateSchema', () => {
       'description',
       'Configuration schema for bonvoy release automation tool',
     );
-    expect(schema).toHaveProperty('$ref', '#/definitions/BonvoyConfig');
-    expect(schema).toHaveProperty('definitions');
-    expect(schema.definitions).toHaveProperty('BonvoyConfig');
+    expect(schema).toHaveProperty('type', 'object');
+    expect(schema).toHaveProperty('properties');
+    expect(schema.properties).toHaveProperty('versioning');
   });
 
   it('should generate valid JSON that can be parsed', async () => {

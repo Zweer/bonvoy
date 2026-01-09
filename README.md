@@ -132,17 +132,72 @@ jobs:
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@bonvoy/core` | Hook system, CLI, config loading, schema validation |
-| `@bonvoy/plugin-conventional` | Conventional commits parser (default) |
-| `@bonvoy/plugin-git` | Git commit, tag, push (default) |
-| `@bonvoy/plugin-npm` | npm publish with OIDC (default) |
-| `@bonvoy/plugin-github` | GitHub releases (default) |
-| `@bonvoy/plugin-changelog` | Changelog generation (default) |
-| `@bonvoy/plugin-gitlab` | GitLab releases (optional) |
-| `@bonvoy/plugin-slack` | Slack notifications (optional) |
-| `@bonvoy/plugin-changeset` | Changeset-style workflow (optional) |
+| Package | Description | Status |
+|---------|-------------|--------|
+| `@bonvoy/core` | Hook system, CLI, config loading, schema validation | ✅ **Implemented** |
+| `@bonvoy/plugin-conventional` | Conventional commits parser (default) | ✅ **Implemented** |
+| `@bonvoy/plugin-git` | Git commit, tag, push (default) | 🚧 Planned |
+| `@bonvoy/plugin-npm` | npm publish with OIDC (default) | 🚧 Planned |
+| `@bonvoy/plugin-github` | GitHub releases (default) | 🚧 Planned |
+| `@bonvoy/plugin-changelog` | Changelog generation (default) | 🚧 Planned |
+| `@bonvoy/plugin-gitlab` | GitLab releases (optional) | 🚧 Planned |
+| `@bonvoy/plugin-slack` | Slack notifications (optional) | 🚧 Planned |
+| `@bonvoy/plugin-changeset` | Changeset-style workflow (optional) | 🚧 Planned |
+
+## Plugin: Conventional Commits
+
+The `@bonvoy/plugin-conventional` analyzes commit messages to determine semantic version bumps automatically.
+
+### Features
+
+- ✅ **Robust parsing** with [`conventional-commits-parser`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-commits-parser)
+- ✅ **Breaking changes** support (`feat!:` and `BREAKING CHANGE:`)
+- ✅ **Configurable presets** (angular, conventional, atom, custom)
+- ✅ **Monorepo-ready** with per-package commit filtering
+- ✅ **Graceful fallbacks** for malformed commits
+
+### Supported Commit Types
+
+| Type | Bump | Example |
+|------|------|---------|
+| `feat` | `minor` | `feat: add new API endpoint` |
+| `fix` | `patch` | `fix: resolve memory leak` |
+| `perf` | `patch` | `perf: optimize database queries` |
+| `feat!` | `major` | `feat!: remove deprecated API` |
+| `BREAKING CHANGE` | `major` | Any commit with `BREAKING CHANGE:` in body |
+
+### Configuration
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-conventional', {
+      preset: 'angular', // 'angular' | 'conventional' | 'atom' | 'custom'
+      types: {
+        // Custom types (when preset: 'custom')
+        feat: 'minor',
+        fix: 'patch',
+        breaking: 'major'
+      }
+    }]
+  ]
+};
+```
+
+### Examples
+
+```bash
+# These commits will trigger releases:
+git commit -m "feat: add user authentication"     # → minor bump
+git commit -m "fix: resolve login bug"            # → patch bump  
+git commit -m "feat!: remove legacy API"          # → major bump
+git commit -m "perf: optimize queries"            # → patch bump
+
+# These commits will NOT trigger releases:
+git commit -m "docs: update README"               # → no bump
+git commit -m "chore: update dependencies"        # → no bump
+git commit -m "style: fix formatting"             # → no bump
+```
 
 ## Writing Plugins
 

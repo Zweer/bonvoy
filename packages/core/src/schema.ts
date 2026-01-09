@@ -61,6 +61,8 @@ export interface Context {
   changedPackages: Package[];
   rootPath: string;
   isDryRun: boolean;
+  commits?: CommitInfo[]; // Commit filtrati per il package corrente
+  currentPackage?: Package; // Package che stiamo processando
 }
 
 export interface VersionContext extends Context {

@@ -1,3 +1,3 @@
 {
-  "conventionalCommits.scopes": ["cli", "core", "plugin-conventional"]
+  "conventionalCommits.scopes": ["cli", "core", "plugin-changelog", "plugin-conventional"]
 }

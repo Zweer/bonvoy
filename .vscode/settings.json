@@ -4,6 +4,7 @@
     "core",
     "plugin-changelog",
     "plugin-conventional",
-    "plugin-git"
+    "plugin-git",
+    "plugin-npm"
   ]
 }

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import ChangelogPlugin from '../src/changelog.js';
 
@@ -29,6 +29,9 @@ describe('ChangelogPlugin', () => {
   let mockBonvoy: any;
 
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-10'));
+
     plugin = new ChangelogPlugin();
     mockBonvoy = {
       hooks: {
@@ -36,6 +39,10 @@ describe('ChangelogPlugin', () => {
         afterChangelog: { tap: vi.fn() },
       },
     };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should register hooks', () => {

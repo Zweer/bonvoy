@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { generateTemplate } from '../src/template.js';
 
@@ -20,6 +20,15 @@ const createMockPackage = (name = '@test/package', version = '1.0.0') => ({
 });
 
 describe('generateTemplate', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-10'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should generate changelog for single commit', () => {
     const commits = [createMockCommit('feat: add new feature')];
     const pkg = createMockPackage();

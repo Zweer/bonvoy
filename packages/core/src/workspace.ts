@@ -1,12 +1,12 @@
 import { relative, resolve } from 'node:path';
 
-import type { Package } from './schema.js';
+import type { CommitInfo, Package } from './schema.js';
 
 export function assignCommitsToPackages(
-  commits: Array<{ files: string[] }>,
+  commits: CommitInfo[],
   packages: Package[],
   rootPath: string,
-): Array<{ packages: string[] }> {
+): CommitInfo[] {
   return commits.map((commit) => {
     const affectedPackages = new Set<string>();
 

@@ -374,16 +374,17 @@ jobs:
 
 ## Implementation Phases
 
-### Phase 1: Core + Essential Plugins (3-4 days)
-- [ ] `@bonvoy/core` - Hook system, CLI, config loading, workspace detection
-- [ ] `@bonvoy/plugin-conventional` - Conventional commits parser
-- [ ] `@bonvoy/plugin-changelog` - Changelog generation
-- [ ] `@bonvoy/plugin-git` - Commit, tag, push
+### Phase 1: Core + Essential Plugins (3-4 days) ✅ COMPLETED
+- [x] `@bonvoy/core` - Hook system, CLI, config loading, workspace detection
+- [x] `@bonvoy/cli` - CLI orchestration with shipit command
+- [x] `@bonvoy/plugin-conventional` - Conventional commits parser
+- [x] `@bonvoy/plugin-changelog` - Changelog generation
+- [x] `@bonvoy/plugin-git` - Commit, tag, push
 
-### Phase 2: Publishing (2 days)
-- [ ] `@bonvoy/plugin-npm` - Publish with OIDC
+### Phase 2: Publishing (2 days) - PARTIALLY COMPLETED
+- [x] `@bonvoy/plugin-npm` - Publish with OIDC
+- [x] Dry-run mode
 - [ ] `@bonvoy/plugin-github` - GitHub releases
-- [ ] Dry-run mode
 - [ ] JSON output for CI
 
 ### Phase 3: PR Workflow (2 days)

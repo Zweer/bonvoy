@@ -38,8 +38,14 @@
   ],
   "dependencies": {
     "@bonvoy/core": "0.0.0",
+    "@bonvoy/plugin-changelog": "0.0.0",
+    "@bonvoy/plugin-conventional": "0.0.0",
+    "@bonvoy/plugin-git": "0.0.0",
+    "@bonvoy/plugin-npm": "0.0.0",
     "@commander-js/extra-typings": "^14.0.0",
-    "commander": "^14.0.2"
+    "commander": "^14.0.2",
+    "execa": "^9.5.2",
+    "semver": "^7.6.3"
   },
   "engines": {
     "node": ">=20.5"

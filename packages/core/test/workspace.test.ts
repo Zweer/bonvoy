@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { CommitInfo } from '../src/schema.js';
 import { assignCommitsToPackages, getPackageFromPath } from '../src/workspace.js';
 
 describe('workspace', () => {
@@ -119,10 +120,20 @@ describe('workspace', () => {
       { name: '@test/core', path: '/test/packages/core', version: '1.0.0' },
     ];
 
+    const createCommit = (files: string[], extra = {}): CommitInfo => ({
+      hash: 'abc123',
+      message: 'test commit',
+      author: 'Test Author',
+      date: new Date('2024-01-01'),
+      files,
+      packages: [],
+      ...extra,
+    });
+
     it('should assign commits to packages', () => {
       const commits = [
-        { files: ['packages/core/src/index.ts', 'README.md'] },
-        { files: ['packages/core/test/index.test.ts'] },
+        createCommit(['packages/core/src/index.ts', 'README.md']),
+        createCommit(['packages/core/test/index.test.ts']),
       ];
 
       const result = assignCommitsToPackages(commits, packages, '/test');
@@ -132,7 +143,7 @@ describe('workspace', () => {
     });
 
     it('should handle commits with no matching packages', () => {
-      const commits = [{ files: ['unmatched/file.ts'] }];
+      const commits = [createCommit(['unmatched/file.ts'])];
 
       const result = assignCommitsToPackages(commits, packages, '/test');
 
@@ -140,7 +151,7 @@ describe('workspace', () => {
     });
 
     it('should handle commits with duplicate package matches', () => {
-      const commits = [{ files: ['packages/core/src/index.ts', 'packages/core/src/config.ts'] }];
+      const commits = [createCommit(['packages/core/src/index.ts', 'packages/core/src/config.ts'])];
 
       const result = assignCommitsToPackages(commits, packages, '/test');
 
@@ -148,14 +159,14 @@ describe('workspace', () => {
     });
 
     it('should preserve original commit properties', () => {
-      const commits = [{ files: ['README.md'], hash: 'abc123', message: 'test commit' }];
+      const commits = [createCommit(['README.md'], { hash: 'xyz789', message: 'custom message' })];
 
       const result = assignCommitsToPackages(commits, packages, '/test');
 
-      expect(result[0]).toEqual({
+      expect(result[0]).toMatchObject({
         files: ['README.md'],
-        hash: 'abc123',
-        message: 'test commit',
+        hash: 'xyz789',
+        message: 'custom message',
         packages: ['root'],
       });
     });
@@ -167,7 +178,7 @@ describe('workspace', () => {
     });
 
     it('should handle commits with empty files array', () => {
-      const commits = [{ files: [] }];
+      const commits = [createCommit([])];
 
       const result = assignCommitsToPackages(commits, packages, '/test');
 

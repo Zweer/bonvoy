@@ -135,11 +135,12 @@ jobs:
 | Package | Description | Status |
 |---------|-------------|--------|
 | `@bonvoy/core` | Hook system, CLI, config loading, schema validation | ✅ **Implemented** |
+| `@bonvoy/cli` | CLI orchestration and commands | ✅ **Implemented** |
 | `@bonvoy/plugin-conventional` | Conventional commits parser (default) | ✅ **Implemented** |
-| `@bonvoy/plugin-git` | Git commit, tag, push (default) | 🚧 Planned |
-| `@bonvoy/plugin-npm` | npm publish with OIDC (default) | 🚧 Planned |
+| `@bonvoy/plugin-changelog` | Changelog generation (default) | ✅ **Implemented** |
+| `@bonvoy/plugin-git` | Git commit, tag, push (default) | ✅ **Implemented** |
+| `@bonvoy/plugin-npm` | npm publish with OIDC (default) | ✅ **Implemented** |
 | `@bonvoy/plugin-github` | GitHub releases (default) | 🚧 Planned |
-| `@bonvoy/plugin-changelog` | Changelog generation (default) | 🚧 Planned |
 | `@bonvoy/plugin-gitlab` | GitLab releases (optional) | 🚧 Planned |
 | `@bonvoy/plugin-slack` | Slack notifications (optional) | 🚧 Planned |
 | `@bonvoy/plugin-changeset` | Changeset-style workflow (optional) | 🚧 Planned |

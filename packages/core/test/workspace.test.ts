@@ -147,7 +147,8 @@ describe('workspace', () => {
 
       const result = assignCommitsToPackages(commits, packages, '/test');
 
-      expect(result[0].packages).toEqual([]);
+      // File inside rootPath but not in any workspace package matches root package
+      expect(result[0].packages).toEqual(['root']);
     });
 
     it('should handle commits with duplicate package matches', () => {

@@ -31,6 +31,11 @@ export function getPackageFromPath(
 ): Package | null {
   const relativePath = relative(rootPath, filePath);
 
+  // If file is outside rootPath, return null
+  if (relativePath.startsWith('..')) {
+    return null;
+  }
+
   // Find the package that contains this file path
   let bestMatch: Package | null = null;
   let bestMatchLength = -1;
@@ -40,8 +45,8 @@ export function getPackageFromPath(
 
     // Handle root package (empty relative path)
     if (pkgRelativePath === '' || pkgRelativePath === '.') {
-      // Only match root package if no other package matches or if file is directly in root
-      if (!relativePath.includes('/') && bestMatchLength < 0) {
+      // Root package matches all files that don't belong to a workspace package
+      if (bestMatchLength < 0) {
         bestMatch = pkg;
         bestMatchLength = 0;
       }

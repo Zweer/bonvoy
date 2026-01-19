@@ -4,9 +4,12 @@ import { createProgram } from '../src/cli.js';
 
 // Mock all dependencies
 vi.mock('@bonvoy/core', () => ({
-  Bonvoy: vi.fn().mockImplementation(() => ({
-    use: vi.fn(),
-    hooks: {
+  Bonvoy: vi.fn().mockImplementation(function (this: {
+    use: ReturnType<typeof vi.fn>;
+    hooks: Record<string, { promise: ReturnType<typeof vi.fn> }>;
+  }) {
+    this.use = vi.fn();
+    this.hooks = {
       getVersion: { promise: vi.fn().mockResolvedValue('none') },
       beforeChangelog: { promise: vi.fn() },
       generateChangelog: { promise: vi.fn() },
@@ -14,8 +17,8 @@ vi.mock('@bonvoy/core', () => ({
       beforePublish: { promise: vi.fn() },
       publish: { promise: vi.fn() },
       afterPublish: { promise: vi.fn() },
-    },
-  })),
+    };
+  }),
   loadConfig: vi.fn().mockResolvedValue({}),
   assignCommitsToPackages: vi.fn().mockReturnValue([]),
 }));
@@ -41,8 +44,29 @@ vi.mock('execa', () => ({
 }));
 
 vi.mock('node:fs', () => ({
-  readFileSync: vi.fn().mockReturnValue(JSON.stringify({ name: 'test', version: '0.0.0' })),
+  readFileSync: vi.fn((path: string) => {
+    if (path.includes('packages/cli/package.json')) {
+      return JSON.stringify({ name: '@bonvoy/cli', version: '0.0.0' });
+    }
+    return JSON.stringify({ name: 'test', version: '0.0.0' });
+  }),
 }));
+
+// Mock shipit to return controlled results
+vi.mock('../src/cli.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/cli.js')>();
+  return {
+    ...actual,
+    shipit: vi.fn().mockResolvedValue({
+      packages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+      changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+      versions: { 'test-pkg': '1.1.0' },
+      bumps: { 'test-pkg': 'minor' },
+      changelogs: {},
+      commits: [],
+    }),
+  };
+});
 
 describe('@bonvoy/cli', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;

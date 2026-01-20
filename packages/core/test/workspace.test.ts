@@ -185,5 +185,42 @@ describe('workspace', () => {
 
       expect(result[0].packages).toEqual([]);
     });
+
+    it('should skip files outside rootPath', () => {
+      const commits = [createCommit(['../outside/file.ts', 'packages/core/src/index.ts'])];
+
+      const result = assignCommitsToPackages(commits, packages, '/test');
+
+      // Only packages/core/src/index.ts should match
+      expect(result[0].packages).toEqual(['@test/core']);
+    });
+
+    it('should match root package when no workspace packages match', () => {
+      const commits = [createCommit(['README.md', 'LICENSE'])];
+
+      const result = assignCommitsToPackages(commits, packages, '/test');
+
+      // Files at root should match root package
+      expect(result[0].packages).toEqual(['root']);
+    });
+
+    it('should match root package when it is the only package', () => {
+      const rootOnlyPackages = [{ name: 'single-pkg', path: '/test', version: '1.0.0' }];
+      const commits = [createCommit(['README.md', 'src/index.ts'])];
+
+      const result = assignCommitsToPackages(commits, rootOnlyPackages, '/test');
+
+      // All files should match the single root package
+      expect(result[0].packages).toEqual(['single-pkg']);
+    });
+
+    it('should match root package with dot path', () => {
+      const rootWithDot = [{ name: 'root-dot', path: '.', version: '1.0.0' }];
+      const commits = [createCommit(['README.md'])];
+
+      const result = assignCommitsToPackages(commits, rootWithDot, '.');
+
+      expect(result[0].packages).toEqual(['root-dot']);
+    });
   });
 });

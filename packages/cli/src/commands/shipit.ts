@@ -14,7 +14,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   const rootPath = options.cwd || process.cwd();
 
   // 1. Load configuration
-  const config = await loadConfig();
+  const config = await loadConfig(rootPath);
 
   // 2. Initialize Bonvoy with hooks
   const bonvoy = new Bonvoy(config);

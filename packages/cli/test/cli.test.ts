@@ -207,4 +207,21 @@ describe('@bonvoy/cli', () => {
 
     errorSpy.mockRestore();
   });
+
+  it('should handle no changes scenario', async () => {
+    const { shipit } = await import('../src/cli.js');
+    vi.mocked(shipit).mockResolvedValueOnce({
+      packages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+      changedPackages: [],
+      versions: {},
+      bumps: {},
+      changelogs: {},
+      commits: [],
+    });
+
+    const program = createProgram();
+    await program.parseAsync(['node', 'bonvoy', 'shipit']);
+
+    expect(consoleSpy).toHaveBeenCalledWith('✅ No changes detected - nothing to release');
+  });
 });

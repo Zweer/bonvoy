@@ -46,6 +46,7 @@ export function getPackageFromPath(
     // Handle root package (empty relative path)
     if (pkgRelativePath === '' || pkgRelativePath === '.') {
       // Root package matches all files that don't belong to a workspace package
+      // v8 ignore else -- @preserve
       if (bestMatchLength < 0) {
         bestMatch = pkg;
         bestMatchLength = 0;

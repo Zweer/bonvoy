@@ -142,12 +142,13 @@ describe('E2E: Force Version', () => {
     const { shipit } = await import('../packages/cli/src/commands/shipit.js');
     const result = await shipit('major', { dryRun: true, cwd: '/project' });
 
-    expect(result.changedPackages).toHaveLength(2);
+    expect(result.changedPackages).toHaveLength(3);
     expect(result.versions['@test/core']).toBe('2.0.0');
     expect(result.versions['@test/utils']).toBe('2.0.0');
-    expect(result.versions['@test/cli']).toBeUndefined();
+    expect(result.versions['@test/cli']).toBe('2.0.0');
     expect(result.bumps['@test/core']).toBe('major');
     expect(result.bumps['@test/utils']).toBe('major');
+    expect(result.bumps['@test/cli']).toBe('major');
   });
 
   it('should force specific version in monorepo', async () => {
@@ -174,12 +175,12 @@ describe('E2E: Force Version', () => {
     const { shipit } = await import('../packages/cli/src/commands/shipit.js');
     const result = await shipit('5.0.0', { dryRun: true, cwd: '/project' });
 
-    expect(result.changedPackages).toHaveLength(1);
+    expect(result.changedPackages).toHaveLength(2);
     expect(result.versions['@test/core']).toBe('5.0.0');
-    expect(result.versions['@test/utils']).toBeUndefined();
+    expect(result.versions['@test/utils']).toBe('5.0.0');
   });
 
-  it('should not force version when no changes', async () => {
+  it('should force bump type even without semantic commits', async () => {
     const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('docs', 'update docs', ['README.md'])]);
     mockExeca.setGitLastTag(null);
@@ -199,7 +200,55 @@ describe('E2E: Force Version', () => {
     const { shipit } = await import('../packages/cli/src/commands/shipit.js');
     const result = await shipit('major', { dryRun: true, cwd: '/project' });
 
-    expect(result.changedPackages).toHaveLength(0);
-    expect(result.versions).toEqual({});
+    expect(result.changedPackages).toHaveLength(1);
+    expect(result.versions['test-pkg']).toBe('2.0.0');
+  });
+
+  it('should force version even without semantic commits', async () => {
+    const mockExeca = createMockExeca();
+    mockExeca.setGitCommits([createMockCommit('docs', 'update docs', ['README.md'])]);
+    mockExeca.setGitLastTag(null);
+    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
+
+    vol.fromJSON(
+      {
+        'package.json': JSON.stringify({
+          name: 'test-pkg',
+          version: '1.0.0',
+        }),
+        'bonvoy.config.js': 'export default {};',
+      },
+      '/project',
+    );
+
+    const { shipit } = await import('../packages/cli/src/commands/shipit.js');
+    const result = await shipit('2.0.0', { dryRun: true, cwd: '/project' });
+
+    expect(result.changedPackages).toHaveLength(1);
+    expect(result.versions['test-pkg']).toBe('2.0.0');
+  });
+
+  it('should reject invalid semver versions', async () => {
+    const mockExeca = createMockExeca();
+    mockExeca.setGitCommits([createMockCommit('feat', 'add feature', ['src/index.ts'])]);
+    mockExeca.setGitLastTag(null);
+    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
+
+    vol.fromJSON(
+      {
+        'package.json': JSON.stringify({
+          name: 'test-pkg',
+          version: '1.0.0',
+        }),
+        'bonvoy.config.js': 'export default {};',
+      },
+      '/project',
+    );
+
+    const { shipit } = await import('../packages/cli/src/commands/shipit.js');
+
+    await expect(shipit('banana', { dryRun: true, cwd: '/project' })).rejects.toThrow(
+      'Invalid version "banana"',
+    );
   });
 });

@@ -4,7 +4,7 @@ import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import GitPlugin from '@bonvoy/plugin-git';
 import NpmPlugin from '@bonvoy/plugin-npm';
-import { inc } from 'semver';
+import { inc, valid } from 'semver';
 
 import { detectPackages } from '../utils/detect-packages.js';
 import { getCommitsSinceLastTag } from '../utils/git.js';
@@ -55,8 +55,8 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
     let bumpType: string | null = await bonvoy.hooks.getVersion.promise(context);
 
-    // Apply force bump if provided and package has changes
-    if (forceBump && bumpType && bumpType !== 'none') {
+    // Apply force bump if provided
+    if (forceBump) {
       bumpType = forceBump;
     }
 
@@ -65,7 +65,12 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
         newVersion = inc(pkg.version, bumpType) || pkg.version;
       } else {
-        // Explicit version
+        // Explicit version - validate it's a valid semver
+        if (!valid(bumpType)) {
+          throw new Error(
+            `Invalid version "${bumpType}" for package ${pkg.name}. Must be a valid semver version or bump type (major/minor/patch).`,
+          );
+        }
         newVersion = bumpType;
       }
       versions[pkg.name] = newVersion;

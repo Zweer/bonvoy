@@ -381,10 +381,10 @@ jobs:
 - [x] `@bonvoy/plugin-changelog` - Changelog generation
 - [x] `@bonvoy/plugin-git` - Commit, tag, push
 
-### Phase 2: Publishing (2 days) - PARTIALLY COMPLETED
+### Phase 2: Publishing (2 days) ✅ COMPLETED
 - [x] `@bonvoy/plugin-npm` - Publish with OIDC
 - [x] Dry-run mode
-- [ ] `@bonvoy/plugin-github` - GitHub releases
+- [x] `@bonvoy/plugin-github` - GitHub releases
 - [ ] JSON output for CI
 
 ### Phase 3: PR Workflow (2 days)

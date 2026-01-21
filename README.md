@@ -91,6 +91,10 @@ export default {
       breaking: '💥 Breaking Changes',
     },
   },
+  github: {
+    draft: false,      // Create releases as drafts
+    prerelease: false, // Force prerelease flag (auto-detected by default)
+  },
   workflow: 'direct',  // or 'pr'
   baseBranch: 'main',
   plugins: [],  // Additional plugins
@@ -199,6 +203,46 @@ git commit -m "docs: update README"               # → no bump
 git commit -m "chore: update dependencies"        # → no bump
 git commit -m "style: fix formatting"             # → no bump
 ```
+
+## Plugin: GitHub Releases
+
+The `@bonvoy/plugin-github` automatically creates GitHub releases after publishing packages.
+
+### Features
+
+- ✅ **Auto-detection** - Parses repository from git remote URL
+- ✅ **Per-package releases** - Creates individual releases with changelogs
+- ✅ **Prerelease support** - Automatically detects prerelease versions (e.g., `1.0.0-beta.1`)
+- ✅ **Draft releases** - Optional draft mode for manual review
+- ✅ **Dry-run support** - Preview releases without creating them
+
+### Configuration
+
+```javascript
+export default {
+  github: {
+    token: process.env.GITHUB_TOKEN,  // Optional, defaults to env var
+    owner: 'my-org',                   // Optional, auto-detected from git remote
+    repo: 'my-repo',                   // Optional, auto-detected from git remote
+    draft: false,                      // Create as draft (default: false)
+    prerelease: false,                 // Force prerelease flag (default: auto-detect)
+  },
+};
+```
+
+### Requirements
+
+- `GITHUB_TOKEN` environment variable with `contents: write` permission
+- Repository must be on GitHub
+
+### Example Release
+
+When you run `bonvoy shipit`, the plugin will:
+1. Detect repository from `git remote get-url origin`
+2. Create a release for each published package
+3. Use the package's changelog as release body
+4. Tag format: `package-name@version` (e.g., `@bonvoy/core@1.0.0`)
+5. Release name: `package-name vversion` (e.g., `@bonvoy/core v1.0.0`)
 
 ## Writing Plugins
 

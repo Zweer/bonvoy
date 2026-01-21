@@ -29,6 +29,17 @@ export const BonvoyConfigSchema = z
       }),
     workflow: z.enum(['direct', 'pr']).default('direct'),
     baseBranch: z.string().default('main'),
+    github: z
+      .object({
+        token: z.string().optional(),
+        owner: z.string().optional(),
+        repo: z.string().optional(),
+        draft: z.boolean().default(false),
+        prerelease: z.boolean().optional(),
+      })
+      .default({
+        draft: false,
+      }),
     plugins: z
       .array(
         z.union([z.string(), z.tuple([z.string(), z.record(z.string(), z.unknown())] as const)]),

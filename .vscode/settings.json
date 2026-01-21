@@ -5,6 +5,7 @@
     "plugin-changelog",
     "plugin-conventional",
     "plugin-git",
+    "plugin-github",
     "plugin-npm"
   ]
 }

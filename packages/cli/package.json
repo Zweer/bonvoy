@@ -41,6 +41,7 @@
     "@bonvoy/plugin-changelog": "0.0.0",
     "@bonvoy/plugin-conventional": "0.0.0",
     "@bonvoy/plugin-git": "0.0.0",
+    "@bonvoy/plugin-github": "0.0.0",
     "@bonvoy/plugin-npm": "0.0.0",
     "@commander-js/extra-typings": "^14.0.0",
     "commander": "^14.0.2",

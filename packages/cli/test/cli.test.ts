@@ -17,6 +17,9 @@ vi.mock('@bonvoy/core', () => ({
       beforePublish: { promise: vi.fn() },
       publish: { promise: vi.fn() },
       afterPublish: { promise: vi.fn() },
+      beforeRelease: { promise: vi.fn() },
+      makeRelease: { promise: vi.fn() },
+      afterRelease: { promise: vi.fn() },
     };
   }),
   loadConfig: vi.fn().mockResolvedValue({}),
@@ -36,6 +39,10 @@ vi.mock('@bonvoy/plugin-git', () => ({
 }));
 
 vi.mock('@bonvoy/plugin-npm', () => ({
+  default: vi.fn(),
+}));
+
+vi.mock('@bonvoy/plugin-github', () => ({
   default: vi.fn(),
 }));
 

@@ -45,6 +45,7 @@ describe('config', () => {
           },
         },
         workflow: 'direct',
+        github: { draft: false },
         baseBranch: 'main',
         plugins: [],
       });

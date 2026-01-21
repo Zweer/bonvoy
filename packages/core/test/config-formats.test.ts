@@ -25,6 +25,7 @@ describe('config formats integration', () => {
       },
     },
     workflow: 'direct',
+    github: { draft: false },
     baseBranch: 'main',
     plugins: [],
   };

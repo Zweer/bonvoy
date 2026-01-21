@@ -140,7 +140,7 @@ jobs:
 | `@bonvoy/plugin-changelog` | Changelog generation (default) | ✅ **Implemented** |
 | `@bonvoy/plugin-git` | Git commit, tag, push (default) | ✅ **Implemented** |
 | `@bonvoy/plugin-npm` | npm publish with OIDC (default) | ✅ **Implemented** |
-| `@bonvoy/plugin-github` | GitHub releases (default) | 🚧 Planned |
+| `@bonvoy/plugin-github` | GitHub releases (default) | ✅ **Implemented** |
 | `@bonvoy/plugin-gitlab` | GitLab releases (optional) | 🚧 Planned |
 | `@bonvoy/plugin-slack` | Slack notifications (optional) | 🚧 Planned |
 | `@bonvoy/plugin-changeset` | Changeset-style workflow (optional) | 🚧 Planned |

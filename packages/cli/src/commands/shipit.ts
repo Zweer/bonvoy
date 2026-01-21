@@ -1,8 +1,9 @@
-import type { ChangelogContext, Context, Package } from '@bonvoy/core';
+import type { ChangelogContext, Context, Package, ReleaseContext } from '@bonvoy/core';
 import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import GitPlugin from '@bonvoy/plugin-git';
+import GitHubPlugin from '@bonvoy/plugin-github';
 import NpmPlugin from '@bonvoy/plugin-npm';
 import { inc, valid } from 'semver';
 
@@ -24,6 +25,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   bonvoy.use(new ChangelogPlugin(config.changelog));
   bonvoy.use(new GitPlugin(config.git));
   bonvoy.use(new NpmPlugin(config.npm));
+  bonvoy.use(new GitHubPlugin(config.github));
 
   // 4. Detect workspace packages
   const packages = await detectPackages(rootPath);
@@ -106,6 +108,16 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     await bonvoy.hooks.beforePublish.promise(publishContext);
     await bonvoy.hooks.publish.promise(publishContext);
     await bonvoy.hooks.afterPublish.promise(publishContext);
+
+    // 9. Create GitHub releases
+    const releaseContext: ReleaseContext = {
+      ...publishContext,
+      releases: {},
+    };
+
+    await bonvoy.hooks.beforeRelease.promise(releaseContext);
+    await bonvoy.hooks.makeRelease.promise(releaseContext);
+    await bonvoy.hooks.afterRelease.promise(releaseContext);
   }
 
   return {

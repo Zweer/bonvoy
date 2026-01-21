@@ -66,6 +66,32 @@
       "default": "main",
       "type": "string"
     },
+    "github": {
+      "default": {
+        "draft": false
+      },
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "repo": {
+          "type": "string"
+        },
+        "draft": {
+          "default": false,
+          "type": "boolean"
+        },
+        "prerelease": {
+          "type": "boolean"
+        }
+      },
+      "required": ["draft"],
+      "additionalProperties": false
+    },
     "plugins": {
       "default": [],
       "type": "array",

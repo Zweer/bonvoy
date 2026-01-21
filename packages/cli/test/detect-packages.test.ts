@@ -75,7 +75,7 @@ describe('detectPackages', () => {
     expect(packages[0]).toMatchObject({
       name: 'pkg-a',
       version: '1.0.0',
-      path: 'packages/pkg-a',
+      path: '/test/packages/pkg-a',
       private: false,
       dependencies: { lodash: '^4.0.0' },
       devDependencies: { vitest: '^4.0.0' },
@@ -83,7 +83,7 @@ describe('detectPackages', () => {
     expect(packages[1]).toMatchObject({
       name: 'pkg-b',
       version: '2.0.0',
-      path: 'packages/pkg-b',
+      path: '/test/packages/pkg-b',
       private: true,
     });
     expect(execa).toHaveBeenCalledWith('npm', ['query', '.workspace'], { cwd: '/test' });

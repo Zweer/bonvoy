@@ -35,7 +35,10 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   // 6. Determine version bumps per package
   const changedPackages: Package[] = [];
   const versions: Record<string, string> = {};
-  const bumps: Record<string, import('@bonvoy/core').SemverBump> = {};
+  const bumps: Record<string, string> = {};
+
+  // Parse force bump if provided
+  const forceBump = _bump ? parseForceBump(_bump) : null;
 
   for (const pkg of packages) {
     const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
@@ -50,10 +53,21 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       currentPackage: pkg,
     };
 
-    const bumpType = await bonvoy.hooks.getVersion.promise(context);
+    let bumpType: string | null = await bonvoy.hooks.getVersion.promise(context);
+
+    // Apply force bump if provided and package has changes
+    if (forceBump && bumpType && bumpType !== 'none') {
+      bumpType = forceBump;
+    }
 
     if (bumpType && bumpType !== 'none') {
-      const newVersion = inc(pkg.version, bumpType) || pkg.version;
+      let newVersion: string;
+      if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
+        newVersion = inc(pkg.version, bumpType) || pkg.version;
+      } else {
+        // Explicit version
+        newVersion = bumpType;
+      }
       versions[pkg.name] = newVersion;
       bumps[pkg.name] = bumpType;
       changedPackages.push(pkg);
@@ -97,6 +111,10 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     changelogs: changelogContext.changelogs,
     commits: commitsWithPackages,
   };
+}
+
+function parseForceBump(bump: string): string {
+  return bump;
 }
 
 export async function shipitCommand(

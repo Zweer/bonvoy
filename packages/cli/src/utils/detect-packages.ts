@@ -19,7 +19,7 @@ export async function detectPackages(rootPath: string): Promise<Package[]> {
       packages.push({
         name: ws.name,
         version: ws.version,
-        path: ws.location,
+        path: join(rootPath, ws.location),
         private: ws.private,
         dependencies: ws.dependencies,
         devDependencies: ws.devDependencies,

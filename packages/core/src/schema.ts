@@ -67,7 +67,7 @@ export interface Context {
 
 export interface VersionContext extends Context {
   versions: Record<string, string>;
-  bumps: Record<string, SemverBump>;
+  bumps: Record<string, string>;
 }
 
 export interface ChangelogContext extends VersionContext {

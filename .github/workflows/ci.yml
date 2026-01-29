@@ -60,3 +60,4 @@ jobs:
         run: npx bonvoy shipit ${{ github.event.inputs.bump || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUSKY: 0

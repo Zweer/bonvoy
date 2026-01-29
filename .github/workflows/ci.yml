@@ -48,8 +48,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
-
       - run: npm run build
+      - run: npm ci --install-links
 
       - name: Configure git
         run: |

@@ -118,8 +118,7 @@ describe('@bonvoy/cli', () => {
     await program.parseAsync(['node', 'bonvoy', 'shipit', '--dry-run']);
 
     expect(consoleSpy).toHaveBeenCalledWith('🚢 Starting bonvoy release...');
-    expect(consoleSpy).toHaveBeenCalledWith('🔍 Dry run mode enabled');
-    expect(consoleSpy).toHaveBeenCalledWith('✅ Configuration loaded');
+    expect(consoleSpy).toHaveBeenCalledWith('🔍 Dry run mode enabled\n');
   });
 
   it('should execute shipit with package filter', async () => {
@@ -152,7 +151,6 @@ describe('@bonvoy/cli', () => {
     await program.parseAsync(['node', 'bonvoy', 'shipit']);
 
     expect(consoleSpy).toHaveBeenCalledWith('🚢 Starting bonvoy release...');
-    expect(consoleSpy).toHaveBeenCalledWith('✅ Changelogs generated');
   });
 
   it('should execute prepare command', async () => {

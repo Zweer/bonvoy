@@ -133,10 +133,9 @@ describe('E2E: Single Package - First Release', () => {
     await shipitCommand(undefined, { dryRun: true, cwd: '/project' });
 
     expect(consoleSpy).toHaveBeenCalledWith('🚢 Starting bonvoy release...');
-    expect(consoleSpy).toHaveBeenCalledWith('🔍 Dry run mode enabled');
+    expect(consoleSpy).toHaveBeenCalledWith('🔍 Dry run mode enabled\n');
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('test-pkg: 1.0.0 → 1.1.0'));
-    expect(consoleSpy).toHaveBeenCalledWith('✅ 1 package(s) to release');
-    expect(consoleSpy).toHaveBeenCalledWith('🔍 Dry run completed - no changes made');
+    expect(consoleSpy).toHaveBeenCalledWith('\n🔍 Dry run completed - no changes made');
 
     consoleSpy.mockRestore();
   });
@@ -160,7 +159,7 @@ describe('E2E: Single Package - First Release', () => {
     await shipitCommand(undefined, { dryRun: false, cwd: '/project' });
 
     expect(consoleSpy).toHaveBeenCalledWith('🚢 Starting bonvoy release...');
-    expect(consoleSpy).toHaveBeenCalledWith('🎉 Release completed successfully!');
+    expect(consoleSpy).toHaveBeenCalledWith('\n🎉 Release completed successfully!');
 
     consoleSpy.mockRestore();
   });

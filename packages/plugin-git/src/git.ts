@@ -23,50 +23,69 @@ export default class GitPlugin implements BonvoyPlugin {
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
   apply(bonvoy: { hooks: { beforePublish: any; afterPublish: any } }): void {
     bonvoy.hooks.beforePublish.tap(this.name, async (context: PublishContext) => {
+      console.log('📝 Committing changes...');
       await this.commitChanges(context);
+      console.log('🏷️  Creating git tags...');
       await this.createTags(context);
     });
 
     bonvoy.hooks.afterPublish.tap(this.name, async (context: PublishContext) => {
       if (this.config.push) {
+        console.log('⬆️  Pushing to remote...');
         await this.pushChanges(context);
       }
     });
   }
 
   private async commitChanges(context: PublishContext): Promise<void> {
-    const { packages } = context;
+    const { packages, isDryRun } = context;
 
     if (packages.length === 0) return;
 
     // Add all changed files
-    await execa('git', ['add', '.']);
+    if (!isDryRun) {
+      await execa('git', ['add', '.']);
+    }
 
     // Create commit message
     const packageNames = packages.map((pkg) => pkg.name).join(', ');
     const message = this.config.commitMessage.replace('{packages}', packageNames);
 
+    console.log(`  Commit message: "${message}"`);
+
     // Commit changes
-    await execa('git', ['commit', '-m', message]);
+    if (!isDryRun) {
+      await execa('git', ['commit', '-m', message]);
+    }
   }
 
   private async createTags(context: PublishContext): Promise<void> {
-    const { packages } = context;
+    const { packages, isDryRun } = context;
 
     for (const pkg of packages) {
       const tag = this.config.tagFormat
         .replace('{name}', pkg.name)
         .replace('{version}', pkg.version);
 
-      await execa('git', ['tag', tag]);
+      console.log(`  Tag: ${tag}`);
+
+      if (!isDryRun) {
+        await execa('git', ['tag', tag]);
+      }
     }
   }
 
-  private async pushChanges(_context: PublishContext): Promise<void> {
-    // Push commits
-    await execa('git', ['push']);
+  private async pushChanges(context: PublishContext): Promise<void> {
+    const { isDryRun } = context;
 
-    // Push tags
-    await execa('git', ['push', '--tags']);
+    console.log('  Pushing commits and tags...');
+
+    if (!isDryRun) {
+      // Push commits
+      await execa('git', ['push']);
+
+      // Push tags
+      await execa('git', ['push', '--tags']);
+    }
   }
 }

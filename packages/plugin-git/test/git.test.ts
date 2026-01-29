@@ -18,7 +18,7 @@ describe('GitPlugin', () => {
     mockBonvoy = {
       hooks: {
         beforePublish: { tap: vi.fn() },
-        afterPublish: { tap: vi.fn() },
+        beforeRelease: { tap: vi.fn() },
       },
     };
   });
@@ -27,7 +27,7 @@ describe('GitPlugin', () => {
     plugin.apply(mockBonvoy);
 
     expect(mockBonvoy.hooks.beforePublish.tap).toHaveBeenCalledWith('git', expect.any(Function));
-    expect(mockBonvoy.hooks.afterPublish.tap).toHaveBeenCalledWith('git', expect.any(Function));
+    expect(mockBonvoy.hooks.beforeRelease.tap).toHaveBeenCalledWith('git', expect.any(Function));
   });
 
   it('should commit changes with default message', async () => {
@@ -86,7 +86,7 @@ describe('GitPlugin', () => {
 
     const context = { packages: [] };
 
-    const afterPublishFn = mockBonvoy.hooks.afterPublish.tap.mock.calls[0][1];
+    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
     await afterPublishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
@@ -99,7 +99,7 @@ describe('GitPlugin', () => {
 
     const context = { packages: [] };
 
-    const afterPublishFn = mockBonvoy.hooks.afterPublish.tap.mock.calls[0][1];
+    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
     await afterPublishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
@@ -149,7 +149,7 @@ describe('GitPlugin', () => {
       isDryRun: true,
     };
 
-    const afterPublishFn = mockBonvoy.hooks.afterPublish.tap.mock.calls[0][1];
+    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
     await afterPublishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
@@ -213,7 +213,7 @@ describe('GitPlugin', () => {
       isDryRun: false,
     };
 
-    const afterPublishFn = mockBonvoy.hooks.afterPublish.tap.mock.calls[0][1];
+    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
     await afterPublishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);

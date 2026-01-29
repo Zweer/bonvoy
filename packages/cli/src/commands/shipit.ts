@@ -113,7 +113,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       const pkgJsonPath = join(pkg.path, 'package.json');
       const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
       pkgJson.version = versions[pkg.name];
-      writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
+      writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
 
       // Write changelog
       const changelogPath = join(pkg.path, 'CHANGELOG.md');

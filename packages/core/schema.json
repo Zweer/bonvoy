@@ -5,19 +5,12 @@
     "versioning": {
       "default": "independent",
       "type": "string",
-      "enum": [
-        "independent",
-        "fixed"
-      ]
+      "enum": ["independent", "fixed"]
     },
     "rootVersionStrategy": {
       "default": "max",
       "type": "string",
-      "enum": [
-        "max",
-        "patch",
-        "none"
-      ]
+      "enum": ["max", "patch", "none"]
     },
     "commitMessage": {
       "default": "chore: release {packages}",
@@ -61,19 +54,13 @@
           }
         }
       },
-      "required": [
-        "global",
-        "sections"
-      ],
+      "required": ["global", "sections"],
       "additionalProperties": false
     },
     "workflow": {
       "default": "direct",
       "type": "string",
-      "enum": [
-        "direct",
-        "pr"
-      ]
+      "enum": ["direct", "pr"]
     },
     "baseBranch": {
       "default": "main",
@@ -102,9 +89,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "draft"
-      ],
+      "required": ["draft"],
       "additionalProperties": false
     },
     "plugins": {

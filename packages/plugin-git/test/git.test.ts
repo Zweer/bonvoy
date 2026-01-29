@@ -155,4 +155,68 @@ describe('GitPlugin', () => {
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push', '--tags']);
   });
+
+  it('should skip commit in dry-run mode', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0' }],
+      isDryRun: true,
+    };
+
+    const beforePublishFn = mockBonvoy.hooks.beforePublish.tap.mock.calls[0][1];
+    await beforePublishFn(context);
+
+    expect(mockedExeca).not.toHaveBeenCalledWith('git', ['add', '.']);
+    expect(mockedExeca).not.toHaveBeenCalledWith('git', ['commit', '-m', expect.any(String)]);
+  });
+
+  it('should skip tags in dry-run mode', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0' }],
+      isDryRun: true,
+    };
+
+    const beforePublishFn = mockBonvoy.hooks.beforePublish.tap.mock.calls[0][1];
+    await beforePublishFn(context);
+
+    expect(mockedExeca).not.toHaveBeenCalledWith('git', ['tag', expect.any(String)]);
+  });
+
+  it('should execute git operations when not in dry-run', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0' }],
+      isDryRun: false,
+    };
+
+    const beforePublishFn = mockBonvoy.hooks.beforePublish.tap.mock.calls[0][1];
+    await beforePublishFn(context);
+
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['add', '.']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', [
+      'commit',
+      '-m',
+      'chore: release @test/package',
+    ]);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package@1.0.0']);
+  });
+
+  it('should push when not in dry-run', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0' }],
+      isDryRun: false,
+    };
+
+    const afterPublishFn = mockBonvoy.hooks.afterPublish.tap.mock.calls[0][1];
+    await afterPublishFn(context);
+
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', '--tags']);
+  });
 });

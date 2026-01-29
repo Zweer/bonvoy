@@ -33,7 +33,7 @@
     },
     "shell": {
       "autoAllowReadonly": true,
-      "blockedCommands": ["git commit*", "git push*"]
+      "deniedCommands": ["git commit .*", "git push .*"]
     }
   }
 }

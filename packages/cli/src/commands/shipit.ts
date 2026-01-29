@@ -98,8 +98,11 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.generateChangelog.promise(changelogContext);
   await bonvoy.hooks.afterChangelog.promise(changelogContext);
 
+  console.log('✅ Changelogs generated');
+
   if (!options.dryRun) {
     // 8. Publish packages
+    console.log('📦 Publishing packages to npm...');
     const publishContext = {
       ...changelogContext,
       publishedPackages: [],
@@ -110,6 +113,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     await bonvoy.hooks.afterPublish.promise(publishContext);
 
     // 9. Create GitHub releases
+    console.log('🏷️  Creating GitHub releases...');
     const releaseContext: ReleaseContext = {
       ...publishContext,
       releases: {},
@@ -118,6 +122,10 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     await bonvoy.hooks.beforeRelease.promise(releaseContext);
     await bonvoy.hooks.makeRelease.promise(releaseContext);
     await bonvoy.hooks.afterRelease.promise(releaseContext);
+
+    console.log('🎉 Release completed successfully!');
+  } else {
+    console.log('🔍 Dry run completed - no changes made');
   }
 
   return {
@@ -162,14 +170,10 @@ export async function shipitCommand(
     }
 
     console.log(`✅ ${result.changedPackages.length} package(s) to release`);
-    console.log('✅ Changelogs generated');
 
     if (options.dryRun) {
-      console.log('🔍 Dry run completed - no changes made');
       return;
     }
-
-    console.log('🎉 Release completed successfully!');
   } catch (error) {
     console.error('❌ Release failed:', error instanceof Error ? error.message : String(error));
     process.exit(1);

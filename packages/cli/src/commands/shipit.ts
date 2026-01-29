@@ -100,10 +100,17 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
   console.log('✅ Changelogs generated');
 
+  // 8. Update package versions for publishing
+  const packagesWithNewVersions = changedPackages.map((pkg) => ({
+    ...pkg,
+    version: versions[pkg.name],
+  }));
+
   // 8. Publish packages
   console.log('📦 Publishing packages to npm...');
   const publishContext = {
     ...changelogContext,
+    packages: packagesWithNewVersions,
     publishedPackages: [],
   };
 

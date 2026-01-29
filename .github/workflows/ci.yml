@@ -24,6 +24,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
+      - name: Configure git for tests
+        run: |
+          git config --global user.email "ci@bonvoy.dev"
+          git config --global user.name "Bonvoy CI"
       - run: npm test
 
   release:
@@ -44,6 +48,11 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
+
+      - name: Configure git
+        run: |
+          git config --global user.email "ci@bonvoy.dev"
+          git config --global user.name "Bonvoy CI"
 
       - name: Release
         run: npx bonvoy shipit ${{ github.event.inputs.bump || '' }}

@@ -76,7 +76,7 @@ export default class GitPlugin implements BonvoyPlugin {
   }
 
   private async pushChanges(context: PublishContext): Promise<void> {
-    const { isDryRun } = context;
+    const { packages, isDryRun } = context;
 
     console.log('  Pushing commits and tags...');
 
@@ -84,8 +84,13 @@ export default class GitPlugin implements BonvoyPlugin {
       // Push commits
       await execa('git', ['push']);
 
-      // Push tags
-      await execa('git', ['push', '--tags']);
+      // Push only the tags we just created
+      for (const pkg of packages) {
+        const tag = this.config.tagFormat
+          .replace('{name}', pkg.name)
+          .replace('{version}', pkg.version);
+        await execa('git', ['push', 'origin', tag]);
+      }
     }
   }
 }

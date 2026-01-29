@@ -84,26 +84,33 @@ describe('GitPlugin', () => {
   it('should push changes by default', async () => {
     plugin.apply(mockBonvoy);
 
-    const context = { packages: [] };
+    const context = {
+      packages: [
+        { name: '@test/package-a', version: '1.0.0' },
+        { name: '@test/package-b', version: '2.0.0' },
+      ],
+    };
 
     const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
     await afterPublishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
-    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', '--tags']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-a@1.0.0']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-b@2.0.0']);
   });
 
   it('should not push when disabled', async () => {
     plugin = new GitPlugin({ push: false });
     plugin.apply(mockBonvoy);
 
-    const context = { packages: [] };
+    const context = {
+      packages: [{ name: '@test/package-a', version: '1.0.0' }],
+    };
 
     const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
     await afterPublishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
-    expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push', '--tags']);
   });
 
   it('should skip commit when no packages', async () => {
@@ -153,7 +160,6 @@ describe('GitPlugin', () => {
     await afterPublishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
-    expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push', '--tags']);
   });
 
   it('should skip commit in dry-run mode', async () => {
@@ -217,6 +223,6 @@ describe('GitPlugin', () => {
     await afterPublishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
-    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', '--tags']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package@1.0.0']);
   });
 });

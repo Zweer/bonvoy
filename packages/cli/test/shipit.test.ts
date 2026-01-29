@@ -91,4 +91,51 @@ package.json`,
 
     expect(result.changedPackages).toHaveLength(0);
   });
+
+  it('should write global changelog when enabled', async () => {
+    const { execa } = await import('execa');
+    const { loadConfig } = await import('@bonvoy/core');
+    const fs = await import('node:fs');
+
+    const writeFileSyncSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+
+    vi.mocked(loadConfig).mockResolvedValueOnce({
+      changelog: { global: true },
+    } as never);
+
+    vi.mocked(execa).mockImplementation((async (cmd: string, args: string[]) => {
+      if (cmd === 'npm' && args[0] === 'query') {
+        return { stdout: JSON.stringify([]) };
+      }
+      if (cmd === 'git' && args[0] === 'describe') {
+        throw new Error('No tags');
+      }
+      if (cmd === 'git' && args[0] === 'log') {
+        return {
+          stdout: `abc123|feat: add feature|Test|2024-01-01T00:00:00Z
+src/index.ts`,
+        };
+      }
+      return { stdout: '' };
+    }) as never);
+
+    vol.fromJSON(
+      {
+        'package.json': JSON.stringify({
+          name: 'test-pkg',
+          version: '1.0.0',
+        }),
+      },
+      '/test',
+    );
+
+    await shipit(undefined, { dryRun: false, cwd: '/test' });
+
+    expect(writeFileSyncSpy).toHaveBeenCalledWith(
+      expect.stringContaining('CHANGELOG.md'),
+      expect.any(String),
+    );
+
+    writeFileSyncSpy.mockRestore();
+  });
 });

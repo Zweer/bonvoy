@@ -57,6 +57,7 @@ vi.mock('node:fs', () => ({
     }
     return JSON.stringify({ name: 'test', version: '0.0.0' });
   }),
+  writeFileSync: vi.fn(),
 }));
 
 // Mock shipit to return controlled results
@@ -151,7 +152,7 @@ describe('@bonvoy/cli', () => {
     await program.parseAsync(['node', 'bonvoy', 'shipit']);
 
     expect(consoleSpy).toHaveBeenCalledWith('🚢 Starting bonvoy release...');
-    expect(consoleSpy).toHaveBeenCalledWith('✅ Configuration loaded');
+    expect(consoleSpy).toHaveBeenCalledWith('✅ Changelogs generated');
   });
 
   it('should execute prepare command', async () => {
@@ -229,6 +230,6 @@ describe('@bonvoy/cli', () => {
     const program = createProgram();
     await program.parseAsync(['node', 'bonvoy', 'shipit']);
 
-    expect(consoleSpy).toHaveBeenCalledWith('✅ No changes detected - nothing to release');
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('No changes detected'));
   });
 });

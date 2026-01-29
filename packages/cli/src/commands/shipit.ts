@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import type { ChangelogContext, Context, Package, ReleaseContext } from '@bonvoy/core';
 import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
@@ -99,6 +101,32 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.afterChangelog.promise(changelogContext);
 
   console.log('✅ Changelogs generated');
+
+  if (!options.dryRun) {
+    // Write changelogs to disk
+    console.log('📝 Writing changelogs and updating package.json...');
+    const { writeFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+
+    for (const pkg of changedPackages) {
+      // Update package.json version
+      const pkgJsonPath = join(pkg.path, 'package.json');
+      const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+      pkgJson.version = versions[pkg.name];
+      writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
+
+      // Write changelog
+      const changelogPath = join(pkg.path, 'CHANGELOG.md');
+      const changelog = changelogContext.changelogs[pkg.name] || '';
+      writeFileSync(changelogPath, changelog);
+    }
+
+    // Write global changelog if enabled
+    if (config.changelog?.global) {
+      const globalChangelog = Object.values(changelogContext.changelogs).join('\n\n');
+      writeFileSync(join(rootPath, 'CHANGELOG.md'), globalChangelog);
+    }
+  }
 
   // 8. Update package versions for publishing
   const packagesWithNewVersions = changedPackages.map((pkg) => ({

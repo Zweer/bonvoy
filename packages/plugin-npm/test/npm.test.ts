@@ -248,4 +248,26 @@ describe('NpmPlugin', () => {
 
     expect(mockedExeca).not.toHaveBeenCalled();
   });
+
+  it('should not add provenance flag when disabled', async () => {
+    plugin = new NpmPlugin({ provenance: false });
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
+    };
+
+    mockedExeca
+      .mockRejectedValueOnce(new Error('Not found'))
+      // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
+      .mockResolvedValueOnce(undefined as any);
+
+    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    await publishFn(context);
+
+    expect(mockedExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'public'], {
+      cwd: '/path/to/pkg',
+      stdio: 'inherit',
+    });
+  });
 });

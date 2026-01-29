@@ -139,4 +139,20 @@ describe('GitPlugin', () => {
     ]);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package@1.0.0']);
   });
+
+  it('should skip push in dry-run mode', async () => {
+    plugin = new GitPlugin({ push: true });
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0' }],
+      isDryRun: true,
+    };
+
+    const afterPublishFn = mockBonvoy.hooks.afterPublish.tap.mock.calls[0][1];
+    await afterPublishFn(context);
+
+    expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
+    expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push', '--tags']);
+  });
 });

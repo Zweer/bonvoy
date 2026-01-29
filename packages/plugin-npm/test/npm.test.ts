@@ -56,17 +56,25 @@ describe('NpmPlugin', () => {
     expect(mockedExeca).toHaveBeenCalledWith('npm', ['view', '@test/package-a@1.0.0', 'version'], {
       stdio: 'pipe',
     });
-    expect(mockedExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'public'], {
-      cwd: '/path/to/a',
-      stdio: 'inherit',
-    });
+    expect(mockedExeca).toHaveBeenCalledWith(
+      'npm',
+      ['publish', '--access', 'public', '--provenance'],
+      {
+        cwd: '/path/to/a',
+        stdio: 'inherit',
+      },
+    );
     expect(mockedExeca).toHaveBeenCalledWith('npm', ['view', '@test/package-b@2.0.0', 'version'], {
       stdio: 'pipe',
     });
-    expect(mockedExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'public'], {
-      cwd: '/path/to/b',
-      stdio: 'inherit',
-    });
+    expect(mockedExeca).toHaveBeenCalledWith(
+      'npm',
+      ['publish', '--access', 'public', '--provenance'],
+      {
+        cwd: '/path/to/b',
+        stdio: 'inherit',
+      },
+    );
   });
 
   it('should skip already published packages', async () => {
@@ -108,7 +116,7 @@ describe('NpmPlugin', () => {
 
     expect(mockedExeca).toHaveBeenCalledWith(
       'npm',
-      ['publish', '--dry-run', '--access', 'public'],
+      ['publish', '--dry-run', '--access', 'public', '--provenance'],
       {
         cwd: '/path/to/pkg',
         stdio: 'inherit',
@@ -134,7 +142,14 @@ describe('NpmPlugin', () => {
 
     expect(mockedExeca).toHaveBeenCalledWith(
       'npm',
-      ['publish', '--access', 'public', '--registry', 'https://custom.registry.com'],
+      [
+        'publish',
+        '--access',
+        'public',
+        '--provenance',
+        '--registry',
+        'https://custom.registry.com',
+      ],
       {
         cwd: '/path/to/pkg',
         stdio: 'inherit',
@@ -158,10 +173,14 @@ describe('NpmPlugin', () => {
     const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
     await publishFn(context);
 
-    expect(mockedExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'restricted'], {
-      cwd: '/path/to/pkg',
-      stdio: 'inherit',
-    });
+    expect(mockedExeca).toHaveBeenCalledWith(
+      'npm',
+      ['publish', '--access', 'restricted', '--provenance'],
+      {
+        cwd: '/path/to/pkg',
+        stdio: 'inherit',
+      },
+    );
   });
 
   it('should not skip existing when disabled', async () => {
@@ -183,10 +202,14 @@ describe('NpmPlugin', () => {
       ['view', '@test/package@1.0.0', 'version'],
       { stdio: 'pipe' },
     );
-    expect(mockedExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'public'], {
-      cwd: '/path/to/pkg',
-      stdio: 'inherit',
-    });
+    expect(mockedExeca).toHaveBeenCalledWith(
+      'npm',
+      ['publish', '--access', 'public', '--provenance'],
+      {
+        cwd: '/path/to/pkg',
+        stdio: 'inherit',
+      },
+    );
   });
 
   it('should not add registry flag for default registry', async () => {
@@ -205,10 +228,14 @@ describe('NpmPlugin', () => {
     const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
     await publishFn(context);
 
-    expect(mockedExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'public'], {
-      cwd: '/path/to/pkg',
-      stdio: 'inherit',
-    });
+    expect(mockedExeca).toHaveBeenCalledWith(
+      'npm',
+      ['publish', '--access', 'public', '--provenance'],
+      {
+        cwd: '/path/to/pkg',
+        stdio: 'inherit',
+      },
+    );
   });
 
   it('should handle empty packages array', async () => {

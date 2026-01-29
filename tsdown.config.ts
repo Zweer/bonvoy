@@ -11,4 +11,13 @@ export default defineConfig({
     enabled: 'ci-only',
     profile: 'esm-only',
   },
+  outputOptions: {
+    banner: (chunk) => {
+      // Add shebang only to CLI entry point
+      if (chunk.name === 'index' && chunk.facadeModuleId?.includes('packages/cli')) {
+        return '#!/usr/bin/env node';
+      }
+      return '';
+    },
+  },
 });

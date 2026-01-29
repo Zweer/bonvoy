@@ -6,6 +6,7 @@ export interface NpmPluginConfig {
   access?: 'public' | 'restricted';
   dryRun?: boolean;
   skipExisting?: boolean;
+  provenance?: boolean;
 }
 
 export default class NpmPlugin implements BonvoyPlugin {
@@ -19,6 +20,7 @@ export default class NpmPlugin implements BonvoyPlugin {
       access: config.access ?? 'public',
       dryRun: config.dryRun ?? false,
       skipExisting: config.skipExisting ?? true,
+      provenance: config.provenance ?? true,
     };
   }
 
@@ -54,6 +56,10 @@ export default class NpmPlugin implements BonvoyPlugin {
     }
 
     args.push('--access', this.config.access);
+
+    if (this.config.provenance) {
+      args.push('--provenance');
+    }
 
     if (this.config.registry !== 'https://registry.npmjs.org') {
       args.push('--registry', this.config.registry);

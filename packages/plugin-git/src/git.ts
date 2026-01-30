@@ -82,13 +82,11 @@ export default class GitPlugin implements BonvoyPlugin {
       // Push commits
       await execa('git', ['push']);
 
-      // Push only the tags we just created
-      for (const pkg of packages) {
-        const tag = this.config.tagFormat
-          .replace('{name}', pkg.name)
-          .replace('{version}', pkg.version);
-        await execa('git', ['push', 'origin', tag]);
-      }
+      // Push all tags at once to avoid race condition with GitHub
+      const tags = packages.map((pkg) =>
+        this.config.tagFormat.replace('{name}', pkg.name).replace('{version}', pkg.version),
+      );
+      await execa('git', ['push', 'origin', ...tags]);
     }
   }
 }

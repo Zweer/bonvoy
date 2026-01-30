@@ -50,8 +50,12 @@ describe('GitPlugin', () => {
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package-a@1.0.0']);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package-b@2.0.0']);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
-    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-a@1.0.0']);
-    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-b@2.0.0']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', [
+      'push',
+      'origin',
+      '@test/package-a@1.0.0',
+      '@test/package-b@2.0.0',
+    ]);
   });
 
   it('should use custom commit message', async () => {
@@ -96,8 +100,12 @@ describe('GitPlugin', () => {
     await beforePublishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
-    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-a@1.0.0']);
-    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-b@2.0.0']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', [
+      'push',
+      'origin',
+      '@test/package-a@1.0.0',
+      '@test/package-b@2.0.0',
+    ]);
   });
 
   it('should not push when disabled', async () => {

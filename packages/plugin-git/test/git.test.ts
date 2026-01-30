@@ -18,7 +18,6 @@ describe('GitPlugin', () => {
     mockBonvoy = {
       hooks: {
         beforePublish: { tap: vi.fn() },
-        beforeRelease: { tap: vi.fn() },
       },
     };
   });
@@ -27,7 +26,6 @@ describe('GitPlugin', () => {
     plugin.apply(mockBonvoy);
 
     expect(mockBonvoy.hooks.beforePublish.tap).toHaveBeenCalledWith('git', expect.any(Function));
-    expect(mockBonvoy.hooks.beforeRelease.tap).toHaveBeenCalledWith('git', expect.any(Function));
   });
 
   it('should commit changes with default message', async () => {
@@ -51,6 +49,9 @@ describe('GitPlugin', () => {
     ]);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package-a@1.0.0']);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package-b@2.0.0']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-a@1.0.0']);
+    expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-b@2.0.0']);
   });
 
   it('should use custom commit message', async () => {
@@ -91,8 +92,8 @@ describe('GitPlugin', () => {
       ],
     };
 
-    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
-    await afterPublishFn(context);
+    const beforePublishFn = mockBonvoy.hooks.beforePublish.tap.mock.calls[0][1];
+    await beforePublishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package-a@1.0.0']);
@@ -107,8 +108,8 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package-a', version: '1.0.0' }],
     };
 
-    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
-    await afterPublishFn(context);
+    const beforePublishFn = mockBonvoy.hooks.beforePublish.tap.mock.calls[0][1];
+    await beforePublishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
   });
@@ -156,8 +157,8 @@ describe('GitPlugin', () => {
       isDryRun: true,
     };
 
-    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
-    await afterPublishFn(context);
+    const beforePublishFn = mockBonvoy.hooks.beforePublish.tap.mock.calls[0][1];
+    await beforePublishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalledWith('git', ['push']);
   });
@@ -209,19 +210,6 @@ describe('GitPlugin', () => {
       'chore: release @test/package',
     ]);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package@1.0.0']);
-  });
-
-  it('should push when not in dry-run', async () => {
-    plugin.apply(mockBonvoy);
-
-    const context = {
-      packages: [{ name: '@test/package', version: '1.0.0' }],
-      isDryRun: false,
-    };
-
-    const afterPublishFn = mockBonvoy.hooks.beforeRelease.tap.mock.calls[0][1];
-    await afterPublishFn(context);
-
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push', 'origin', '@test/package@1.0.0']);
   });

@@ -199,7 +199,7 @@ export async function shipitCommand(
     console.log('🚢 Starting bonvoy release...');
     if (options.dryRun) console.log('🔍 Dry run mode enabled\n');
 
-    const result = await shipit(bump, options);
+    await shipit(bump, options);
 
     // Summary is already printed by shipit function
   } catch (error) {

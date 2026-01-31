@@ -14,7 +14,7 @@ export default class GitPlugin implements BonvoyPlugin {
 
   constructor(config: GitPluginConfig = {}) {
     this.config = {
-      commitMessage: config.commitMessage ?? 'chore: release {packages} [skip ci]',
+      commitMessage: config.commitMessage ?? 'chore(release): :bookmark: {packages} [skip ci]',
       tagFormat: config.tagFormat ?? '{name}@{version}',
       push: config.push ?? true,
     };

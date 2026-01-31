@@ -48,7 +48,7 @@ describe('GitPlugin', () => {
     expect(mockedExeca).toHaveBeenCalledWith('git', [
       'commit',
       '-m',
-      'chore: release @test/package-a, @test/package-b',
+      'chore: release @test/package-a, @test/package-b [skip ci]',
     ]);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package-a@1.0.0']);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package-b@2.0.0']);
@@ -154,7 +154,7 @@ describe('GitPlugin', () => {
     expect(mockedExeca).toHaveBeenCalledWith('git', [
       'commit',
       '-m',
-      'chore: release @test/package',
+      'chore: release @test/package [skip ci]',
     ]);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package@1.0.0']);
   });
@@ -218,7 +218,7 @@ describe('GitPlugin', () => {
     expect(mockedExeca).toHaveBeenCalledWith('git', [
       'commit',
       '-m',
-      'chore: release @test/package',
+      'chore: release @test/package [skip ci]',
     ]);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['tag', '@test/package@1.0.0']);
     expect(mockedExeca).toHaveBeenCalledWith('git', ['push']);

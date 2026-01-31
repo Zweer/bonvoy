@@ -20,7 +20,7 @@ describe('NpmPlugin', () => {
     plugin = new NpmPlugin();
     mockBonvoy = {
       hooks: {
-        publish: { tap: vi.fn() },
+        publish: { tapPromise: vi.fn() },
       },
     };
   });
@@ -28,7 +28,7 @@ describe('NpmPlugin', () => {
   it('should register hooks', () => {
     plugin.apply(mockBonvoy);
 
-    expect(mockBonvoy.hooks.publish.tap).toHaveBeenCalledWith('npm', expect.any(Function));
+    expect(mockBonvoy.hooks.publish.tapPromise).toHaveBeenCalledWith('npm', expect.any(Function));
   });
 
   it('should publish packages with default config', async () => {
@@ -50,7 +50,7 @@ describe('NpmPlugin', () => {
       // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
       .mockResolvedValueOnce(undefined as any); // Second package publish
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('npm', ['view', '@test/package-a@1.0.0', 'version'], {
@@ -88,7 +88,7 @@ describe('NpmPlugin', () => {
     // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
     mockedExeca.mockResolvedValue({ stdout: '1.0.0' } as any);
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('npm', ['view', '@test/package@1.0.0', 'version'], {
@@ -111,7 +111,7 @@ describe('NpmPlugin', () => {
       // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
       .mockResolvedValueOnce(undefined as any); // Package publish
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith(
@@ -137,7 +137,7 @@ describe('NpmPlugin', () => {
       // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
       .mockResolvedValueOnce(undefined as any); // Package publish
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith(
@@ -170,7 +170,7 @@ describe('NpmPlugin', () => {
       // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
       .mockResolvedValueOnce(undefined as any); // Package publish
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith(
@@ -194,7 +194,7 @@ describe('NpmPlugin', () => {
     mockedExeca // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
       .mockResolvedValueOnce(undefined as any); // Package publish (no check)
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalledWith(
@@ -225,7 +225,7 @@ describe('NpmPlugin', () => {
       // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
       .mockResolvedValueOnce(undefined as any); // Package publish
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith(
@@ -243,7 +243,7 @@ describe('NpmPlugin', () => {
 
     const context = { packages: [] };
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).not.toHaveBeenCalled();
@@ -262,7 +262,7 @@ describe('NpmPlugin', () => {
       // biome-ignore lint/suspicious/noExplicitAny: Mock return value for testing
       .mockResolvedValueOnce(undefined as any);
 
-    const publishFn = mockBonvoy.hooks.publish.tap.mock.calls[0][1];
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
     await publishFn(context);
 
     expect(mockedExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'public'], {

@@ -36,7 +36,7 @@ describe('ChangelogPlugin', () => {
     mockBonvoy = {
       hooks: {
         generateChangelog: { tap: vi.fn() },
-        afterChangelog: { tap: vi.fn() },
+        afterChangelog: { tapPromise: vi.fn() },
       },
     };
   });
@@ -52,7 +52,7 @@ describe('ChangelogPlugin', () => {
       'changelog',
       expect.any(Function),
     );
-    expect(mockBonvoy.hooks.afterChangelog.tap).toHaveBeenCalledWith(
+    expect(mockBonvoy.hooks.afterChangelog.tapPromise).toHaveBeenCalledWith(
       'changelog',
       expect.any(Function),
     );
@@ -195,7 +195,7 @@ describe('ChangelogPlugin', () => {
 
     plugin.apply(mockBonvoy);
 
-    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tap).mock.calls[0][1];
+    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tapPromise).mock.calls[0][1];
     const context = {
       commits: [],
       versions: { '@test/package': '1.0.0' },
@@ -225,7 +225,7 @@ describe('ChangelogPlugin', () => {
 
     globalPlugin.apply(mockBonvoy);
 
-    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tap).mock.calls[0][1];
+    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tapPromise).mock.calls[0][1];
     const context = {
       commits: [],
       versions: { '@test/package-a': '1.0.0', '@test/package-b': '2.0.0' },
@@ -289,7 +289,7 @@ describe('ChangelogPlugin', () => {
 
     plugin.apply(mockBonvoy);
 
-    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tap).mock.calls[0][1];
+    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tapPromise).mock.calls[0][1];
     const context = {
       commits: [],
       versions: { '@test/package-a': '1.0.0', '@test/package-b': '2.0.0' },
@@ -325,7 +325,7 @@ describe('ChangelogPlugin', () => {
 
     globalPlugin.apply(mockBonvoy);
 
-    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tap).mock.calls[0][1];
+    const afterChangelogFn = vi.mocked(mockBonvoy.hooks.afterChangelog.tapPromise).mock.calls[0][1];
     const context = {
       commits: [],
       versions: { '@test/package-a': '1.0.0', '@test/package-b': '2.0.0' },

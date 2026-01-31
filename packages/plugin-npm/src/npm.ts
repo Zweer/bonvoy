@@ -26,7 +26,7 @@ export default class NpmPlugin implements BonvoyPlugin {
 
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
   apply(bonvoy: { hooks: { publish: any } }): void {
-    bonvoy.hooks.publish.tap(this.name, async (context: PublishContext) => {
+    bonvoy.hooks.publish.tapPromise(this.name, async (context: PublishContext) => {
       await this.publishPackages(context);
     });
   }

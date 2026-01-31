@@ -36,19 +36,13 @@ export default class ChangelogPlugin implements BonvoyPlugin {
     };
   }
 
-  apply(bonvoy: {
-    hooks: {
-      generateChangelog: { tap: (name: string, fn: (context: ChangelogContext) => string) => void };
-      afterChangelog: {
-        tap: (name: string, fn: (context: ChangelogContext) => Promise<void>) => void;
-      };
-    };
-  }): void {
+  // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
+  apply(bonvoy: { hooks: { generateChangelog: any; afterChangelog: any } }): void {
     bonvoy.hooks.generateChangelog.tap(this.name, (context: ChangelogContext) => {
       return this.generateChangelog(context);
     });
 
-    bonvoy.hooks.afterChangelog.tap(this.name, async (context: ChangelogContext) => {
+    bonvoy.hooks.afterChangelog.tapPromise(this.name, async (context: ChangelogContext) => {
       await this.writeChangelogFiles(context);
     });
   }

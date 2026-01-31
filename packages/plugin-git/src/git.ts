@@ -22,7 +22,7 @@ export default class GitPlugin implements BonvoyPlugin {
 
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
   apply(bonvoy: { hooks: { beforePublish: any } }): void {
-    bonvoy.hooks.beforePublish.tap(this.name, async (context: PublishContext) => {
+    bonvoy.hooks.beforePublish.tapPromise(this.name, async (context: PublishContext) => {
       console.log('📝 Committing changes...');
       await this.commitChanges(context);
       console.log('🏷️  Creating git tags...');

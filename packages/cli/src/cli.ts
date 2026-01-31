@@ -26,6 +26,7 @@ export function createProgram(): Command {
     .command('shipit')
     .description('Release all changed packages')
     .option('--dry-run', 'Preview changes without executing')
+    .option('--json', 'Output results as JSON (for CI)')
     .option('--package <name...>', 'Only release specific package(s)')
     .argument('[bump]', 'Version bump (patch/minor/major/x.y.z)')
     .action(shipitCommand);

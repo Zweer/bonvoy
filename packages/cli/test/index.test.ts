@@ -33,4 +33,11 @@ describe('@bonvoy/cli', () => {
       .filter((name) => name !== 'help');
     expect(commandNames).toEqual(['shipit', 'prepare', 'status', 'changelog']);
   });
+
+  it('shipit command should have --json option', () => {
+    const program = createProgram();
+    const shipitCmd = program.commands.find((cmd) => cmd.name() === 'shipit');
+    const options = shipitCmd?.options.map((opt) => opt.long);
+    expect(options).toContain('--json');
+  });
 });

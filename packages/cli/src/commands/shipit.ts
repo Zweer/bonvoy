@@ -17,6 +17,7 @@ import type { ShipitOptions, ShipitResult } from '../utils/types.js';
 export async function shipit(_bump?: string, options: ShipitOptions = {}): Promise<ShipitResult> {
   const rootPath = options.cwd || process.cwd();
   const gitOps = options.gitOps ?? defaultGitOperations;
+  const log = options.silent ? () => {} : console.log.bind(console);
 
   // 1. Load configuration
   const config = options.config ?? (await loadConfig(rootPath));
@@ -93,7 +94,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
   // Early return if no changes
   if (changedPackages.length === 0) {
-    console.log('✅ No changes detected - nothing to release');
+    log('✅ No changes detected - nothing to release');
     return {
       packages,
       changedPackages: [],
@@ -104,11 +105,11 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     };
   }
 
-  console.log(`📦 Releasing ${changedPackages.length} package(s):`);
+  log(`📦 Releasing ${changedPackages.length} package(s):`);
   for (const pkg of changedPackages) {
-    console.log(`  • ${pkg.name}: ${pkg.version} → ${versions[pkg.name]}`);
+    log(`  • ${pkg.name}: ${pkg.version} → ${versions[pkg.name]}`);
   }
-  console.log('');
+  log('');
 
   // 7. Generate changelogs
   const changelogContext: ChangelogContext = {
@@ -176,9 +177,9 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.afterRelease.promise(releaseContext);
 
   if (!options.dryRun) {
-    console.log('\n🎉 Release completed successfully!');
+    log('\n🎉 Release completed successfully!');
   } else {
-    console.log('\n🔍 Dry run completed - no changes made');
+    log('\n🔍 Dry run completed - no changes made');
   }
 
   return {
@@ -197,15 +198,41 @@ function parseForceBump(bump: string): string {
 
 export async function shipitCommand(
   bump?: string,
-  options: { dryRun?: boolean; package?: string[] } = {},
+  options: { dryRun?: boolean; json?: boolean; package?: string[] } = {},
 ): Promise<void> {
   try {
-    console.log('🚢 Starting bonvoy release...');
-    if (options.dryRun) console.log('🔍 Dry run mode enabled\n');
+    if (!options.json) {
+      console.log('🚢 Starting bonvoy release...');
+      if (options.dryRun) console.log('🔍 Dry run mode enabled\n');
+    }
 
-    await shipit(bump, options);
+    const result = await shipit(bump, { ...options, silent: options.json });
+
+    if (options.json) {
+      console.log(
+        JSON.stringify(
+          {
+            success: true,
+            dryRun: options.dryRun ?? false,
+            released: result.changedPackages.map((pkg) => ({
+              name: pkg.name,
+              version: result.versions[pkg.name],
+              bump: result.bumps[pkg.name],
+            })),
+            changelogs: result.changelogs,
+          },
+          null,
+          2,
+        ),
+      );
+    }
   } catch (error) {
-    console.error('❌ Release failed:', error instanceof Error ? error.message : String(error));
+    const errorMessage = String(error instanceof Error ? error.message : error);
+    if (options.json) {
+      console.log(JSON.stringify({ success: false, error: errorMessage }));
+      process.exit(1);
+    }
+    console.error('❌ Release failed:', errorMessage);
     process.exit(1);
   }
 }

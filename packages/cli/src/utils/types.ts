@@ -3,6 +3,7 @@ import type { GitOperations } from '@bonvoy/plugin-git';
 
 export interface ShipitOptions {
   dryRun?: boolean;
+  silent?: boolean; // Suppress console output (for JSON mode)
   package?: string[];
   cwd?: string;
   plugins?: BonvoyPlugin[];

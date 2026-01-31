@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import GitPlugin from '../src/git.js';
 import type { GitOperations } from '../src/operations.js';
 
+// biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
 function createMockOps(): GitOperations & { calls: Array<{ method: string; args: any[] }> } {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   return {
     calls,
@@ -174,5 +176,11 @@ describe('GitPlugin', () => {
     await beforePublishFn(context);
 
     expect(mockOps.calls).toHaveLength(0);
+  });
+
+  it('should use default operations when none provided', () => {
+    const pluginWithDefaults = new GitPlugin();
+    expect(pluginWithDefaults.name).toBe('git');
+    // The plugin should work without explicit ops (uses defaultGitOperations internally)
   });
 });

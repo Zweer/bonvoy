@@ -6,7 +6,9 @@ import type { GitHubOperations, GitHubReleaseParams } from '../src/operations.js
 
 vi.mock('node:fs');
 
+// biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
 function createMockOps(): GitHubOperations & { calls: Array<{ method: string; args: any[] }> } {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   return {
     calls,
@@ -176,5 +178,130 @@ describe('GitHubPlugin', () => {
     expect(mockOps.calls[0].args[1].prerelease).toBe(true);
 
     consoleSpy.mockRestore();
+  });
+
+  it('should throw when createRelease fails', async () => {
+    const mockOps = {
+      calls: [],
+      async createRelease() {
+        throw new Error('API error');
+      },
+    };
+    const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+
+    plugin.apply(mockBonvoy);
+
+    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
+    await expect(
+      hookFn({
+        isDryRun: false,
+        changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+        versions: { 'test-pkg': '1.0.0' },
+        changelogs: {},
+        rootPath: '/test',
+      }),
+    ).rejects.toThrow('API error');
+  });
+
+  it('should throw when repo info cannot be determined', async () => {
+    const mockOps = createMockOps();
+    const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+
+    vol.fromJSON({ '/test/package.json': JSON.stringify({ name: 'test' }) }, '/');
+
+    plugin.apply(mockBonvoy);
+
+    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
+    await expect(
+      hookFn({
+        isDryRun: false,
+        changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+        versions: { 'test-pkg': '1.0.0' },
+        changelogs: {},
+        rootPath: '/test',
+      }),
+    ).rejects.toThrow('Could not determine GitHub repository');
+  });
+
+  it('should handle non-Error throws', async () => {
+    const mockOps = {
+      calls: [],
+      async createRelease() {
+        throw 'string error';
+      },
+    };
+    const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+
+    plugin.apply(mockBonvoy);
+
+    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
+    await expect(
+      hookFn({
+        isDryRun: false,
+        changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+        versions: { 'test-pkg': '1.0.0' },
+        changelogs: {},
+        rootPath: '/test',
+      }),
+    ).rejects.toBe('string error');
+  });
+
+  it('should read repo from string repository field', async () => {
+    const mockOps = createMockOps();
+    const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ repository: 'https://github.com/org/repo' }) },
+      '/',
+    );
+
+    plugin.apply(mockBonvoy);
+
+    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
+    await hookFn({
+      isDryRun: false,
+      changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+      versions: { 'test-pkg': '1.0.0' },
+      changelogs: {},
+      rootPath: '/test',
+    });
+
+    expect(mockOps.calls[0].args[1].owner).toBe('org');
+    expect(mockOps.calls[0].args[1].repo).toBe('repo');
+  });
+
+  it('should throw when repo URL is invalid', async () => {
+    const mockOps = createMockOps();
+    const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ repository: 'https://gitlab.com/org/repo' }) },
+      '/',
+    );
+
+    plugin.apply(mockBonvoy);
+
+    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
+    await expect(
+      hookFn({
+        isDryRun: false,
+        changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+        versions: { 'test-pkg': '1.0.0' },
+        changelogs: {},
+        rootPath: '/test',
+      }),
+    ).rejects.toThrow('Could not determine GitHub repository');
   });
 });

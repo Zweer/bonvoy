@@ -3,6 +3,7 @@ import type { GitHubOperations, GitHubReleaseParams } from '@bonvoy/plugin-githu
 import type { NpmOperations } from '@bonvoy/plugin-npm';
 
 export interface MockGitOperations extends GitOperations {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
   commits: Array<{ hash: string; message: string; author: string; date: string; files: string[] }>;
   lastTag: string | null;
@@ -20,6 +21,7 @@ export function createMockGitOperations(
     lastTag?: string | null;
   } = {},
 ): MockGitOperations {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   const commits = config.commits ?? [];
   const lastTag = config.lastTag ?? null;
@@ -62,11 +64,13 @@ export function createMockGitOperations(
 }
 
 export interface MockNpmOperations extends NpmOperations {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
   publishedVersions: Map<string, string>;
 }
 
 export function createMockNpmOperations(): MockNpmOperations {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   const publishedVersions = new Map<string, string>();
 
@@ -86,10 +90,12 @@ export function createMockNpmOperations(): MockNpmOperations {
 }
 
 export interface MockGitHubOperations extends GitHubOperations {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
 }
 
 export function createMockGitHubOperations(): MockGitHubOperations {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
 
   return {

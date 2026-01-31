@@ -32,7 +32,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/core": "0.0.0",
+    "@bonvoy/core": "^0.1.0",
     "@types/conventional-commits-parser": "^5.0.2",
     "conventional-commits-parser": "^5.0.0"
   },

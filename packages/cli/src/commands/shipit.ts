@@ -19,7 +19,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   const gitOps = options.gitOps ?? defaultGitOperations;
 
   // 1. Load configuration
-  const config = await loadConfig(rootPath);
+  const config = options.config ?? (await loadConfig(rootPath));
 
   // 2. Initialize Bonvoy with hooks
   const bonvoy = new Bonvoy(config);

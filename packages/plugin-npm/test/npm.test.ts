@@ -4,9 +4,11 @@ import NpmPlugin from '../src/npm.js';
 import type { NpmOperations } from '../src/operations.js';
 
 function createMockOps(): NpmOperations & {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
   publishedVersions: Map<string, string>;
 } {
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   const publishedVersions = new Map<string, string>();
   return {
@@ -22,7 +24,7 @@ function createMockOps(): NpmOperations & {
   };
 }
 
-const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+vi.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('NpmPlugin', () => {
   let mockOps: ReturnType<typeof createMockOps>;
@@ -132,5 +134,41 @@ describe('NpmPlugin', () => {
     const publishCall = mockOps.calls.find((c) => c.method === 'publish');
     expect(publishCall?.args[0]).toContain('--access');
     expect(publishCall?.args[0]).toContain('restricted');
+  });
+
+  it('should use custom registry', async () => {
+    plugin = new NpmPlugin({ registry: 'https://custom.registry.com' }, mockOps);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await publishFn(context);
+
+    const publishCall = mockOps.calls.find((c) => c.method === 'publish');
+    expect(publishCall?.args[0]).toContain('--registry');
+    expect(publishCall?.args[0]).toContain('https://custom.registry.com');
+  });
+
+  it('should use default operations when none provided', () => {
+    const pluginWithDefaults = new NpmPlugin();
+    expect(pluginWithDefaults.name).toBe('npm');
+  });
+
+  it('should skip provenance when disabled', async () => {
+    plugin = new NpmPlugin({ provenance: false }, mockOps);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await publishFn(context);
+
+    const publishCall = mockOps.calls.find((c) => c.method === 'publish');
+    expect(publishCall?.args[0]).not.toContain('--provenance');
   });
 });

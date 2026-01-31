@@ -30,6 +30,10 @@ export default class NpmPlugin implements BonvoyPlugin {
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
   apply(bonvoy: { hooks: { publish: any } }): void {
     bonvoy.hooks.publish.tapPromise(this.name, async (context: PublishContext) => {
+      if (context.isDryRun) {
+        console.log('🔍 [dry-run] Would publish packages to npm');
+        return;
+      }
       await this.publishPackages(context);
     });
   }

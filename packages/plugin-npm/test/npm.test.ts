@@ -48,6 +48,20 @@ describe('NpmPlugin', () => {
     expect(mockBonvoy.hooks.publish.tapPromise).toHaveBeenCalledWith('npm', expect.any(Function));
   });
 
+  it('should skip publish in dry-run mode', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
+      isDryRun: true,
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await publishFn(context);
+
+    expect(mockOps.calls.filter((c) => c.method === 'publish')).toHaveLength(0);
+  });
+
   it('should publish packages with default config', async () => {
     plugin.apply(mockBonvoy);
 

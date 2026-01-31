@@ -1,5 +1,6 @@
 import type { BonvoyPlugin, PublishContext } from '@bonvoy/core';
-import { execa } from 'execa';
+
+import { defaultNpmOperations, type NpmOperations } from './operations.js';
 
 export interface NpmPluginConfig {
   registry?: string;
@@ -13,8 +14,9 @@ export default class NpmPlugin implements BonvoyPlugin {
   name = 'npm';
 
   private config: Required<NpmPluginConfig>;
+  private ops: NpmOperations;
 
-  constructor(config: NpmPluginConfig = {}) {
+  constructor(config: NpmPluginConfig = {}, ops?: NpmOperations) {
     this.config = {
       registry: config.registry ?? 'https://registry.npmjs.org',
       access: config.access ?? 'public',
@@ -22,6 +24,7 @@ export default class NpmPlugin implements BonvoyPlugin {
       skipExisting: config.skipExisting ?? true,
       provenance: config.provenance ?? true,
     };
+    this.ops = ops ?? defaultNpmOperations;
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
@@ -49,7 +52,7 @@ export default class NpmPlugin implements BonvoyPlugin {
     version: string;
     path: string;
   }): Promise<void> {
-    const args = ['publish'];
+    const args: string[] = [];
 
     if (this.config.dryRun) {
       args.push('--dry-run');
@@ -67,20 +70,13 @@ export default class NpmPlugin implements BonvoyPlugin {
 
     console.log(`Publishing ${pkg.name}@${pkg.version}...`);
 
-    await execa('npm', args, {
-      cwd: pkg.path,
-      stdio: 'inherit',
-    });
+    await this.ops.publish(args, pkg.path);
   }
 
   private async isAlreadyPublished(pkg: { name: string; version: string }): Promise<boolean> {
-    try {
-      const result = await execa('npm', ['view', `${pkg.name}@${pkg.version}`, 'version'], {
-        stdio: 'pipe',
-      });
-      return result.stdout.trim() === pkg.version;
-    } catch {
-      return false;
-    }
+    const version = await this.ops.view(pkg.name, pkg.version);
+    return version === pkg.version;
   }
 }
+
+export { defaultNpmOperations, type NpmOperations } from './operations.js';

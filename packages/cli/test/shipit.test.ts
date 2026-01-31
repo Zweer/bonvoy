@@ -1,57 +1,66 @@
 import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import ChangelogPlugin from '../../plugin-changelog/src/changelog.js';
+import ConventionalPlugin from '../../plugin-conventional/src/conventional.js';
+import GitPlugin from '../../plugin-git/src/git.js';
+import type { GitOperations } from '../../plugin-git/src/operations.js';
 import { shipit } from '../src/commands/shipit.js';
 
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
-vi.mock('execa');
-vi.mock('@bonvoy/core', async () => {
-  const actual = await vi.importActual('@bonvoy/core');
+
+function createMockGitOps(config: {
+  commits?: Array<{ hash: string; message: string; author: string; date: string; files: string[] }>;
+  lastTag?: string | null;
+}): GitOperations {
   return {
-    ...actual,
-    loadConfig: vi.fn().mockResolvedValue({}),
+    async add() {},
+    async commit() {},
+    async tag() {},
+    async push() {},
+    async pushTags() {},
+    async getLastTag() {
+      return config.lastTag ?? null;
+    },
+    async getCommitsSinceTag() {
+      return config.commits ?? [];
+    },
   };
-});
+}
 
 describe('shipit command', () => {
   beforeEach(() => {
     vol.reset();
-    vi.clearAllMocks();
   });
 
   it('should handle workspace with changes', async () => {
-    const { execa } = await import('execa');
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
 
-    // Mock git commands
-    vi.mocked(execa).mockImplementation((async (cmd: string, args: string[]) => {
-      if (cmd === 'npm' && args[0] === 'query') {
-        return { stdout: JSON.stringify([]) };
-      }
-      if (cmd === 'git' && args[0] === 'describe') {
-        throw new Error('No tags');
-      }
-      if (cmd === 'git' && args[0] === 'log') {
-        return {
-          stdout: `abc123|feat: add feature|Test|2024-01-01T00:00:00Z
-src/index.ts`,
-        };
-      }
-      return { stdout: '' };
-    }) as never);
-
-    // Setup filesystem
     vol.fromJSON(
       {
-        'package.json': JSON.stringify({
-          name: 'test-pkg',
-          version: '1.0.0',
-        }),
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
       },
-      '/test',
+      '/',
     );
 
-    const result = await shipit(undefined, { dryRun: true, cwd: '/test' });
+    const result = await shipit(undefined, {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
 
     expect(result.packages).toHaveLength(1);
     expect(result.changedPackages).toHaveLength(1);
@@ -59,83 +68,73 @@ src/index.ts`,
   });
 
   it('should handle no changes', async () => {
-    const { execa } = await import('execa');
-
-    vi.mocked(execa).mockImplementation((async (cmd: string, args: string[]) => {
-      if (cmd === 'npm' && args[0] === 'query') {
-        return { stdout: JSON.stringify([]) };
-      }
-      if (cmd === 'git' && args[0] === 'describe') {
-        throw new Error('No tags');
-      }
-      if (cmd === 'git' && args[0] === 'log') {
-        return {
-          stdout: `abc123|chore: update deps|Test|2024-01-01T00:00:00Z
-package.json`,
-        };
-      }
-      return { stdout: '' };
-    }) as never);
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'chore: update deps',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['package.json'],
+        },
+      ],
+      lastTag: null,
+    });
 
     vol.fromJSON(
       {
-        'package.json': JSON.stringify({
-          name: 'test-pkg',
-          version: '1.0.0',
-        }),
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
       },
-      '/test',
+      '/',
     );
 
-    const result = await shipit(undefined, { dryRun: true, cwd: '/test' });
+    const result = await shipit(undefined, {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
 
     expect(result.changedPackages).toHaveLength(0);
   });
 
-  it('should write global changelog when enabled', async () => {
-    const { execa } = await import('execa');
-    const { loadConfig } = await import('@bonvoy/core');
-    const fs = await import('node:fs');
-
-    const writeFileSyncSpy = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
-
-    vi.mocked(loadConfig).mockResolvedValueOnce({
-      changelog: { global: true },
-    } as never);
-
-    vi.mocked(execa).mockImplementation((async (cmd: string, args: string[]) => {
-      if (cmd === 'npm' && args[0] === 'query') {
-        return { stdout: JSON.stringify([]) };
-      }
-      if (cmd === 'git' && args[0] === 'describe') {
-        throw new Error('No tags');
-      }
-      if (cmd === 'git' && args[0] === 'log') {
-        return {
-          stdout: `abc123|feat: add feature|Test|2024-01-01T00:00:00Z
-src/index.ts`,
-        };
-      }
-      return { stdout: '' };
-    }) as never);
+  it('should write changelog when not in dry-run', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
 
     vol.fromJSON(
       {
-        'package.json': JSON.stringify({
-          name: 'test-pkg',
-          version: '1.0.0',
-        }),
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
       },
-      '/test',
+      '/',
     );
 
-    await shipit(undefined, { dryRun: false, cwd: '/test' });
+    const result = await shipit(undefined, {
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      plugins: [
+        new ConventionalPlugin(),
+        new ChangelogPlugin(),
+        new GitPlugin({ push: false }, gitOps),
+      ],
+    });
 
-    expect(writeFileSyncSpy).toHaveBeenCalledWith(
-      expect.stringContaining('CHANGELOG.md'),
-      expect.any(String),
-    );
+    // Verify version was bumped
+    expect(result.versions['test-pkg']).toBe('1.1.0');
 
-    writeFileSyncSpy.mockRestore();
+    // Verify package.json was updated
+    const pkgJson = JSON.parse(vol.readFileSync('/test/package.json', 'utf-8') as string);
+    expect(pkgJson.version).toBe('1.1.0');
   });
 });

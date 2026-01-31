@@ -1,5 +1,6 @@
 import type { BonvoyPlugin, PublishContext } from '@bonvoy/core';
-import { execa } from 'execa';
+
+import { defaultGitOperations, type GitOperations } from './operations.js';
 
 export interface GitPluginConfig {
   commitMessage?: string;
@@ -11,13 +12,15 @@ export default class GitPlugin implements BonvoyPlugin {
   name = 'git';
 
   private config: Required<GitPluginConfig>;
+  private ops: GitOperations;
 
-  constructor(config: GitPluginConfig = {}) {
+  constructor(config: GitPluginConfig = {}, ops?: GitOperations) {
     this.config = {
       commitMessage: config.commitMessage ?? 'chore(release): :bookmark: {packages} [skip ci]',
       tagFormat: config.tagFormat ?? '{name}@{version}',
       push: config.push ?? true,
     };
+    this.ops = ops ?? defaultGitOperations;
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
@@ -36,29 +39,23 @@ export default class GitPlugin implements BonvoyPlugin {
   }
 
   private async commitChanges(context: PublishContext): Promise<void> {
-    const { packages, isDryRun } = context;
+    const { packages, isDryRun, rootPath } = context;
 
     if (packages.length === 0) return;
 
-    // Add all changed files
-    if (!isDryRun) {
-      await execa('git', ['add', '.']);
-    }
-
-    // Create commit message
     const packageNames = packages.map((pkg) => pkg.name).join(', ');
     const message = this.config.commitMessage.replace('{packages}', packageNames);
 
     console.log(`  Commit message: "${message}"`);
 
-    // Commit changes
     if (!isDryRun) {
-      await execa('git', ['commit', '-m', message]);
+      await this.ops.add('.', rootPath);
+      await this.ops.commit(message, rootPath);
     }
   }
 
   private async createTags(context: PublishContext): Promise<void> {
-    const { packages, isDryRun } = context;
+    const { packages, isDryRun, rootPath } = context;
 
     for (const pkg of packages) {
       const tag = this.config.tagFormat
@@ -68,25 +65,25 @@ export default class GitPlugin implements BonvoyPlugin {
       console.log(`  Tag: ${tag}`);
 
       if (!isDryRun) {
-        await execa('git', ['tag', tag]);
+        await this.ops.tag(tag, rootPath);
       }
     }
   }
 
   private async pushChanges(context: PublishContext): Promise<void> {
-    const { packages, isDryRun } = context;
+    const { packages, isDryRun, rootPath } = context;
 
     console.log('  Pushing commits and tags...');
 
     if (!isDryRun) {
-      // Push commits
-      await execa('git', ['push']);
+      await this.ops.push(rootPath);
 
-      // Push all tags at once to avoid race condition with GitHub
       const tags = packages.map((pkg) =>
         this.config.tagFormat.replace('{name}', pkg.name).replace('{version}', pkg.version),
       );
-      await execa('git', ['push', 'origin', ...tags]);
+      await this.ops.pushTags(tags, rootPath);
     }
   }
 }
+
+export { defaultGitOperations, type GitOperations } from './operations.js';

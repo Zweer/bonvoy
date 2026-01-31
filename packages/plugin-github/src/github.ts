@@ -1,5 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import type { BonvoyPlugin, ReleaseContext } from '@bonvoy/core';
-import { Octokit } from '@octokit/rest';
+
+import { defaultGitHubOperations, type GitHubOperations } from './operations.js';
 
 export interface GitHubPluginOptions {
   token?: string;
@@ -12,9 +16,11 @@ export interface GitHubPluginOptions {
 export default class GitHubPlugin implements BonvoyPlugin {
   name = 'github';
   private options: GitHubPluginOptions;
+  private ops: GitHubOperations;
 
-  constructor(options: GitHubPluginOptions = {}) {
+  constructor(options: GitHubPluginOptions = {}, ops?: GitHubOperations) {
     this.options = options;
+    this.ops = ops ?? defaultGitHubOperations;
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Bonvoy type causes circular dependency
@@ -31,10 +37,7 @@ export default class GitHubPlugin implements BonvoyPlugin {
         return;
       }
 
-      const octokit = new Octokit({ auth: token });
-
-      // Get repo info from git remote or options
-      const { owner, repo } = await this.getRepoInfo(context.rootPath);
+      const { owner, repo } = this.getRepoInfo(context.rootPath);
 
       for (const pkg of context.changedPackages) {
         const version = context.versions[pkg.name];
@@ -42,7 +45,7 @@ export default class GitHubPlugin implements BonvoyPlugin {
         const tagName = `${pkg.name}@${version}`;
 
         try {
-          await octokit.repos.createRelease({
+          await this.ops.createRelease(token, {
             owner,
             repo,
             tag_name: tagName,
@@ -62,26 +65,36 @@ export default class GitHubPlugin implements BonvoyPlugin {
     });
   }
 
-  private async getRepoInfo(rootPath: string): Promise<{ owner: string; repo: string }> {
+  private getRepoInfo(rootPath: string): { owner: string; repo: string } {
     // Use options if provided
     if (this.options.owner && this.options.repo) {
       return { owner: this.options.owner, repo: this.options.repo };
     }
 
-    // Parse from git remote
-    const { execa } = await import('execa');
+    // Read from package.json repository field
     try {
-      const { stdout } = await execa('git', ['remote', 'get-url', 'origin'], { cwd: rootPath });
-      const match = stdout.match(/github\.com[:/]([^/]+)\/([^/.]+)/);
-      if (match) {
-        return { owner: match[1], repo: match[2] };
+      const pkgPath = join(rootPath, 'package.json');
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+      const repoUrl = typeof pkg.repository === 'string' ? pkg.repository : pkg.repository?.url;
+
+      if (repoUrl) {
+        const match = repoUrl.match(/github\.com[:/]([^/]+)\/([^/.]+)/);
+        if (match) {
+          return { owner: match[1], repo: match[2] };
+        }
       }
     } catch {
       // Ignore error
     }
 
     throw new Error(
-      'Could not determine GitHub repository. Please provide owner and repo in plugin options.',
+      'Could not determine GitHub repository. Please set "repository" in package.json or provide owner/repo in plugin options.',
     );
   }
 }
+
+export {
+  defaultGitHubOperations,
+  type GitHubOperations,
+  type GitHubReleaseParams,
+} from './operations.js';

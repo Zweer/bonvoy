@@ -1,9 +1,13 @@
-import type { CommitInfo, Package } from '@bonvoy/core';
+import type { BonvoyPlugin, CommitInfo, Package } from '@bonvoy/core';
+import type { GitOperations } from '@bonvoy/plugin-git';
 
 export interface ShipitOptions {
   dryRun?: boolean;
   package?: string[];
   cwd?: string;
+  plugins?: BonvoyPlugin[];
+  gitOps?: GitOperations;
+  packages?: Package[]; // Allow injecting packages directly (for testing)
 }
 
 export interface ShipitResult {

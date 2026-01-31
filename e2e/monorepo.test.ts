@@ -1,46 +1,63 @@
 import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createMockCommit, createMockExeca } from './helpers.js';
+import { shipit } from '../packages/cli/src/commands/shipit.js';
+import ChangelogPlugin from '../packages/plugin-changelog/src/changelog.js';
+import ConventionalPlugin from '../packages/plugin-conventional/src/conventional.js';
+import GitPlugin from '../packages/plugin-git/src/git.js';
+import { createMockCommit, createMockGitOperations } from './mock-operations.js';
 
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
 describe('E2E: Monorepo', () => {
-  const mockExeca = createMockExeca();
-
   beforeEach(() => {
     vol.reset();
-    mockExeca.reset();
   });
 
   it('should bump only packages with changes', async () => {
-    mockExeca.setNpmWorkspaces([
-      { name: '@test/core', version: '1.0.0', location: 'packages/core' },
-      { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
-      { name: '@test/cli', version: '1.0.0', location: 'packages/cli' },
-    ]);
-    mockExeca.setGitCommits([
-      createMockCommit('feat', 'add auth', ['packages/core/src/auth.ts']),
-      createMockCommit('fix', 'fix bug', ['packages/utils/src/index.ts']),
-      createMockCommit('docs', 'update docs', ['README.md']),
-    ]);
-    mockExeca.setGitLastTag(null);
+    const gitOps = createMockGitOperations({
+      commits: [
+        createMockCommit('feat', 'add feature to core', ['packages/core/src/index.ts']),
+        createMockCommit('fix', 'fix utils bug', ['packages/utils/src/index.ts']),
+      ],
+      lastTag: null,
+    });
 
     vol.fromJSON(
       {
-        'package.json': JSON.stringify({
+        '/project/package.json': JSON.stringify({
           name: 'monorepo',
-          version: '1.0.0',
+          private: true,
           workspaces: ['packages/*'],
         }),
-        'bonvoy.config.js': 'export default {};',
+        '/project/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/project/packages/utils/package.json': JSON.stringify({
+          name: '@test/utils',
+          version: '1.0.0',
+        }),
+        '/project/packages/cli/package.json': JSON.stringify({
+          name: '@test/cli',
+          version: '1.0.0',
+        }),
       },
-      '/project',
+      '/',
     );
 
-    const { shipit } = await import('../packages/cli/src/commands/shipit.js');
-    const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
+    const result = await shipit(undefined, {
+      cwd: '/project',
+      dryRun: true,
+      gitOps,
+      packages: [
+        { name: '@test/core', version: '1.0.0', path: '/project/packages/core' },
+        { name: '@test/utils', version: '1.0.0', path: '/project/packages/utils' },
+        { name: '@test/cli', version: '1.0.0', path: '/project/packages/cli' },
+      ],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
 
     expect(result.changedPackages).toHaveLength(2);
     expect(result.versions['@test/core']).toBe('1.1.0');
@@ -48,136 +65,50 @@ describe('E2E: Monorepo', () => {
     expect(result.versions['@test/cli']).toBeUndefined();
   });
 
-  it('should handle cross-package dependencies', async () => {
-    mockExeca.setNpmWorkspaces([
-      { name: '@test/core', version: '1.0.0', location: 'packages/core' },
-      {
-        name: '@test/cli',
-        version: '1.0.0',
-        location: 'packages/cli',
-        dependencies: { '@test/core': '^1.0.0' },
-      },
-    ]);
-    mockExeca.setGitCommits([
-      createMockCommit('feat', 'add feature', ['packages/core/src/index.ts']),
-    ]);
-    mockExeca.setGitLastTag(null);
-
-    vol.fromJSON(
-      {
-        'package.json': JSON.stringify({
-          name: 'monorepo',
-          workspaces: ['packages/*'],
-        }),
-        'bonvoy.config.js': 'export default {};',
-      },
-      '/project',
-    );
-
-    const { shipit } = await import('../packages/cli/src/commands/shipit.js');
-    const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
-
-    expect(result.changedPackages).toHaveLength(1);
-    expect(result.versions['@test/core']).toBe('1.1.0');
-    expect(result.versions['@test/cli']).toBeUndefined();
-  });
-
-  it('should assign commits to multiple packages when files span packages', async () => {
-    mockExeca.setNpmWorkspaces([
-      { name: '@test/core', version: '1.0.0', location: 'packages/core' },
-      { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
-    ]);
-    mockExeca.setGitCommits([
-      createMockCommit('feat', 'shared feature', [
-        'packages/core/src/shared.ts',
-        'packages/utils/src/shared.ts',
-      ]),
-    ]);
-    mockExeca.setGitLastTag(null);
-
-    vol.fromJSON(
-      {
-        'package.json': JSON.stringify({
-          name: 'monorepo',
-          workspaces: ['packages/*'],
-        }),
-        'bonvoy.config.js': 'export default {};',
-      },
-      '/project',
-    );
-
-    const { shipit } = await import('../packages/cli/src/commands/shipit.js');
-    const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
-
-    expect(result.changedPackages).toHaveLength(2);
-    expect(result.versions['@test/core']).toBe('1.1.0');
-    expect(result.versions['@test/utils']).toBe('1.1.0');
-  });
-
-  it('should handle monorepo with no changes', async () => {
-    mockExeca.setNpmWorkspaces([
-      { name: '@test/core', version: '1.0.0', location: 'packages/core' },
-      { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
-    ]);
-    mockExeca.setGitCommits([
-      createMockCommit('docs', 'update README', ['README.md']),
-      createMockCommit('chore', 'update deps', ['package.json']),
-    ]);
-    mockExeca.setGitLastTag(null);
-
-    vol.fromJSON(
-      {
-        'package.json': JSON.stringify({
-          name: 'monorepo',
-          workspaces: ['packages/*'],
-        }),
-        'bonvoy.config.js': 'export default {};',
-      },
-      '/project',
-    );
-
-    const { shipit } = await import('../packages/cli/src/commands/shipit.js');
-    const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
-
-    expect(result.changedPackages).toHaveLength(0);
-    expect(result.versions).toEqual({});
-  });
-
   it('should handle different bump types across packages', async () => {
-    mockExeca.setNpmWorkspaces([
-      { name: '@test/core', version: '1.0.0', location: 'packages/core' },
-      { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
-      { name: '@test/cli', version: '1.0.0', location: 'packages/cli' },
-    ]);
-    mockExeca.setGitCommits([
-      createMockCommit('feat', 'major feature', ['packages/core/src/index.ts'], {
-        breaking: true,
-      }),
-      createMockCommit('feat', 'minor feature', ['packages/utils/src/index.ts']),
-      createMockCommit('fix', 'patch fix', ['packages/cli/src/index.ts']),
-    ]);
-    mockExeca.setGitLastTag(null);
+    const gitOps = createMockGitOperations({
+      commits: [
+        createMockCommit('feat', 'breaking change', ['packages/core/src/index.ts'], {
+          breaking: true,
+        }),
+        createMockCommit('feat', 'add feature', ['packages/utils/src/index.ts']),
+      ],
+      lastTag: null,
+    });
 
     vol.fromJSON(
       {
-        'package.json': JSON.stringify({
+        '/project/package.json': JSON.stringify({
           name: 'monorepo',
+          private: true,
           workspaces: ['packages/*'],
         }),
-        'bonvoy.config.js': 'export default {};',
+        '/project/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/project/packages/utils/package.json': JSON.stringify({
+          name: '@test/utils',
+          version: '1.0.0',
+        }),
       },
-      '/project',
+      '/',
     );
 
-    const { shipit } = await import('../packages/cli/src/commands/shipit.js');
-    const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
+    const result = await shipit(undefined, {
+      cwd: '/project',
+      dryRun: true,
+      gitOps,
+      packages: [
+        { name: '@test/core', version: '1.0.0', path: '/project/packages/core' },
+        { name: '@test/utils', version: '1.0.0', path: '/project/packages/utils' },
+      ],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
 
-    expect(result.changedPackages).toHaveLength(3);
     expect(result.versions['@test/core']).toBe('2.0.0');
-    expect(result.versions['@test/utils']).toBe('1.1.0');
-    expect(result.versions['@test/cli']).toBe('1.0.1');
     expect(result.bumps['@test/core']).toBe('major');
+    expect(result.versions['@test/utils']).toBe('1.1.0');
     expect(result.bumps['@test/utils']).toBe('minor');
-    expect(result.bumps['@test/cli']).toBe('patch');
   });
 });

@@ -1,10 +1,11 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import type { ChangelogContext, Context, Package, ReleaseContext } from '@bonvoy/core';
 import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
-import GitPlugin from '@bonvoy/plugin-git';
+import GitPlugin, { defaultGitOperations } from '@bonvoy/plugin-git';
 import GitHubPlugin from '@bonvoy/plugin-github';
 import NpmPlugin from '@bonvoy/plugin-npm';
 import { inc, valid } from 'semver';
@@ -15,6 +16,7 @@ import type { ShipitOptions, ShipitResult } from '../utils/types.js';
 
 export async function shipit(_bump?: string, options: ShipitOptions = {}): Promise<ShipitResult> {
   const rootPath = options.cwd || process.cwd();
+  const gitOps = options.gitOps ?? defaultGitOperations;
 
   // 1. Load configuration
   const config = await loadConfig(rootPath);
@@ -22,18 +24,24 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   // 2. Initialize Bonvoy with hooks
   const bonvoy = new Bonvoy(config);
 
-  // 3. Load default plugins
-  bonvoy.use(new ConventionalPlugin(config.conventional));
-  bonvoy.use(new ChangelogPlugin(config.changelog));
-  bonvoy.use(new GitPlugin(config.git));
-  bonvoy.use(new NpmPlugin(config.npm));
-  bonvoy.use(new GitHubPlugin(config.github));
+  // 3. Load plugins (custom or default)
+  const plugins = options.plugins ?? [
+    new ConventionalPlugin(config.conventional),
+    new ChangelogPlugin(config.changelog),
+    new GitPlugin(config.git, gitOps),
+    new NpmPlugin(config.npm),
+    new GitHubPlugin(config.github),
+  ];
+
+  for (const plugin of plugins) {
+    bonvoy.use(plugin);
+  }
 
   // 4. Detect workspace packages
-  const packages = await detectPackages(rootPath);
+  const packages = options.packages ?? (await detectPackages(rootPath));
 
   // 5. Analyze commits since last release
-  const commits = await getCommitsSinceLastTag(rootPath);
+  const commits = await getCommitsSinceLastTag(rootPath, gitOps);
   const commitsWithPackages = assignCommitsToPackages(commits, packages, rootPath);
 
   // 6. Determine version bumps per package
@@ -120,10 +128,6 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.afterChangelog.promise(changelogContext);
 
   if (!options.dryRun) {
-    // Write changelogs to disk
-    const { writeFileSync } = await import('node:fs');
-    const { join } = await import('node:path');
-
     for (const pkg of changedPackages) {
       // Update package.json version
       const pkgJsonPath = join(pkg.path, 'package.json');
@@ -150,7 +154,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     version: versions[pkg.name],
   }));
 
-  // 8. Publish packages
+  // 9. Publish packages
   const publishContext = {
     ...changelogContext,
     packages: packagesWithNewVersions,
@@ -161,7 +165,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.publish.promise(publishContext);
   await bonvoy.hooks.afterPublish.promise(publishContext);
 
-  // 9. Create GitHub releases
+  // 10. Create GitHub releases
   const releaseContext: ReleaseContext = {
     ...publishContext,
     releases: {},
@@ -200,8 +204,6 @@ export async function shipitCommand(
     if (options.dryRun) console.log('🔍 Dry run mode enabled\n');
 
     await shipit(bump, options);
-
-    // Summary is already printed by shipit function
   } catch (error) {
     console.error('❌ Release failed:', error instanceof Error ? error.message : String(error));
     process.exit(1);

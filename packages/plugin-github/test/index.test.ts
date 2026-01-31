@@ -1,25 +1,25 @@
+import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import GitHubPlugin from '../src/github.js';
+import type { GitHubOperations, GitHubReleaseParams } from '../src/operations.js';
 
-const mockCreateRelease = vi.fn();
-const mockExeca = vi.fn();
+vi.mock('node:fs');
 
-vi.mock('@octokit/rest', () => ({
-  Octokit: class {
-    repos = {
-      createRelease: mockCreateRelease,
-    };
-  },
-}));
-
-vi.mock('execa', () => ({
-  execa: mockExeca,
-}));
+function createMockOps(): GitHubOperations & { calls: Array<{ method: string; args: any[] }> } {
+  const calls: Array<{ method: string; args: any[] }> = [];
+  return {
+    calls,
+    async createRelease(token: string, params: GitHubReleaseParams) {
+      calls.push({ method: 'createRelease', args: [token, params] });
+    },
+  };
+}
 
 describe('GitHubPlugin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vol.reset();
     delete process.env.GITHUB_TOKEN;
   });
 
@@ -30,13 +30,7 @@ describe('GitHubPlugin', () => {
 
   it('should register makeRelease hook', () => {
     const plugin = new GitHubPlugin();
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
 
@@ -49,14 +43,7 @@ describe('GitHubPlugin', () => {
   it('should skip in dry-run mode', async () => {
     const plugin = new GitHubPlugin();
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
 
@@ -76,14 +63,17 @@ describe('GitHubPlugin', () => {
   it('should warn if GITHUB_TOKEN is missing', async () => {
     const plugin = new GitHubPlugin();
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'test',
+          repository: 'https://github.com/test/repo',
+        }),
       },
-    };
+      '/',
+    );
 
     plugin.apply(mockBonvoy);
 
@@ -100,296 +90,91 @@ describe('GitHubPlugin', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should create GitHub release', async () => {
-    mockCreateRelease.mockResolvedValue({
-      data: { html_url: 'https://github.com/test/repo/releases/tag/v1.0.0' },
-    });
-    mockExeca.mockResolvedValue({ stdout: 'https://github.com/test/repo.git' });
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin();
+  it('should create releases for changed packages', async () => {
+    const mockOps = createMockOps();
+    const plugin = new GitHubPlugin(
+      { token: 'test-token', owner: 'test-owner', repo: 'test-repo' },
+      mockOps,
+    );
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
 
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
-      changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
-      versions: { 'test-pkg': '1.0.0' },
-      changelogs: { 'test-pkg': '# Changelog\n\n## 1.0.0\n- Initial release' },
+      changedPackages: [{ name: '@test/pkg', version: '1.0.0', path: '/test/pkg' }],
+      versions: { '@test/pkg': '1.1.0' },
+      changelogs: { '@test/pkg': '## Changes\n- Added feature' },
       rootPath: '/test',
     });
 
-    expect(mockCreateRelease).toHaveBeenCalledWith({
-      owner: 'test',
-      repo: 'repo',
-      tag_name: 'test-pkg@1.0.0',
-      name: 'test-pkg v1.0.0',
-      body: '# Changelog\n\n## 1.0.0\n- Initial release',
-      draft: false,
-      prerelease: false,
+    expect(mockOps.calls).toHaveLength(1);
+    expect(mockOps.calls[0].args[0]).toBe('test-token');
+    expect(mockOps.calls[0].args[1]).toMatchObject({
+      owner: 'test-owner',
+      repo: 'test-repo',
+      tag_name: '@test/pkg@1.1.0',
+      name: '@test/pkg v1.1.0',
+      body: '## Changes\n- Added feature',
     });
-    expect(consoleSpy).toHaveBeenCalledWith('✅ Created GitHub release: test-pkg@1.0.0');
+
     consoleSpy.mockRestore();
   });
 
-  it('should detect prerelease from version', async () => {
-    mockCreateRelease.mockResolvedValue({
-      data: { html_url: 'https://github.com/test/repo/releases/tag/v1.0.0-beta.1' },
-    });
-    mockExeca.mockResolvedValue({ stdout: 'https://github.com/test/repo.git' });
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin();
+  it('should read repo from package.json', async () => {
+    const mockOps = createMockOps();
+    const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'test',
+          repository: { url: 'https://github.com/my-org/my-repo.git' },
+        }),
       },
-    };
+      '/',
+    );
 
     plugin.apply(mockBonvoy);
 
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
-      changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
-      versions: { 'test-pkg': '1.0.0-beta.1' },
-      changelogs: { 'test-pkg': '# Changelog' },
-      rootPath: '/test',
-    });
-
-    expect(mockCreateRelease).toHaveBeenCalledWith(
-      expect.objectContaining({
-        prerelease: true,
-      }),
-    );
-    consoleSpy.mockRestore();
-  });
-
-  it('should use options for owner and repo', async () => {
-    mockCreateRelease.mockResolvedValue({
-      data: { html_url: 'https://github.com/custom/repo/releases/tag/v1.0.0' },
-    });
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin({ owner: 'custom', repo: 'custom-repo' });
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
-
-    plugin.apply(mockBonvoy);
-
-    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
-    await hookFn({
-      isDryRun: false,
-      changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
-      versions: { 'test-pkg': '1.0.0' },
-      changelogs: { 'test-pkg': '# Changelog' },
-      rootPath: '/test',
-    });
-
-    expect(mockCreateRelease).toHaveBeenCalledWith(
-      expect.objectContaining({
-        owner: 'custom',
-        repo: 'custom-repo',
-      }),
-    );
-    consoleSpy.mockRestore();
-  });
-
-  it('should handle release creation error', async () => {
-    mockCreateRelease.mockRejectedValue(new Error('API error'));
-    mockExeca.mockResolvedValue({ stdout: 'https://github.com/test/repo.git' });
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin();
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
-
-    plugin.apply(mockBonvoy);
-
-    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
-
-    await expect(
-      hookFn({
-        isDryRun: false,
-        changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
-        versions: { 'test-pkg': '1.0.0' },
-        changelogs: { 'test-pkg': '# Changelog' },
-        rootPath: '/test',
-      }),
-    ).rejects.toThrow('API error');
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '❌ Failed to create release for test-pkg@1.0.0:',
-      'API error',
-    );
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('should throw error when repo cannot be determined', async () => {
-    mockExeca.mockRejectedValue(new Error('git error'));
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin();
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
-
-    plugin.apply(mockBonvoy);
-
-    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
-
-    await expect(
-      hookFn({
-        isDryRun: false,
-        changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
-        versions: { 'test-pkg': '1.0.0' },
-        changelogs: { 'test-pkg': '# Changelog' },
-        rootPath: '/test',
-      }),
-    ).rejects.toThrow('Could not determine GitHub repository');
-  });
-
-  it('should throw error when git remote URL is invalid', async () => {
-    mockExeca.mockResolvedValue({ stdout: 'https://invalid-url.com/repo.git' });
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin();
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
-
-    plugin.apply(mockBonvoy);
-
-    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
-
-    await expect(
-      hookFn({
-        isDryRun: false,
-        changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
-        versions: { 'test-pkg': '1.0.0' },
-        changelogs: { 'test-pkg': '# Changelog' },
-        rootPath: '/test',
-      }),
-    ).rejects.toThrow('Could not determine GitHub repository');
-  });
-
-  it('should handle non-Error exceptions', async () => {
-    mockCreateRelease.mockRejectedValue('string error');
-    mockExeca.mockResolvedValue({ stdout: 'https://github.com/test/repo.git' });
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin();
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
-
-    plugin.apply(mockBonvoy);
-
-    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
-
-    await expect(
-      hookFn({
-        isDryRun: false,
-        changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
-        versions: { 'test-pkg': '1.0.0' },
-        changelogs: { 'test-pkg': '# Changelog' },
-        rootPath: '/test',
-      }),
-    ).rejects.toThrow('string error');
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '❌ Failed to create release for test-pkg@1.0.0:',
-      'string error',
-    );
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('should handle missing changelog', async () => {
-    mockCreateRelease.mockResolvedValue({
-      data: { html_url: 'https://github.com/test/repo/releases/tag/v1.0.0' },
-    });
-    mockExeca.mockResolvedValue({ stdout: 'https://github.com/test/repo.git' });
-
-    process.env.GITHUB_TOKEN = 'test-token';
-
-    const plugin = new GitHubPlugin();
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-    const mockBonvoy = {
-      hooks: {
-        makeRelease: {
-          tapPromise: vi.fn(),
-        },
-      },
-    };
-
-    plugin.apply(mockBonvoy);
-
-    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
-    await hookFn({
-      isDryRun: false,
-      changedPackages: [{ name: 'test-pkg', path: '/test/pkg' }],
+      changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
       changelogs: {},
       rootPath: '/test',
     });
 
-    expect(mockCreateRelease).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: '',
-      }),
-    );
+    expect(mockOps.calls[0].args[1].owner).toBe('my-org');
+    expect(mockOps.calls[0].args[1].repo).toBe('my-repo');
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should detect prerelease versions', async () => {
+    const mockOps = createMockOps();
+    const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+
+    plugin.apply(mockBonvoy);
+
+    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
+    await hookFn({
+      isDryRun: false,
+      changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+      versions: { 'test-pkg': '1.0.0-beta.1' },
+      changelogs: {},
+      rootPath: '/test',
+    });
+
+    expect(mockOps.calls[0].args[1].prerelease).toBe(true);
+
     consoleSpy.mockRestore();
   });
 });

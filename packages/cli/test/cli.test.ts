@@ -36,6 +36,15 @@ vi.mock('@bonvoy/plugin-changelog', () => ({
 
 vi.mock('@bonvoy/plugin-git', () => ({
   default: vi.fn(),
+  defaultGitOperations: {
+    add: vi.fn(),
+    commit: vi.fn(),
+    tag: vi.fn(),
+    push: vi.fn(),
+    pushTags: vi.fn(),
+    getLastTag: vi.fn().mockResolvedValue(null),
+    getCommitsSinceTag: vi.fn().mockResolvedValue([]),
+  },
 }));
 
 vi.mock('@bonvoy/plugin-npm', () => ({

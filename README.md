@@ -8,8 +8,6 @@
 
 A plugin-based release automation tool for npm packages and monorepos.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 ## Why bonvoy?
 
 Existing release tools have frustrating limitations:
@@ -136,18 +134,23 @@ jobs:
 
 ## Packages
 
-| Package | Description | Status |
-|---------|-------------|--------|
-| `@bonvoy/core` | Hook system, CLI, config loading, schema validation | ✅ **Implemented** |
-| `@bonvoy/cli` | CLI orchestration and commands | ✅ **Implemented** |
-| `@bonvoy/plugin-conventional` | Conventional commits parser (default) | ✅ **Implemented** |
-| `@bonvoy/plugin-changelog` | Changelog generation (default) | ✅ **Implemented** |
-| `@bonvoy/plugin-git` | Git commit, tag, push (default) | ✅ **Implemented** |
-| `@bonvoy/plugin-npm` | npm publish with OIDC (default) | ✅ **Implemented** |
-| `@bonvoy/plugin-github` | GitHub releases (default) | ✅ **Implemented** |
-| `@bonvoy/plugin-gitlab` | GitLab releases (optional) | 🚧 Planned |
-| `@bonvoy/plugin-slack` | Slack notifications (optional) | 🚧 Planned |
-| `@bonvoy/plugin-changeset` | Changeset-style workflow (optional) | 🚧 Planned |
+| Package | Version | Description |
+|---------|---------|-------------|
+| [@bonvoy/cli](./packages/cli) | [![npm](https://img.shields.io/npm/v/@bonvoy/cli)](https://www.npmjs.com/package/@bonvoy/cli) | CLI orchestration and commands |
+| [@bonvoy/core](./packages/core) | [![npm](https://img.shields.io/npm/v/@bonvoy/core)](https://www.npmjs.com/package/@bonvoy/core) | Hook system, config loading, schema validation |
+| [@bonvoy/plugin-changelog](./packages/plugin-changelog) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changelog)](https://www.npmjs.com/package/@bonvoy/plugin-changelog) | Changelog generation (default) |
+| [@bonvoy/plugin-conventional](./packages/plugin-conventional) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-conventional)](https://www.npmjs.com/package/@bonvoy/plugin-conventional) | Conventional commits parser (default) |
+| [@bonvoy/plugin-git](./packages/plugin-git) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-git)](https://www.npmjs.com/package/@bonvoy/plugin-git) | Git commit, tag, push (default) |
+| [@bonvoy/plugin-github](./packages/plugin-github) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-github)](https://www.npmjs.com/package/@bonvoy/plugin-github) | GitHub releases (default) |
+| [@bonvoy/plugin-npm](./packages/plugin-npm) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-npm)](https://www.npmjs.com/package/@bonvoy/plugin-npm) | npm publish with OIDC (default) |
+
+### Planned Plugins
+
+| Package | Description |
+|---------|-------------|
+| `@bonvoy/plugin-gitlab` | GitLab releases |
+| `@bonvoy/plugin-slack` | Slack notifications |
+| `@bonvoy/plugin-changeset` | Changeset-style workflow |
 
 ## Plugin: Conventional Commits
 

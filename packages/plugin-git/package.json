@@ -1,7 +1,7 @@
 {
   "name": "@bonvoy/plugin-git",
   "version": "0.1.1",
-  "description": "Git operations plugin for bonvoy",
+  "description": "🚢 Git operations plugin for bonvoy",
   "keywords": [
     "bonvoy",
     "plugin",

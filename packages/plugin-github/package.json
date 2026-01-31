@@ -1,7 +1,7 @@
 {
   "name": "@bonvoy/plugin-github",
   "version": "0.1.0",
-  "description": "GitHub releases plugin for bonvoy",
+  "description": "🚢 GitHub releases plugin for bonvoy",
   "keywords": [
     "bonvoy",
     "plugin",

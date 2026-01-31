@@ -35,6 +35,9 @@
     "build": "tsdown",
     "test": "vitest"
   },
+  "dependencies": {
+    "execa": "^9.6.1"
+  },
   "devDependencies": {
     "vitest": "^4.0.16"
   },

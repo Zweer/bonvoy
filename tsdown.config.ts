@@ -11,6 +11,7 @@ export default defineConfig({
     enabled: 'ci-only',
     profile: 'esm-only',
   },
+  external: ['execa'],
   outputOptions: {
     banner: (chunk) => {
       // Add shebang only to CLI entry point

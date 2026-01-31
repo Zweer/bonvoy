@@ -1,4 +1,3 @@
-import { execa } from 'execa';
 import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -6,19 +5,18 @@ import { createMockCommit, createMockExeca } from './helpers.js';
 
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
-vi.mock('execa');
 
 describe('E2E: Force Version', () => {
+  const mockExeca = createMockExeca();
+
   beforeEach(() => {
     vol.reset();
-    vi.clearAllMocks();
+    mockExeca.reset();
   });
 
   it('should force specific version', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('feat', 'add feature', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -40,10 +38,8 @@ describe('E2E: Force Version', () => {
   });
 
   it('should force major bump', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('fix', 'small fix', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -65,10 +61,8 @@ describe('E2E: Force Version', () => {
   });
 
   it('should force minor bump', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('fix', 'small fix', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -90,10 +84,8 @@ describe('E2E: Force Version', () => {
   });
 
   it('should force patch bump', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('feat', 'big feature', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -115,7 +107,6 @@ describe('E2E: Force Version', () => {
   });
 
   it('should force version in monorepo for all changed packages', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
@@ -126,7 +117,6 @@ describe('E2E: Force Version', () => {
       createMockCommit('fix', 'fix in utils', ['packages/utils/src/index.ts']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -152,14 +142,12 @@ describe('E2E: Force Version', () => {
   });
 
   it('should force specific version in monorepo', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
     ]);
     mockExeca.setGitCommits([createMockCommit('feat', 'feature', ['packages/core/src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -181,10 +169,8 @@ describe('E2E: Force Version', () => {
   });
 
   it('should force bump type even without semantic commits', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('docs', 'update docs', ['README.md'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -205,10 +191,8 @@ describe('E2E: Force Version', () => {
   });
 
   it('should force version even without semantic commits', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('docs', 'update docs', ['README.md'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -229,10 +213,8 @@ describe('E2E: Force Version', () => {
   });
 
   it('should reject invalid semver versions', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('feat', 'add feature', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {

@@ -1,4 +1,3 @@
-import { execa } from 'execa';
 import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -9,27 +8,22 @@ import { createMockCommit, createMockExeca } from './helpers.js';
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
-// Mock execa
-vi.mock('execa');
-
 describe('E2E: Single Package - First Release', () => {
+  const mockExeca = createMockExeca();
+
   beforeEach(() => {
     vol.reset();
-    vi.clearAllMocks();
+    mockExeca.reset();
   });
 
   it('should bump version from 0.0.0 to 0.1.0 with feat commit', async () => {
-    // Setup mock execa
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([
       createMockCommit('feat', 'add authentication', ['src/auth.ts']),
       createMockCommit('fix', 'resolve memory leak', ['src/memory.ts']),
       createMockCommit('docs', 'update README', ['README.md']),
     ]);
-    mockExeca.setGitLastTag(null); // No previous tags
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
+    mockExeca.setGitLastTag(null);
 
-    // Setup mock filesystem
     vol.fromJSON(
       {
         'package.json': JSON.stringify({
@@ -41,10 +35,8 @@ describe('E2E: Single Package - First Release', () => {
       '/project',
     );
 
-    // Call shipit
     const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
 
-    // Assertions
     expect(result.packages).toHaveLength(1);
     expect(result.changedPackages).toHaveLength(1);
     expect(result.versions['test-pkg']).toBe('0.1.0');
@@ -52,8 +44,6 @@ describe('E2E: Single Package - First Release', () => {
   });
 
   it('should include only semantic commits in changelog', async () => {
-    // Setup mock execa
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([
       createMockCommit('feat', 'add authentication', ['src/auth.ts']),
       createMockCommit('fix', 'resolve memory leak', ['src/memory.ts']),
@@ -61,9 +51,7 @@ describe('E2E: Single Package - First Release', () => {
       createMockCommit('chore', 'update deps', ['package.json']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
-    // Setup mock filesystem
     vol.fromJSON(
       {
         'package.json': JSON.stringify({
@@ -75,26 +63,20 @@ describe('E2E: Single Package - First Release', () => {
       '/project',
     );
 
-    // Call shipit
     const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
 
-    // Assertions - changelog should only include feat and fix
     expect(result.commits).toHaveLength(4);
     expect(result.changedPackages).toHaveLength(1);
     expect(result.versions['test-pkg']).toBe('0.1.0');
   });
 
   it('should handle no changes scenario', async () => {
-    // Setup mock execa
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([
       createMockCommit('docs', 'update README', ['README.md']),
       createMockCommit('chore', 'update deps', ['package.json']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
-    // Setup mock filesystem
     vol.fromJSON(
       {
         'package.json': JSON.stringify({
@@ -106,10 +88,8 @@ describe('E2E: Single Package - First Release', () => {
       '/project',
     );
 
-    // Call shipit
     const result = await shipit(undefined, { dryRun: true, cwd: '/project' });
 
-    // Assertions - no semantic commits means no changes
     expect(result.changedPackages).toHaveLength(0);
     expect(result.versions).toEqual({});
   });
@@ -117,10 +97,8 @@ describe('E2E: Single Package - First Release', () => {
   it('should run shipitCommand with changes in dry-run mode', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('feat', 'add feature', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -142,11 +120,10 @@ describe('E2E: Single Package - First Release', () => {
 
   it('should run shipitCommand without dry-run', async () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('feat', 'add feature', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -161,14 +138,19 @@ describe('E2E: Single Package - First Release', () => {
     expect(consoleSpy).toHaveBeenCalledWith('🚢 Starting bonvoy release...');
     expect(consoleSpy).toHaveBeenCalledWith('\n🎉 Release completed successfully!');
 
+    // Verify git commands were called
+    const calls = mockExeca.getCalls();
+    expect(calls.some((c) => c.cmd === 'git' && c.args[0] === 'add')).toBe(true);
+    expect(calls.some((c) => c.cmd === 'git' && c.args[0] === 'commit')).toBe(true);
+    expect(calls.some((c) => c.cmd === 'git' && c.args[0] === 'tag')).toBe(true);
+    expect(calls.some((c) => c.cmd === 'git' && c.args[0] === 'push')).toBe(true);
+
     consoleSpy.mockRestore();
   });
 
   it('should handle invalid version gracefully', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([createMockCommit('feat', 'add feature', ['src/index.ts'])]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {

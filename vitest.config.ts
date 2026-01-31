@@ -8,5 +8,6 @@ export default defineConfig({
       include: ['packages/**/src/**/*.ts'],
       exclude: ['**/test/fixtures/**/*', 'packages/**/src/index.ts', 'packages/**/src/**/types.ts'],
     },
+    setupFiles: ['./e2e/setup.ts'],
   },
 });

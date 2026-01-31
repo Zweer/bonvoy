@@ -1,4 +1,3 @@
-import { execa } from 'execa';
 import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -6,23 +5,22 @@ import { createMockCommit, createMockExeca } from './helpers.js';
 
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
-vi.mock('execa');
 
 describe('E2E: Breaking Changes', () => {
+  const mockExeca = createMockExeca();
+
   beforeEach(() => {
     vol.reset();
-    vi.clearAllMocks();
+    mockExeca.reset();
   });
 
   it('should bump major version with feat! syntax', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([
       createMockCommit('feat', 'remove deprecated API', ['src/api.ts'], {
         breaking: true,
       }),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -44,14 +42,12 @@ describe('E2E: Breaking Changes', () => {
   });
 
   it('should bump major version with fix! syntax', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([
       createMockCommit('fix', 'change default behavior', ['src/config.ts'], {
         breaking: true,
       }),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -73,14 +69,12 @@ describe('E2E: Breaking Changes', () => {
   });
 
   it('should prioritize major over minor when both present', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([
       createMockCommit('feat', 'add new feature', ['src/feature.ts']),
       createMockCommit('feat', 'breaking change', ['src/api.ts'], { breaking: true }),
       createMockCommit('fix', 'fix bug', ['src/bug.ts']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -102,7 +96,6 @@ describe('E2E: Breaking Changes', () => {
   });
 
   it('should handle breaking changes in monorepo', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
@@ -114,7 +107,6 @@ describe('E2E: Breaking Changes', () => {
       createMockCommit('feat', 'normal feature in utils', ['packages/utils/src/index.ts']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -138,12 +130,10 @@ describe('E2E: Breaking Changes', () => {
   });
 
   it('should handle 0.x.x versions with breaking changes', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setGitCommits([
       createMockCommit('feat', 'breaking change', ['src/index.ts'], { breaking: true }),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {

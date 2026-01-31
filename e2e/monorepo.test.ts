@@ -1,4 +1,3 @@
-import { execa } from 'execa';
 import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -6,16 +5,16 @@ import { createMockCommit, createMockExeca } from './helpers.js';
 
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
-vi.mock('execa');
 
 describe('E2E: Monorepo', () => {
+  const mockExeca = createMockExeca();
+
   beforeEach(() => {
     vol.reset();
-    vi.clearAllMocks();
+    mockExeca.reset();
   });
 
   it('should bump only packages with changes', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
@@ -27,7 +26,6 @@ describe('E2E: Monorepo', () => {
       createMockCommit('docs', 'update docs', ['README.md']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -51,7 +49,6 @@ describe('E2E: Monorepo', () => {
   });
 
   it('should handle cross-package dependencies', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       {
@@ -65,7 +62,6 @@ describe('E2E: Monorepo', () => {
       createMockCommit('feat', 'add feature', ['packages/core/src/index.ts']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -87,7 +83,6 @@ describe('E2E: Monorepo', () => {
   });
 
   it('should assign commits to multiple packages when files span packages', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
@@ -99,7 +94,6 @@ describe('E2E: Monorepo', () => {
       ]),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -121,7 +115,6 @@ describe('E2E: Monorepo', () => {
   });
 
   it('should handle monorepo with no changes', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
@@ -131,7 +124,6 @@ describe('E2E: Monorepo', () => {
       createMockCommit('chore', 'update deps', ['package.json']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {
@@ -152,7 +144,6 @@ describe('E2E: Monorepo', () => {
   });
 
   it('should handle different bump types across packages', async () => {
-    const mockExeca = createMockExeca();
     mockExeca.setNpmWorkspaces([
       { name: '@test/core', version: '1.0.0', location: 'packages/core' },
       { name: '@test/utils', version: '1.0.0', location: 'packages/utils' },
@@ -166,7 +157,6 @@ describe('E2E: Monorepo', () => {
       createMockCommit('fix', 'patch fix', ['packages/cli/src/index.ts']),
     ]);
     mockExeca.setGitLastTag(null);
-    vi.mocked(execa).mockImplementation(mockExeca.mockFn);
 
     vol.fromJSON(
       {

@@ -31,7 +31,7 @@ export default class NpmPlugin implements BonvoyPlugin {
   apply(bonvoy: { hooks: { publish: any } }): void {
     bonvoy.hooks.publish.tapPromise(this.name, async (context: PublishContext) => {
       if (context.isDryRun) {
-        console.log('🔍 [dry-run] Would publish packages to npm');
+        context.logger.info('🔍 [dry-run] Would publish packages to npm');
         return;
       }
       await this.publishPackages(context);
@@ -39,23 +39,22 @@ export default class NpmPlugin implements BonvoyPlugin {
   }
 
   private async publishPackages(context: PublishContext): Promise<void> {
-    const { packages } = context;
+    const { packages, logger } = context;
 
     for (const pkg of packages) {
       if (this.config.skipExisting && (await this.isAlreadyPublished(pkg))) {
-        console.log(`Skipping ${pkg.name}@${pkg.version} - already published`);
+        logger.info(`Skipping ${pkg.name}@${pkg.version} - already published`);
         continue;
       }
 
-      await this.publishPackage(pkg);
+      await this.publishPackage(pkg, logger);
     }
   }
 
-  private async publishPackage(pkg: {
-    name: string;
-    version: string;
-    path: string;
-  }): Promise<void> {
+  private async publishPackage(
+    pkg: { name: string; version: string; path: string },
+    logger: PublishContext['logger'],
+  ): Promise<void> {
     const args: string[] = [];
 
     if (this.config.dryRun) {
@@ -72,7 +71,7 @@ export default class NpmPlugin implements BonvoyPlugin {
       args.push('--registry', this.config.registry);
     }
 
-    console.log(`Publishing ${pkg.name}@${pkg.version}...`);
+    logger.info(`Publishing ${pkg.name}@${pkg.version}...`);
 
     await this.ops.publish(args, pkg.path);
   }

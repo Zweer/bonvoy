@@ -26,27 +26,27 @@ export default class GitPlugin implements BonvoyPlugin {
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
   apply(bonvoy: { hooks: { beforePublish: any } }): void {
     bonvoy.hooks.beforePublish.tapPromise(this.name, async (context: PublishContext) => {
-      console.log('📝 Committing changes...');
+      context.logger.info('📝 Committing changes...');
       await this.commitChanges(context);
-      console.log('🏷️  Creating git tags...');
+      context.logger.info('🏷️  Creating git tags...');
       await this.createTags(context);
 
       if (this.config.push) {
-        console.log('⬆️  Pushing to remote...');
+        context.logger.info('⬆️  Pushing to remote...');
         await this.pushChanges(context);
       }
     });
   }
 
   private async commitChanges(context: PublishContext): Promise<void> {
-    const { packages, isDryRun, rootPath } = context;
+    const { packages, isDryRun, rootPath, logger } = context;
 
     if (packages.length === 0) return;
 
     const packageNames = packages.map((pkg) => pkg.name).join(', ');
     const message = this.config.commitMessage.replace('{packages}', packageNames);
 
-    console.log(`  Commit message: "${message}"`);
+    logger.info(`  Commit message: "${message}"`);
 
     if (!isDryRun) {
       await this.ops.add('.', rootPath);
@@ -55,14 +55,14 @@ export default class GitPlugin implements BonvoyPlugin {
   }
 
   private async createTags(context: PublishContext): Promise<void> {
-    const { packages, isDryRun, rootPath } = context;
+    const { packages, isDryRun, rootPath, logger } = context;
 
     for (const pkg of packages) {
       const tag = this.config.tagFormat
         .replace('{name}', pkg.name)
         .replace('{version}', pkg.version);
 
-      console.log(`  Tag: ${tag}`);
+      logger.info(`  Tag: ${tag}`);
 
       if (!isDryRun) {
         await this.ops.tag(tag, rootPath);
@@ -71,9 +71,9 @@ export default class GitPlugin implements BonvoyPlugin {
   }
 
   private async pushChanges(context: PublishContext): Promise<void> {
-    const { packages, isDryRun, rootPath } = context;
+    const { packages, isDryRun, rootPath, logger } = context;
 
-    console.log('  Pushing commits and tags...');
+    logger.info('  Pushing commits and tags...');
 
     if (!isDryRun) {
       await this.ops.push(rootPath);

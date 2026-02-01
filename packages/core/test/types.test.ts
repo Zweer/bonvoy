@@ -32,6 +32,7 @@ describe('types', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: { info: () => {}, warn: () => {}, error: () => {} },
     };
 
     expect(context.config.versioning).toBe('independent');

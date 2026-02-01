@@ -66,12 +66,19 @@ export interface Package {
   devDependencies?: Record<string, string>;
 }
 
+export interface Logger {
+  info(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+}
+
 export interface Context {
   config: BonvoyConfig;
   packages: Package[];
   changedPackages: Package[];
   rootPath: string;
   isDryRun: boolean;
+  logger: Logger;
   commits?: CommitInfo[]; // Commit filtrati per il package corrente
   currentPackage?: Package; // Package che stiamo processando
 }

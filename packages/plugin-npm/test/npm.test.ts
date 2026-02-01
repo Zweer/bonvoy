@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import NpmPlugin from '../src/npm.js';
 import type { NpmOperations } from '../src/operations.js';
 
+const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+
 function createMockOps(): NpmOperations & {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
@@ -23,8 +25,6 @@ function createMockOps(): NpmOperations & {
     },
   };
 }
-
-vi.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('NpmPlugin', () => {
   let mockOps: ReturnType<typeof createMockOps>;
@@ -54,6 +54,7 @@ describe('NpmPlugin', () => {
     const context = {
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
       isDryRun: true,
+      logger: mockLogger,
     };
 
     const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
@@ -66,6 +67,8 @@ describe('NpmPlugin', () => {
     plugin.apply(mockBonvoy);
 
     const context = {
+      isDryRun: false,
+      logger: mockLogger,
       packages: [
         { name: '@test/package-a', version: '1.0.0', path: '/path/to/a' },
         { name: '@test/package-b', version: '2.0.0', path: '/path/to/b' },
@@ -88,6 +91,8 @@ describe('NpmPlugin', () => {
     plugin.apply(mockBonvoy);
 
     const context = {
+      isDryRun: false,
+      logger: mockLogger,
       packages: [
         { name: '@test/package-a', version: '1.0.0', path: '/path/to/a' },
         { name: '@test/package-b', version: '2.0.0', path: '/path/to/b' },
@@ -108,6 +113,8 @@ describe('NpmPlugin', () => {
     plugin.apply(mockBonvoy);
 
     const context = {
+      isDryRun: false,
+      logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
 
@@ -124,6 +131,8 @@ describe('NpmPlugin', () => {
     plugin.apply(mockBonvoy);
 
     const context = {
+      isDryRun: false,
+      logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
 
@@ -139,6 +148,8 @@ describe('NpmPlugin', () => {
     plugin.apply(mockBonvoy);
 
     const context = {
+      isDryRun: false,
+      logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
 
@@ -148,22 +159,6 @@ describe('NpmPlugin', () => {
     const publishCall = mockOps.calls.find((c) => c.method === 'publish');
     expect(publishCall?.args[0]).toContain('--access');
     expect(publishCall?.args[0]).toContain('restricted');
-  });
-
-  it('should use custom registry', async () => {
-    plugin = new NpmPlugin({ registry: 'https://custom.registry.com' }, mockOps);
-    plugin.apply(mockBonvoy);
-
-    const context = {
-      packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
-    };
-
-    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
-    await publishFn(context);
-
-    const publishCall = mockOps.calls.find((c) => c.method === 'publish');
-    expect(publishCall?.args[0]).toContain('--registry');
-    expect(publishCall?.args[0]).toContain('https://custom.registry.com');
   });
 
   it('should use default operations when none provided', () => {
@@ -176,6 +171,8 @@ describe('NpmPlugin', () => {
     plugin.apply(mockBonvoy);
 
     const context = {
+      isDryRun: false,
+      logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
 

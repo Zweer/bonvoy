@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import GitPlugin from '../src/git.js';
 import type { GitOperations } from '../src/operations.js';
 
+const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+
 // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
 function createMockOps(): GitOperations & { calls: Array<{ method: string; args: any[] }> } {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
@@ -68,6 +70,7 @@ describe('GitPlugin', () => {
       ],
       rootPath: '/project',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const beforePublishFn = mockBonvoy.hooks.beforePublish.tapPromise.mock.calls[0][1];
@@ -101,6 +104,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const beforePublishFn = mockBonvoy.hooks.beforePublish.tapPromise.mock.calls[0][1];
@@ -120,6 +124,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const beforePublishFn = mockBonvoy.hooks.beforePublish.tapPromise.mock.calls[0][1];
@@ -136,6 +141,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package-a', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const beforePublishFn = mockBonvoy.hooks.beforePublish.tapPromise.mock.calls[0][1];
@@ -153,6 +159,7 @@ describe('GitPlugin', () => {
       packages: [],
       rootPath: '/project',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const beforePublishFn = mockBonvoy.hooks.beforePublish.tapPromise.mock.calls[0][1];
@@ -170,6 +177,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: true,
+      logger: mockLogger,
     };
 
     const beforePublishFn = mockBonvoy.hooks.beforePublish.tapPromise.mock.calls[0][1];

@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import ConventionalPlugin from '../src/conventional.js';
 
+const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+
 // Helper function to create mock CommitInfo
 const createMockCommit = (message: string) => ({
   hash: 'abc123',
@@ -41,6 +43,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
     const result = await bonvoy.hooks.getVersion.promise(context);
     expect(result).toBe('none');
@@ -55,6 +58,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -70,6 +74,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -85,6 +90,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -100,6 +106,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -115,6 +122,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -135,6 +143,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -150,6 +159,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -165,6 +175,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -180,6 +191,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -198,6 +210,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -216,6 +229,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -234,6 +248,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -253,6 +268,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -270,6 +286,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -285,6 +302,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -300,6 +318,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -315,6 +334,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -331,6 +351,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      logger: mockLogger,
     };
 
     const result = await bonvoy.hooks.getVersion.promise(context);

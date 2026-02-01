@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { ChangelogContext, Context, Package, ReleaseContext } from '@bonvoy/core';
+import type { ChangelogContext, Context, Logger, Package, ReleaseContext } from '@bonvoy/core';
 import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
@@ -14,10 +14,17 @@ import { detectPackages } from '../utils/detect-packages.js';
 import { getCommitsSinceLastTag } from '../utils/git.js';
 import type { ShipitOptions, ShipitResult } from '../utils/types.js';
 
+const silentLogger: Logger = { info: () => {}, warn: () => {}, error: () => {} };
+const consoleLogger: Logger = {
+  info: console.log.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+};
+
 export async function shipit(_bump?: string, options: ShipitOptions = {}): Promise<ShipitResult> {
   const rootPath = options.cwd || process.cwd();
   const gitOps = options.gitOps ?? defaultGitOperations;
-  const log = options.silent ? () => {} : console.log.bind(console);
+  const logger = options.silent ? silentLogger : consoleLogger;
 
   // 1. Load configuration
   const config = options.config ?? (await loadConfig(rootPath));
@@ -62,6 +69,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       changedPackages: [pkg],
       rootPath,
       isDryRun: options.dryRun || false,
+      logger,
       commits: pkgCommits,
       currentPackage: pkg,
     };
@@ -94,7 +102,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
   // Early return if no changes
   if (changedPackages.length === 0) {
-    log('✅ No changes detected - nothing to release');
+    logger.info('✅ No changes detected - nothing to release');
     return {
       packages,
       changedPackages: [],
@@ -105,11 +113,11 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     };
   }
 
-  log(`📦 Releasing ${changedPackages.length} package(s):`);
+  logger.info(`📦 Releasing ${changedPackages.length} package(s):`);
   for (const pkg of changedPackages) {
-    log(`  • ${pkg.name}: ${pkg.version} → ${versions[pkg.name]}`);
+    logger.info(`  • ${pkg.name}: ${pkg.version} → ${versions[pkg.name]}`);
   }
-  log('');
+  logger.info('');
 
   // 7. Generate changelogs
   const changelogContext: ChangelogContext = {
@@ -118,6 +126,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     changedPackages,
     rootPath,
     isDryRun: options.dryRun || false,
+    logger,
     commits: commitsWithPackages,
     versions,
     bumps,
@@ -177,9 +186,9 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.afterRelease.promise(releaseContext);
 
   if (!options.dryRun) {
-    log('\n🎉 Release completed successfully!');
+    logger.info('\n🎉 Release completed successfully!');
   } else {
-    log('\n🔍 Dry run completed - no changes made');
+    logger.info('\n🔍 Dry run completed - no changes made');
   }
 
   return {

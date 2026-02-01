@@ -6,6 +6,8 @@ import type { GitHubOperations, GitHubReleaseParams } from '../src/operations.js
 
 vi.mock('node:fs');
 
+const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+
 // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
 function createMockOps(): GitHubOperations & { calls: Array<{ method: string; args: any[] }> } {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
@@ -44,7 +46,6 @@ describe('GitHubPlugin', () => {
 
   it('should skip in dry-run mode', async () => {
     const plugin = new GitHubPlugin();
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
@@ -52,19 +53,18 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: true,
+      logger: mockLogger,
       changedPackages: [],
       versions: {},
       changelogs: {},
       rootPath: '/test',
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('🔍 [dry-run] Would create GitHub releases');
-    consoleSpy.mockRestore();
+    expect(mockLogger.info).toHaveBeenCalledWith('🔍 [dry-run] Would create GitHub releases');
   });
 
   it('should warn if GITHUB_TOKEN is missing', async () => {
     const plugin = new GitHubPlugin();
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     vol.fromJSON(
@@ -82,14 +82,16 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      logger: mockLogger,
       changedPackages: [],
       versions: {},
       changelogs: {},
       rootPath: '/test',
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('⚠️  GITHUB_TOKEN not found, skipping GitHub releases');
-    consoleSpy.mockRestore();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      '⚠️  GITHUB_TOKEN not found, skipping GitHub releases',
+    );
   });
 
   it('should create releases for changed packages', async () => {
@@ -98,7 +100,6 @@ describe('GitHubPlugin', () => {
       { token: 'test-token', owner: 'test-owner', repo: 'test-repo' },
       mockOps,
     );
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
@@ -106,6 +107,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      logger: mockLogger,
       changedPackages: [{ name: '@test/pkg', version: '1.0.0', path: '/test/pkg' }],
       versions: { '@test/pkg': '1.1.0' },
       changelogs: { '@test/pkg': '## Changes\n- Added feature' },
@@ -121,14 +123,11 @@ describe('GitHubPlugin', () => {
       name: '@test/pkg v1.1.0',
       body: '## Changes\n- Added feature',
     });
-
-    consoleSpy.mockRestore();
   });
 
   it('should read repo from package.json', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     vol.fromJSON(
@@ -146,6 +145,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
       changelogs: {},
@@ -154,14 +154,11 @@ describe('GitHubPlugin', () => {
 
     expect(mockOps.calls[0].args[1].owner).toBe('my-org');
     expect(mockOps.calls[0].args[1].repo).toBe('my-repo');
-
-    consoleSpy.mockRestore();
   });
 
   it('should detect prerelease versions', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
@@ -169,6 +166,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0-beta.1' },
       changelogs: {},
@@ -176,8 +174,6 @@ describe('GitHubPlugin', () => {
     });
 
     expect(mockOps.calls[0].args[1].prerelease).toBe(true);
-
-    consoleSpy.mockRestore();
   });
 
   it('should throw when createRelease fails', async () => {
@@ -188,8 +184,6 @@ describe('GitHubPlugin', () => {
       },
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
@@ -198,6 +192,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
         changelogs: {},
@@ -209,7 +204,6 @@ describe('GitHubPlugin', () => {
   it('should throw when repo info cannot be determined', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     vol.fromJSON({ '/test/package.json': JSON.stringify({ name: 'test' }) }, '/');
@@ -220,6 +214,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
         changelogs: {},
@@ -236,8 +231,6 @@ describe('GitHubPlugin', () => {
       },
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     plugin.apply(mockBonvoy);
@@ -246,6 +239,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
         changelogs: {},
@@ -257,7 +251,6 @@ describe('GitHubPlugin', () => {
   it('should read repo from string repository field', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     vol.fromJSON(
@@ -270,6 +263,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
       changelogs: {},
@@ -283,7 +277,6 @@ describe('GitHubPlugin', () => {
   it('should throw when repo URL is invalid', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
 
     vol.fromJSON(
@@ -297,6 +290,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
         changelogs: {},

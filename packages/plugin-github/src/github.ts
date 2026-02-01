@@ -27,13 +27,13 @@ export default class GitHubPlugin implements BonvoyPlugin {
   apply(bonvoy: any): void {
     bonvoy.hooks.makeRelease.tapPromise(this.name, async (context: ReleaseContext) => {
       if (context.isDryRun) {
-        console.log('🔍 [dry-run] Would create GitHub releases');
+        context.logger.info('🔍 [dry-run] Would create GitHub releases');
         return;
       }
 
       const token = this.options.token || process.env.GITHUB_TOKEN;
       if (!token) {
-        console.warn('⚠️  GITHUB_TOKEN not found, skipping GitHub releases');
+        context.logger.warn('⚠️  GITHUB_TOKEN not found, skipping GitHub releases');
         return;
       }
 
@@ -55,10 +55,10 @@ export default class GitHubPlugin implements BonvoyPlugin {
             prerelease: this.options.prerelease || version.includes('-'),
           });
 
-          console.log(`✅ Created GitHub release: ${tagName}`);
+          context.logger.info(`✅ Created GitHub release: ${tagName}`);
         } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          console.error(`❌ Failed to create release for ${tagName}:`, errorMessage);
+          context.logger.error(`❌ Failed to create release for ${tagName}: ${errorMessage}`);
           throw error;
         }
       }

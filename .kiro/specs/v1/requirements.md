@@ -80,6 +80,13 @@
 - ✅ **Releases**: Create GitHub release per package with changelog
 - ✅ **PR creation**: For PR-based workflow
 
+#### Pre-release Validation
+- ⬜ **Tag existence check**: Verify git tags don't already exist before release
+- ⬜ **GitHub release check**: Verify GitHub releases don't already exist
+- ⬜ **npm version check**: Verify npm package version not already published
+- ⬜ **npm first publish check**: Warn if first publish without NPM_TOKEN (OIDC requires existing package)
+- ⬜ **Graceful abort**: Stop process before any changes if validation fails
+
 ### Non-Functional Requirements
 
 - ✅ **No change files**: No `.changeset/` or similar tracking files (by default)

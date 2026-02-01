@@ -393,9 +393,9 @@ jobs:
 - [ ] Merge detection
 
 ### Phase 4: Optional Plugins (2-3 days)
+- [x] `@bonvoy/plugin-exec` - Custom shell commands
 - [ ] `@bonvoy/plugin-changeset` - Changeset-style workflow
 - [ ] `@bonvoy/plugin-manual` - Force version from CLI
-- [ ] `@bonvoy/plugin-exec` - Custom shell commands
 - [ ] `@bonvoy/plugin-gitlab` - GitLab support
 
 ### Phase 5: Polish (1-2 days)

@@ -141,6 +141,7 @@ jobs:
 | [@bonvoy/core](./packages/core) | [![npm](https://img.shields.io/npm/v/@bonvoy/core)](https://www.npmjs.com/package/@bonvoy/core) | Hook system, config loading, schema validation |
 | [@bonvoy/plugin-changelog](./packages/plugin-changelog) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changelog)](https://www.npmjs.com/package/@bonvoy/plugin-changelog) | Changelog generation (default) |
 | [@bonvoy/plugin-conventional](./packages/plugin-conventional) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-conventional)](https://www.npmjs.com/package/@bonvoy/plugin-conventional) | Conventional commits parser (default) |
+| [@bonvoy/plugin-exec](./packages/plugin-exec) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-exec)](https://www.npmjs.com/package/@bonvoy/plugin-exec) | Custom shell commands (optional) |
 | [@bonvoy/plugin-git](./packages/plugin-git) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-git)](https://www.npmjs.com/package/@bonvoy/plugin-git) | Git commit, tag, push (default) |
 | [@bonvoy/plugin-github](./packages/plugin-github) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-github)](https://www.npmjs.com/package/@bonvoy/plugin-github) | GitHub releases (default) |
 | [@bonvoy/plugin-npm](./packages/plugin-npm) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-npm)](https://www.npmjs.com/package/@bonvoy/plugin-npm) | npm publish with OIDC (default) |

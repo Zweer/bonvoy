@@ -111,4 +111,51 @@ describe('E2E: Monorepo', () => {
     expect(result.versions['@test/utils']).toBe('1.1.0');
     expect(result.bumps['@test/utils']).toBe('minor');
   });
+
+  it('should assign multi-package commit to all affected packages', async () => {
+    const gitOps = createMockGitOperations({
+      commits: [
+        createMockCommit('feat', 'shared types', [
+          'packages/core/src/types.ts',
+          'packages/utils/src/types.ts',
+        ]),
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/project/package.json': JSON.stringify({
+          name: 'monorepo',
+          private: true,
+          workspaces: ['packages/*'],
+        }),
+        '/project/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/project/packages/utils/package.json': JSON.stringify({
+          name: '@test/utils',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    const result = await shipit(undefined, {
+      cwd: '/project',
+      dryRun: true,
+      gitOps,
+      packages: [
+        { name: '@test/core', version: '1.0.0', path: '/project/packages/core' },
+        { name: '@test/utils', version: '1.0.0', path: '/project/packages/utils' },
+      ],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    // Both packages should be bumped from the same commit
+    expect(result.changedPackages).toHaveLength(2);
+    expect(result.versions['@test/core']).toBe('1.1.0');
+    expect(result.versions['@test/utils']).toBe('1.1.0');
+  });
 });

@@ -452,24 +452,23 @@ jobs:
 - [x] `@bonvoy/plugin-github` - GitHub releases
 - [x] JSON output for CI
 
-### Phase 3: PR Workflow (2 days) 🔄 IN PROGRESS
+### Phase 3: PR Workflow (2 days) ✅ COMPLETED
 - [x] PR creation in `@bonvoy/plugin-github`
 - [x] PR creation in `@bonvoy/plugin-gitlab` (MR)
 - [x] `prepare` command implementation
-- [ ] Tests for PR workflow
-- [ ] PR-based release flow (`shipit --from-pr`)
-- [ ] Merge detection
+- [x] Auto-detection: shipit on main with tracking file → publish-only mode
+- [x] PR tracking via `.bonvoy/release-pr.json`
 
 ### Phase 4: Optional Plugins (2-3 days) ✅ COMPLETED
 - [x] `@bonvoy/plugin-exec` - Custom shell commands
 - [x] `@bonvoy/plugin-changeset` - Changeset-compatible workflow
 - [x] `@bonvoy/plugin-gitlab` - GitLab support
 
-### Phase 5: Polish (1-2 days)
-- [ ] Documentation (plugin READMEs)
-- [ ] Error messages refinement
-- [ ] Tests (100% coverage)
-- [ ] Dogfooding (use bonvoy to release bonvoy!)
+### Phase 5: Polish (1-2 days) ✅ COMPLETED
+- [x] Documentation (plugin READMEs)
+- [x] Error messages refinement
+- [x] Tests (100% coverage)
+- [x] Dogfooding (use bonvoy to release bonvoy!)
 
 ---
 

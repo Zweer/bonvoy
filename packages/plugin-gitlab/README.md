@@ -1,84 +1,91 @@
 # @bonvoy/plugin-gitlab 🚢
 
-> GitLab releases plugin for bonvoy
+> GitLab releases and MR plugin for bonvoy
 
-Optional plugin that creates GitLab releases after publishing packages.
-
-## Features
-
-- ✅ **Auto-detection** - Parses project from package.json or git remote
-- ✅ **Per-package releases** - Creates individual releases with changelogs
-- ✅ **Self-hosted support** - Works with GitLab.com and self-hosted instances
-- ✅ **Dry-run support** - Preview releases without creating them
+Creates GitLab releases with changelogs and manages release merge requests.
 
 ## Installation
 
 ```bash
-npm install -D @bonvoy/plugin-gitlab
+npm install @bonvoy/plugin-gitlab
 ```
 
+## Features
+
+- ✅ Creates GitLab releases for each published package
+- ✅ Creates release MRs for PR-based workflow
+- ✅ Auto-detects project from package.json or git remote
+- ✅ Includes changelog as release description
+- ✅ Custom GitLab host support (self-hosted)
+- ✅ Dry-run support
+
+## Configuration
+
+```javascript
+// bonvoy.config.js
+export default {
+  gitlab: {
+    token: process.env.GITLAB_TOKEN,       // default
+    host: 'https://gitlab.com',            // default, or self-hosted URL
+    projectId: 'my-group/my-project',      // optional, auto-detected
+  },
+};
+```
+
+## Hooks
+
+This plugin taps into the following hooks:
+
+| Hook | Action |
+|------|--------|
+| `makeRelease` | Creates GitLab releases for published packages |
+| `createPR` | Creates a release MR with version bumps and changelog |
+
+## Requirements
+
+- `GITLAB_TOKEN` environment variable with `api` scope
+- For self-hosted: `GITLAB_HOST` environment variable (optional)
+
+## Project Detection
+
+The plugin auto-detects the project in this order:
+
+1. Config option (`projectId`)
+2. `package.json` repository field
+3. Git remote URL
+
+Supported URL formats:
+- `https://gitlab.com/group/project`
+- `https://gitlab.com/group/subgroup/project`
+- `git@gitlab.com:group/project.git`
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `GITLAB_TOKEN` | GitLab personal access token |
+| `GITLAB_HOST` | GitLab host URL (default: `https://gitlab.com`) |
+
+## MR Workflow
+
+When using `bonvoy prepare`, this plugin:
+
+1. Creates an MR from the release branch to the base branch
+2. Sets MR title and description with version bumps and changelog
+3. Stores MR info in `.bonvoy/release-pr.json` for merge detection
+
 ## Usage
+
+To use GitLab instead of GitHub, disable the GitHub plugin:
 
 ```javascript
 // bonvoy.config.js
 export default {
   plugins: [
     '@bonvoy/plugin-gitlab',
-    // NOTE: Use instead of @bonvoy/plugin-github, not alongside
-  ]
+    // GitHub plugin is disabled when GitLab is explicitly added
+  ],
 };
-```
-
-## Configuration
-
-```javascript
-export default {
-  plugins: [
-    ['@bonvoy/plugin-gitlab', {
-      token: process.env.GITLAB_TOKEN,  // Optional, defaults to env var
-      host: 'https://gitlab.example.com', // Optional, defaults to gitlab.com
-      projectId: 'group/project',        // Optional, auto-detected from package.json
-    }]
-  ]
-};
-```
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `GITLAB_TOKEN` | GitLab personal access token with `api` scope |
-| `GITLAB_HOST` | GitLab instance URL (default: `https://gitlab.com`) |
-
-## Requirements
-
-- `GITLAB_TOKEN` with `api` scope
-- Repository URL in package.json or `projectId` in options
-
-## Example Release
-
-When you run `bonvoy shipit`, the plugin will:
-1. Detect project from `repository` field in package.json
-2. Create a release for each published package
-3. Use the package's changelog as release description
-4. Tag format: `package-name@version` (e.g., `@scope/core@1.0.0`)
-
-## Self-hosted GitLab
-
-```javascript
-export default {
-  plugins: [
-    ['@bonvoy/plugin-gitlab', {
-      host: 'https://gitlab.mycompany.com',
-    }]
-  ]
-};
-```
-
-Or via environment variable:
-
-```bash
-GITLAB_HOST=https://gitlab.mycompany.com bonvoy shipit
 ```
 
 ## License

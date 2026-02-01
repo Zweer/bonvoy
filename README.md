@@ -104,6 +104,8 @@ Configuration is validated at runtime using [Zod](https://zod.dev) for type safe
 
 ## GitHub Actions
 
+### Direct Release
+
 ```yaml
 name: Release
 on:
@@ -132,6 +134,41 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+### PR-based Release
+
+For a release-please style workflow where changes accumulate in a PR:
+
+```yaml
+name: Release
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npx bonvoy shipit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+The `shipit` command auto-detects the context:
+- **On feature branch**: Creates/updates a release PR with version bumps and changelog
+- **On main after PR merge**: Publishes packages (detected via `.bonvoy/release-pr.json`)
 
 ## Packages
 

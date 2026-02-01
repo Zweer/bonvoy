@@ -452,9 +452,12 @@ jobs:
 - [x] `@bonvoy/plugin-github` - GitHub releases
 - [x] JSON output for CI
 
-### Phase 3: PR Workflow (2 days)
-- [ ] PR creation in `@bonvoy/plugin-github`
-- [ ] PR-based release flow
+### Phase 3: PR Workflow (2 days) 🔄 IN PROGRESS
+- [x] PR creation in `@bonvoy/plugin-github`
+- [x] PR creation in `@bonvoy/plugin-gitlab` (MR)
+- [x] `prepare` command implementation
+- [ ] Tests for PR workflow
+- [ ] PR-based release flow (`shipit --from-pr`)
 - [ ] Merge detection
 
 ### Phase 4: Optional Plugins (2-3 days) ✅ COMPLETED

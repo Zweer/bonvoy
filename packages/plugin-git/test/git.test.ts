@@ -26,6 +26,10 @@ function createMockOps(): GitOperations & { calls: Array<{ method: string; args:
     async pushTags(tags, cwd) {
       calls.push({ method: 'pushTags', args: [tags, cwd] });
     },
+    async checkout() {},
+    async getCurrentBranch() {
+      return 'feature-branch';
+    },
     async getLastTag() {
       return null;
     },

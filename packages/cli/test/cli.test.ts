@@ -42,6 +42,8 @@ vi.mock('@bonvoy/plugin-git', () => ({
     tag: vi.fn(),
     push: vi.fn(),
     pushTags: vi.fn(),
+    checkout: vi.fn(),
+    getCurrentBranch: vi.fn().mockResolvedValue('feature-branch'),
     getLastTag: vi.fn().mockResolvedValue(null),
     getCommitsSinceTag: vi.fn().mockResolvedValue([]),
   },
@@ -167,8 +169,8 @@ describe('@bonvoy/cli', () => {
 
     await program.parseAsync(['node', 'bonvoy', 'prepare']);
 
-    expect(consoleSpy).toHaveBeenCalledWith('🔄 Creating release PR...');
-    expect(consoleSpy).toHaveBeenCalledWith('Not implemented yet');
+    // prepare now outputs "No packages to release" when there are no changes
+    expect(consoleSpy).toHaveBeenCalledWith('No packages to release');
   });
 
   it('should execute status command', async () => {

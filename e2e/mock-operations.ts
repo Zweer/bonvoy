@@ -19,12 +19,14 @@ export function createMockGitOperations(
       files: string[];
     }>;
     lastTag?: string | null;
+    currentBranch?: string;
   } = {},
 ): MockGitOperations {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   const commits = config.commits ?? [];
   const lastTag = config.lastTag ?? null;
+  const currentBranch = config.currentBranch ?? 'feature-branch';
 
   return {
     calls,
@@ -49,6 +51,15 @@ export function createMockGitOperations(
 
     async pushTags(tags, cwd) {
       calls.push({ method: 'pushTags', args: [tags, cwd] });
+    },
+
+    async checkout(branch, cwd, create) {
+      calls.push({ method: 'checkout', args: [branch, cwd, create] });
+    },
+
+    async getCurrentBranch(_cwd) {
+      calls.push({ method: 'getCurrentBranch', args: [_cwd] });
+      return currentBranch;
     },
 
     async getLastTag(_cwd) {

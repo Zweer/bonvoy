@@ -13,6 +13,10 @@ function createMockOps(config: {
     async tag() {},
     async push() {},
     async pushTags() {},
+    async checkout() {},
+    async getCurrentBranch() {
+      return 'feature-branch';
+    },
     async getLastTag() {
       return config.lastTag ?? null;
     },

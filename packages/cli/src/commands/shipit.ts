@@ -1,7 +1,14 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { ChangelogContext, Context, Logger, Package, ReleaseContext } from '@bonvoy/core';
+import type {
+  ChangelogContext,
+  Context,
+  Logger,
+  Package,
+  PRTrackingFile,
+  ReleaseContext,
+} from '@bonvoy/core';
 import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
@@ -27,13 +34,21 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   const gitOps = options.gitOps ?? defaultGitOperations;
   const logger = options.silent ? silentLogger : consoleLogger;
 
-  // 1. Load configuration
+  // 0. Auto-detect: check if we're on main with a merged release PR
+  const trackingFilePath = join(rootPath, '.bonvoy', 'release-pr.json');
   const config = options.config ?? (await loadConfig(rootPath));
+  const baseBranch = config.baseBranch || 'main';
+  const currentBranch = await gitOps.getCurrentBranch(rootPath);
 
-  // 2. Initialize Bonvoy with hooks
+  if (currentBranch === baseBranch && existsSync(trackingFilePath)) {
+    // Publish-only mode: release PR was merged
+    return shipitPublishOnly(rootPath, trackingFilePath, config, gitOps, logger, options);
+  }
+
+  // 1. Initialize Bonvoy with hooks
   const bonvoy = new Bonvoy(config);
 
-  // 3. Load plugins (custom or default)
+  // 2. Load plugins (custom or default)
   const plugins = options.plugins ?? [
     new ConventionalPlugin(config.conventional),
     new ChangelogPlugin(config.changelog),
@@ -46,14 +61,14 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     bonvoy.use(plugin);
   }
 
-  // 4. Detect workspace packages
+  // 3. Detect workspace packages
   const packages = options.packages ?? (await detectPackages(rootPath));
 
-  // 5. Analyze commits since last release
+  // 4. Analyze commits since last release
   const commits = await getCommitsSinceLastTag(rootPath, gitOps);
   const commitsWithPackages = assignCommitsToPackages(commits, packages, rootPath);
 
-  // 6. Determine version bumps per package
+  // 5. Determine version bumps per package
   const changedPackages: Package[] = [];
   const versions: Record<string, string> = {};
   const bumps: Record<string, string> = {};
@@ -199,6 +214,99 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     bumps,
     changelogs: changelogContext.changelogs,
     commits: commitsWithPackages,
+  };
+}
+
+async function shipitPublishOnly(
+  rootPath: string,
+  trackingFilePath: string,
+  config: ReturnType<typeof loadConfig> extends Promise<infer T> ? T : never,
+  gitOps: typeof defaultGitOperations,
+  logger: Logger,
+  options: ShipitOptions,
+): Promise<ShipitResult> {
+  const tracking: PRTrackingFile = JSON.parse(readFileSync(trackingFilePath, 'utf-8'));
+
+  logger.info('🔀 Release PR merged - publish-only mode');
+  logger.info(`📦 Publishing packages from PR #${tracking.prNumber}\n`);
+
+  // Initialize Bonvoy with publish plugins only
+  const bonvoy = new Bonvoy(config);
+  bonvoy.use(new GitPlugin(config.git, gitOps));
+  bonvoy.use(new NpmPlugin(config.npm));
+  bonvoy.use(new GitHubPlugin(config.github));
+
+  // Detect packages and filter to those in the release
+  const allPackages = options.packages ?? (await detectPackages(rootPath));
+  const packages = allPackages.filter((p) => tracking.packages.includes(p.name));
+
+  // Build context for publish
+  const versions: Record<string, string> = {};
+  const bumps: Record<string, string> = {};
+  const changelogs: Record<string, string> = {};
+
+  for (const pkg of packages) {
+    versions[pkg.name] = pkg.version; // Already bumped in PR
+    bumps[pkg.name] = 'from-pr';
+
+    // Read existing changelog
+    const changelogPath = join(pkg.path, 'CHANGELOG.md');
+    try {
+      changelogs[pkg.name] = readFileSync(changelogPath, 'utf-8');
+      /* c8 ignore start - file not found */
+    } catch {
+      changelogs[pkg.name] = '';
+    }
+    /* c8 ignore stop */
+  }
+
+  const publishContext = {
+    config,
+    packages,
+    changedPackages: packages,
+    rootPath,
+    /* c8 ignore next */
+    isDryRun: options.dryRun || false,
+    logger,
+    commits: [],
+    versions,
+    bumps,
+    changelogs,
+    publishedPackages: [] as string[],
+  };
+
+  // Publish
+  await bonvoy.hooks.beforePublish.promise(publishContext);
+  await bonvoy.hooks.publish.promise(publishContext);
+  await bonvoy.hooks.afterPublish.promise(publishContext);
+
+  // Create releases
+  const releaseContext: ReleaseContext = { ...publishContext, releases: {} };
+  await bonvoy.hooks.beforeRelease.promise(releaseContext);
+  await bonvoy.hooks.makeRelease.promise(releaseContext);
+  await bonvoy.hooks.afterRelease.promise(releaseContext);
+
+  // Clean up tracking file
+  /* c8 ignore start - requires real git operations */
+  if (!options.dryRun) {
+    rmSync(trackingFilePath);
+    await gitOps.add('.bonvoy/release-pr.json', rootPath);
+    await gitOps.commit('chore: clean up release PR tracking file', rootPath);
+    await gitOps.push(rootPath);
+
+    logger.info('\n🎉 Publish completed successfully!');
+  } else {
+    logger.info('\n🔍 Dry run completed - no changes made');
+  }
+  /* c8 ignore stop */
+
+  return {
+    packages: allPackages,
+    changedPackages: packages,
+    versions,
+    bumps,
+    changelogs,
+    commits: [],
   };
 }
 

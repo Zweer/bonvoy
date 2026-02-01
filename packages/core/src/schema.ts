@@ -102,8 +102,21 @@ export interface ReleaseContext extends PublishContext {
 }
 
 export interface PRContext extends Context {
+  branchName: string;
+  baseBranch: string;
+  title: string;
+  body: string;
   prUrl?: string;
   prNumber?: number;
+}
+
+export interface PRTrackingFile {
+  prNumber: number;
+  prUrl: string;
+  branch: string;
+  baseBranch: string;
+  createdAt: string;
+  packages: string[];
 }
 
 export interface CommitInfo {

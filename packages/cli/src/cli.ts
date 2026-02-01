@@ -31,7 +31,11 @@ export function createProgram(): Command {
     .argument('[bump]', 'Version bump (patch/minor/major/x.y.z)')
     .action(shipitCommand);
 
-  prog.command('prepare').description('Create release PR').action(prepareCommand);
+  prog
+    .command('prepare')
+    .description('Create release PR')
+    .option('--dry-run', 'Preview changes without creating PR')
+    .action(prepareCommand);
 
   prog.command('status').description('Show pending changes').action(statusCommand);
 
@@ -40,6 +44,8 @@ export function createProgram(): Command {
   return prog;
 }
 
+export type { PrepareOptions, PrepareResult } from './commands/prepare.js';
+export { prepare } from './commands/prepare.js';
 // Re-export shipit for testing
 export { shipit } from './commands/shipit.js';
 export type { ShipitOptions, ShipitResult } from './utils/types.js';

@@ -4,8 +4,10 @@ export interface GitOperations {
   add(files: string, cwd: string): Promise<void>;
   commit(message: string, cwd: string): Promise<void>;
   tag(name: string, cwd: string): Promise<void>;
-  push(cwd: string): Promise<void>;
+  push(cwd: string, branch?: string): Promise<void>;
   pushTags(tags: string[], cwd: string): Promise<void>;
+  checkout(branch: string, cwd: string, create?: boolean): Promise<void>;
+  getCurrentBranch(cwd: string): Promise<string>;
   getCommitsSinceTag(
     tag: string | null,
     cwd: string,
@@ -28,13 +30,29 @@ export const defaultGitOperations: GitOperations = {
     await execa('git', ['tag', name], { cwd });
   },
 
-  async push(cwd) {
-    await execa('git', ['push'], { cwd });
+  /* c8 ignore start - real git operations */
+  async push(cwd, branch?) {
+    if (branch) {
+      await execa('git', ['push', '-u', 'origin', branch], { cwd });
+    } else {
+      await execa('git', ['push'], { cwd });
+    }
   },
 
   async pushTags(tags, cwd) {
     await execa('git', ['push', 'origin', ...tags], { cwd });
   },
+
+  async checkout(branch, cwd, create = false) {
+    const args = create ? ['checkout', '-b', branch] : ['checkout', branch];
+    await execa('git', args, { cwd });
+  },
+
+  async getCurrentBranch(cwd) {
+    const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd });
+    return stdout.trim();
+  },
+  /* c8 ignore stop */
 
   async getLastTag(cwd) {
     try {

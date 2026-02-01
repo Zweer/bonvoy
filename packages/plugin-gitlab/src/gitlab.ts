@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { BonvoyPlugin, ReleaseContext } from '@bonvoy/core';
+import type { BonvoyPlugin, PRContext, ReleaseContext } from '@bonvoy/core';
 
 import { defaultGitLabOperations, type GitLabOperations } from './operations.js';
 
@@ -59,6 +59,41 @@ export default class GitLabPlugin implements BonvoyPlugin {
         }
       }
     });
+
+    // MR creation hook
+    bonvoy.hooks.createPR.tapPromise(this.name, async (context: PRContext) => {
+      if (context.isDryRun) {
+        context.logger.info('🔍 [dry-run] Would create GitLab MR');
+        return;
+      }
+
+      const token = this.options.token || process.env.GITLAB_TOKEN;
+      if (!token) {
+        context.logger.warn('⚠️  GITLAB_TOKEN not found, skipping MR creation');
+        return;
+      }
+
+      const host = this.options.host || process.env.GITLAB_HOST || 'https://gitlab.com';
+      const projectId = this.getProjectId(context.rootPath);
+
+      try {
+        const result = await this.ops.createMR(token, host, {
+          projectId,
+          title: context.title,
+          description: context.body,
+          sourceBranch: context.branchName,
+          targetBranch: context.baseBranch,
+        });
+
+        context.prUrl = result.url;
+        context.prNumber = result.iid;
+        context.logger.info(`✅ Created GitLab MR: ${result.url}`);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        context.logger.error(`❌ Failed to create MR: ${errorMessage}`);
+        throw error;
+      }
+    });
   }
 
   private getProjectId(rootPath: string): string | number {
@@ -91,6 +126,8 @@ export default class GitLabPlugin implements BonvoyPlugin {
 
 export {
   defaultGitLabOperations,
+  type GitLabMRParams,
+  type GitLabMRResult,
   type GitLabOperations,
   type GitLabReleaseParams,
 } from './operations.js';

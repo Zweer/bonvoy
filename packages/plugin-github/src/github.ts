@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { BonvoyPlugin, ReleaseContext } from '@bonvoy/core';
+import type { BonvoyPlugin, PRContext, ReleaseContext } from '@bonvoy/core';
 
 import { defaultGitHubOperations, type GitHubOperations } from './operations.js';
 
@@ -63,6 +63,41 @@ export default class GitHubPlugin implements BonvoyPlugin {
         }
       }
     });
+
+    // PR creation hook
+    bonvoy.hooks.createPR.tapPromise(this.name, async (context: PRContext) => {
+      if (context.isDryRun) {
+        context.logger.info('🔍 [dry-run] Would create GitHub PR');
+        return;
+      }
+
+      const token = this.options.token || process.env.GITHUB_TOKEN;
+      if (!token) {
+        context.logger.warn('⚠️  GITHUB_TOKEN not found, skipping PR creation');
+        return;
+      }
+
+      const { owner, repo } = this.getRepoInfo(context.rootPath);
+
+      try {
+        const result = await this.ops.createPR(token, {
+          owner,
+          repo,
+          title: context.title,
+          body: context.body,
+          head: context.branchName,
+          base: context.baseBranch,
+        });
+
+        context.prUrl = result.url;
+        context.prNumber = result.number;
+        context.logger.info(`✅ Created GitHub PR: ${result.url}`);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        context.logger.error(`❌ Failed to create PR: ${errorMessage}`);
+        throw error;
+      }
+    });
   }
 
   private getRepoInfo(rootPath: string): { owner: string; repo: string } {
@@ -96,5 +131,7 @@ export default class GitHubPlugin implements BonvoyPlugin {
 export {
   defaultGitHubOperations,
   type GitHubOperations,
+  type GitHubPRParams,
+  type GitHubPRResult,
   type GitHubReleaseParams,
 } from './operations.js';

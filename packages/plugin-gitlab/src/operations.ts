@@ -7,8 +7,22 @@ export interface GitLabReleaseParams {
   description: string;
 }
 
+export interface GitLabMRParams {
+  projectId: string | number;
+  title: string;
+  description: string;
+  sourceBranch: string;
+  targetBranch: string;
+}
+
+export interface GitLabMRResult {
+  url: string;
+  iid: number;
+}
+
 export interface GitLabOperations {
   createRelease(token: string, host: string, params: GitLabReleaseParams): Promise<void>;
+  createMR(token: string, host: string, params: GitLabMRParams): Promise<GitLabMRResult>;
 }
 
 export const defaultGitLabOperations: GitLabOperations = {
@@ -20,6 +34,20 @@ export const defaultGitLabOperations: GitLabOperations = {
       name: params.name,
       description: params.description,
     });
+  },
+
+  async createMR(token, host, params) {
+    const api = new Gitlab({ token, host });
+    const mr = await api.MergeRequests.create(
+      params.projectId,
+      params.sourceBranch,
+      params.targetBranch,
+      params.title,
+      {
+        description: params.description,
+      },
+    );
+    return { url: mr.web_url, iid: mr.iid };
   },
   /* v8 ignore stop */
 };

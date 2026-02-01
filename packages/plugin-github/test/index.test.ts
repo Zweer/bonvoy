@@ -17,6 +17,10 @@ function createMockOps(): GitHubOperations & { calls: Array<{ method: string; ar
     async createRelease(token: string, params: GitHubReleaseParams) {
       calls.push({ method: 'createRelease', args: [token, params] });
     },
+    async createPR(token: string, params) {
+      calls.push({ method: 'createPR', args: [token, params] });
+      return { url: 'https://github.com/test/repo/pull/1', number: 1 };
+    },
   };
 }
 
@@ -32,9 +36,16 @@ describe('GitHubPlugin', () => {
     expect(plugin.name).toBe('github');
   });
 
+  const createMockBonvoy = () => ({
+    hooks: {
+      makeRelease: { tapPromise: vi.fn() },
+      createPR: { tapPromise: vi.fn() },
+    },
+  });
+
   it('should register makeRelease hook', () => {
     const plugin = new GitHubPlugin();
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     plugin.apply(mockBonvoy);
 
@@ -46,7 +57,7 @@ describe('GitHubPlugin', () => {
 
   it('should skip in dry-run mode', async () => {
     const plugin = new GitHubPlugin();
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     plugin.apply(mockBonvoy);
 
@@ -65,7 +76,7 @@ describe('GitHubPlugin', () => {
 
   it('should warn if GITHUB_TOKEN is missing', async () => {
     const plugin = new GitHubPlugin();
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     vol.fromJSON(
       {
@@ -100,7 +111,7 @@ describe('GitHubPlugin', () => {
       { token: 'test-token', owner: 'test-owner', repo: 'test-repo' },
       mockOps,
     );
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     plugin.apply(mockBonvoy);
 
@@ -128,7 +139,7 @@ describe('GitHubPlugin', () => {
   it('should read repo from package.json', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     vol.fromJSON(
       {
@@ -159,7 +170,7 @@ describe('GitHubPlugin', () => {
   it('should detect prerelease versions', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     plugin.apply(mockBonvoy);
 
@@ -178,13 +189,16 @@ describe('GitHubPlugin', () => {
 
   it('should throw when createRelease fails', async () => {
     const mockOps = {
-      calls: [],
+      calls: [] as { method: string; args: unknown[] }[],
       async createRelease() {
         throw new Error('API error');
       },
+      async createPR() {
+        return { url: '', number: 0 };
+      },
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     plugin.apply(mockBonvoy);
 
@@ -204,7 +218,7 @@ describe('GitHubPlugin', () => {
   it('should throw when repo info cannot be determined', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     vol.fromJSON({ '/test/package.json': JSON.stringify({ name: 'test' }) }, '/');
 
@@ -225,13 +239,16 @@ describe('GitHubPlugin', () => {
 
   it('should handle non-Error throws', async () => {
     const mockOps = {
-      calls: [],
+      calls: [] as { method: string; args: unknown[] }[],
       async createRelease() {
         throw 'string error';
       },
+      async createPR() {
+        return { url: '', number: 0 };
+      },
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     plugin.apply(mockBonvoy);
 
@@ -251,7 +268,7 @@ describe('GitHubPlugin', () => {
   it('should read repo from string repository field', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     vol.fromJSON(
       { '/test/package.json': JSON.stringify({ repository: 'https://github.com/org/repo' }) },
@@ -277,7 +294,7 @@ describe('GitHubPlugin', () => {
   it('should throw when repo URL is invalid', async () => {
     const mockOps = createMockOps();
     const plugin = new GitHubPlugin({ token: 'test-token' }, mockOps);
-    const mockBonvoy = { hooks: { makeRelease: { tapPromise: vi.fn() } } };
+    const mockBonvoy = createMockBonvoy();
 
     vol.fromJSON(
       { '/test/package.json': JSON.stringify({ repository: 'https://gitlab.com/org/repo' }) },
@@ -297,5 +314,137 @@ describe('GitHubPlugin', () => {
         rootPath: '/test',
       }),
     ).rejects.toThrow('Could not determine GitHub repository');
+  });
+
+  describe('createPR hook', () => {
+    it('should skip PR creation in dry-run mode', async () => {
+      const mockOps = createMockOps();
+      const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
+      await hookFn({
+        isDryRun: true,
+        logger: mockLogger,
+        branchName: 'release/123',
+        baseBranch: 'main',
+        title: 'Release',
+        body: 'Body',
+        rootPath: '/test',
+      });
+
+      expect(mockOps.calls).toHaveLength(0);
+      expect(mockLogger.info).toHaveBeenCalledWith('🔍 [dry-run] Would create GitHub PR');
+    });
+
+    it('should skip PR creation without token', async () => {
+      const mockOps = createMockOps();
+      const plugin = new GitHubPlugin({ owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
+      await hookFn({
+        isDryRun: false,
+        logger: mockLogger,
+        branchName: 'release/123',
+        baseBranch: 'main',
+        title: 'Release',
+        body: 'Body',
+        rootPath: '/test',
+      });
+
+      expect(mockOps.calls).toHaveLength(0);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '⚠️  GITHUB_TOKEN not found, skipping PR creation',
+      );
+    });
+
+    it('should create PR and set context properties', async () => {
+      const mockOps = createMockOps();
+      const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
+      const context = {
+        isDryRun: false,
+        logger: mockLogger,
+        branchName: 'release/123',
+        baseBranch: 'main',
+        title: 'Release',
+        body: 'Body',
+        rootPath: '/test',
+      };
+
+      await hookFn(context);
+
+      expect(mockOps.calls).toHaveLength(1);
+      expect(mockOps.calls[0].method).toBe('createPR');
+      expect(context).toHaveProperty('prUrl', 'https://github.com/test/repo/pull/1');
+      expect(context).toHaveProperty('prNumber', 1);
+    });
+
+    it('should handle createPR errors', async () => {
+      const mockOps = {
+        calls: [] as { method: string; args: unknown[] }[],
+        async createRelease() {},
+        async createPR() {
+          throw new Error('PR creation failed');
+        },
+      };
+      const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
+      await expect(
+        hookFn({
+          isDryRun: false,
+          logger: mockLogger,
+          branchName: 'release/123',
+          baseBranch: 'main',
+          title: 'Release',
+          body: 'Body',
+          rootPath: '/test',
+        }),
+      ).rejects.toThrow('PR creation failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith('❌ Failed to create PR: PR creation failed');
+    });
+
+    it('should handle createPR non-Error throws', async () => {
+      const mockOps = {
+        calls: [] as { method: string; args: unknown[] }[],
+        async createRelease() {},
+        async createPR() {
+          throw 'string error';
+        },
+      };
+      const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
+      await expect(
+        hookFn({
+          isDryRun: false,
+          logger: mockLogger,
+          branchName: 'release/123',
+          baseBranch: 'main',
+          title: 'Release',
+          body: 'Body',
+          rootPath: '/test',
+        }),
+      ).rejects.toBe('string error');
+
+      expect(mockLogger.error).toHaveBeenCalledWith('❌ Failed to create PR: string error');
+    });
   });
 });

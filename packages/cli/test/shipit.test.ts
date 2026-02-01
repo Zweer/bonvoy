@@ -16,6 +16,7 @@ vi.mock('execa', () => ({
 function createMockGitOps(config: {
   commits?: Array<{ hash: string; message: string; author: string; date: string; files: string[] }>;
   lastTag?: string | null;
+  currentBranch?: string;
 }): GitOperations {
   return {
     async add() {},
@@ -23,6 +24,10 @@ function createMockGitOps(config: {
     async tag() {},
     async push() {},
     async pushTags() {},
+    async checkout() {},
+    async getCurrentBranch() {
+      return config.currentBranch ?? 'feature-branch';
+    },
     async getLastTag() {
       return config.lastTag ?? null;
     },
@@ -424,5 +429,76 @@ describe('shipitCommand', () => {
 
     consoleSpy.mockRestore();
     cwdSpy.mockRestore();
+  });
+
+  it('should detect publish-only mode when on main with tracking file', async () => {
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.1.0' }),
+        '/test/CHANGELOG.md': '# Changelog\n\n## 1.1.0\n\n- feat: new feature',
+        '/test/.bonvoy/release-pr.json': JSON.stringify({
+          prNumber: 42,
+          prUrl: 'https://github.com/test/repo/pull/42',
+          branch: 'release/1234567890',
+          baseBranch: 'main',
+          createdAt: '2024-01-01T00:00:00Z',
+          packages: ['test-pkg'],
+        }),
+      },
+      '/',
+    );
+
+    const gitOps = createMockGitOps({
+      commits: [],
+      lastTag: null,
+      currentBranch: 'main', // On main branch
+    });
+
+    const result = await shipit(undefined, {
+      cwd: '/test',
+      gitOps,
+      dryRun: true,
+      silent: true,
+    });
+
+    // Should be in publish-only mode
+    expect(result.changedPackages).toHaveLength(1);
+    expect(result.changedPackages[0].name).toBe('test-pkg');
+    expect(result.bumps['test-pkg']).toBe('from-pr');
+  });
+
+  it('should use normal flow when on non-main branch', async () => {
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      },
+      '/',
+    );
+
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: new feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+      currentBranch: 'feature-branch', // Not on main
+    });
+
+    const result = await shipit(undefined, {
+      cwd: '/test',
+      gitOps,
+      dryRun: true,
+      silent: true,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin()],
+    });
+
+    // Should use normal flow
+    expect(result.changedPackages).toHaveLength(1);
+    expect(result.bumps['test-pkg']).toBe('minor');
   });
 });

@@ -145,13 +145,13 @@ jobs:
 | [@bonvoy/plugin-exec](./packages/plugin-exec) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-exec)](https://www.npmjs.com/package/@bonvoy/plugin-exec) | Custom shell commands (optional) |
 | [@bonvoy/plugin-git](./packages/plugin-git) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-git)](https://www.npmjs.com/package/@bonvoy/plugin-git) | Git commit, tag, push (default) |
 | [@bonvoy/plugin-github](./packages/plugin-github) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-github)](https://www.npmjs.com/package/@bonvoy/plugin-github) | GitHub releases (default) |
+| [@bonvoy/plugin-gitlab](./packages/plugin-gitlab) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-gitlab)](https://www.npmjs.com/package/@bonvoy/plugin-gitlab) | GitLab releases (optional) |
 | [@bonvoy/plugin-npm](./packages/plugin-npm) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-npm)](https://www.npmjs.com/package/@bonvoy/plugin-npm) | npm publish with OIDC (default) |
 
 ### Planned Plugins
 
 | Package | Description |
 |---------|-------------|
-| `@bonvoy/plugin-gitlab` | GitLab releases |
 | `@bonvoy/plugin-slack` | Slack notifications |
 
 ## Plugin: Conventional Commits

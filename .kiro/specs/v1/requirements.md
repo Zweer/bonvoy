@@ -457,10 +457,10 @@ jobs:
 - [ ] PR-based release flow
 - [ ] Merge detection
 
-### Phase 4: Optional Plugins (2-3 days)
+### Phase 4: Optional Plugins (2-3 days) ✅ COMPLETED
 - [x] `@bonvoy/plugin-exec` - Custom shell commands
 - [x] `@bonvoy/plugin-changeset` - Changeset-compatible workflow
-- [ ] `@bonvoy/plugin-gitlab` - GitLab support
+- [x] `@bonvoy/plugin-gitlab` - GitLab support
 
 ### Phase 5: Polish (1-2 days)
 - [ ] Documentation (plugin READMEs)

@@ -14,7 +14,8 @@ import { detectPackages } from '../utils/detect-packages.js';
 import { getCommitsSinceLastTag } from '../utils/git.js';
 import type { ShipitOptions, ShipitResult } from '../utils/types.js';
 
-const silentLogger: Logger = { info: () => {}, warn: () => {}, error: () => {} };
+const noop = () => {};
+const silentLogger: Logger = { info: noop, warn: noop, error: noop };
 const consoleLogger: Logger = {
   info: console.log.bind(console),
   warn: console.warn.bind(console),

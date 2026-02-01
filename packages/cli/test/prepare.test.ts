@@ -25,6 +25,9 @@ function createMockGitOps(config: {
     async getCurrentBranch() {
       return config.currentBranch ?? 'main';
     },
+    async tagExists() {
+      return false;
+    },
     async getLastTag() {
       return config.lastTag ?? null;
     },
@@ -158,6 +161,9 @@ describe('prepare command', () => {
       },
       async getCurrentBranch() {
         return 'main';
+      },
+      async tagExists() {
+        return false;
       },
       async getLastTag() {
         return null;

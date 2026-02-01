@@ -8,6 +8,7 @@ export interface GitOperations {
   pushTags(tags: string[], cwd: string): Promise<void>;
   checkout(branch: string, cwd: string, create?: boolean): Promise<void>;
   getCurrentBranch(cwd: string): Promise<string>;
+  tagExists(name: string, cwd: string): Promise<boolean>;
   getCommitsSinceTag(
     tag: string | null,
     cwd: string,
@@ -51,6 +52,15 @@ export const defaultGitOperations: GitOperations = {
   async getCurrentBranch(cwd) {
     const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd });
     return stdout.trim();
+  },
+
+  async tagExists(name, cwd) {
+    try {
+      await execa('git', ['rev-parse', `refs/tags/${name}`], { cwd });
+      return true;
+    } catch {
+      return false;
+    }
   },
   /* c8 ignore stop */
 

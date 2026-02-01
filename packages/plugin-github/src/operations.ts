@@ -27,6 +27,7 @@ export interface GitHubPRResult {
 export interface GitHubOperations {
   createRelease(token: string, params: GitHubReleaseParams): Promise<void>;
   createPR(token: string, params: GitHubPRParams): Promise<GitHubPRResult>;
+  releaseExists(token: string, owner: string, repo: string, tag: string): Promise<boolean>;
 }
 
 export const defaultGitHubOperations: GitHubOperations = {
@@ -40,6 +41,16 @@ export const defaultGitHubOperations: GitHubOperations = {
     const octokit = new Octokit({ auth: token });
     const { data } = await octokit.pulls.create({ ...params });
     return { url: data.html_url, number: data.number };
+  },
+
+  async releaseExists(token, owner, repo, tag) {
+    const octokit = new Octokit({ auth: token });
+    try {
+      await octokit.repos.getReleaseByTag({ owner, repo, tag });
+      return true;
+    } catch {
+      return false;
+    }
   },
   /* c8 ignore stop */
 };

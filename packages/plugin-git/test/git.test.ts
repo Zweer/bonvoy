@@ -5,10 +5,13 @@ import type { GitOperations } from '../src/operations.js';
 
 const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
-// biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
-function createMockOps(): GitOperations & { calls: Array<{ method: string; args: any[] }> } {
+function createMockOps(
+  config: { existingTags?: string[] } = {},
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
+): GitOperations & { calls: Array<{ method: string; args: any[] }> } {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
+  const existingTags = new Set(config.existingTags ?? []);
   return {
     calls,
     async add(files, cwd) {
@@ -29,6 +32,9 @@ function createMockOps(): GitOperations & { calls: Array<{ method: string; args:
     async checkout() {},
     async getCurrentBranch() {
       return 'feature-branch';
+    },
+    async tagExists(name) {
+      return existingTags.has(name);
     },
     async getLastTag() {
       return null;
@@ -51,6 +57,7 @@ describe('GitPlugin', () => {
     plugin = new GitPlugin({}, mockOps);
     mockBonvoy = {
       hooks: {
+        validateRepo: { tapPromise: vi.fn() },
         beforePublish: { tapPromise: vi.fn() },
       },
     };
@@ -58,6 +65,10 @@ describe('GitPlugin', () => {
 
   it('should register hooks', () => {
     plugin.apply(mockBonvoy);
+    expect(mockBonvoy.hooks.validateRepo.tapPromise).toHaveBeenCalledWith(
+      'git',
+      expect.any(Function),
+    );
     expect(mockBonvoy.hooks.beforePublish.tapPromise).toHaveBeenCalledWith(
       'git',
       expect.any(Function),
@@ -194,5 +205,69 @@ describe('GitPlugin', () => {
     const pluginWithDefaults = new GitPlugin();
     expect(pluginWithDefaults.name).toBe('git');
     // The plugin should work without explicit ops (uses defaultGitOperations internally)
+  });
+
+  it('should throw error when tags already exist', async () => {
+    const opsWithExistingTags = createMockOps({ existingTags: ['@test/package@1.0.0'] });
+    const pluginWithTags = new GitPlugin({}, opsWithExistingTags);
+    pluginWithTags.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/project' }],
+      versions: { '@test/package': '1.0.0' },
+      rootPath: '/project',
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).rejects.toThrow('git tags already exist');
+  });
+
+  it('should pass validation when tags do not exist', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/project' }],
+      versions: { '@test/package': '1.0.0' },
+      rootPath: '/project',
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).resolves.toBeUndefined();
+  });
+
+  it('should skip validation when no versions provided', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/project' }],
+      rootPath: '/project',
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).resolves.toBeUndefined();
+  });
+
+  it('should skip package when version not in versions map', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [
+        { name: '@test/package-a', version: '0.9.0', path: '/project' },
+        { name: '@test/package-b', version: '0.9.0', path: '/project' },
+      ],
+      versions: { '@test/package-a': '1.0.0' }, // package-b not in versions
+      rootPath: '/project',
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).resolves.toBeUndefined();
   });
 });

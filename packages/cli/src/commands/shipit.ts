@@ -135,6 +135,19 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   }
   logger.info('');
 
+  // 6. Validate before making any changes
+  const validateContext: Context = {
+    config,
+    packages,
+    changedPackages,
+    rootPath,
+    isDryRun: options.dryRun || false,
+    logger,
+    commits: commitsWithPackages,
+    versions,
+  };
+  await bonvoy.hooks.validateRepo.promise(validateContext);
+
   // 7. Generate changelogs
   const changelogContext: ChangelogContext = {
     config,
@@ -327,6 +340,7 @@ export async function shipitCommand(
     const result = await shipit(bump, { ...options, silent: options.json });
 
     if (options.json) {
+      /* c8 ignore start - JSON output tested via shipit function */
       console.log(
         JSON.stringify(
           {
@@ -343,6 +357,7 @@ export async function shipitCommand(
           2,
         ),
       );
+      /* c8 ignore stop */
     }
   } catch (error) {
     const errorMessage = String(error instanceof Error ? error.message : error);

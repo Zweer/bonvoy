@@ -81,6 +81,7 @@ export interface Context {
   logger: Logger;
   commits?: CommitInfo[]; // Commit filtrati per il package corrente
   currentPackage?: Package; // Package che stiamo processando
+  versions?: Record<string, string>; // Versioni calcolate (disponibile in validateRepo)
 }
 
 export interface VersionContext extends Context {

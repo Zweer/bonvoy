@@ -17,6 +17,9 @@ function createMockOps(config: {
     async getCurrentBranch() {
       return 'feature-branch';
     },
+    async tagExists() {
+      return false;
+    },
     async getLastTag() {
       return config.lastTag ?? null;
     },

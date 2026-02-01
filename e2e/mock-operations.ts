@@ -20,6 +20,7 @@ export function createMockGitOperations(
     }>;
     lastTag?: string | null;
     currentBranch?: string;
+    existingTags?: string[];
   } = {},
 ): MockGitOperations {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
@@ -27,6 +28,7 @@ export function createMockGitOperations(
   const commits = config.commits ?? [];
   const lastTag = config.lastTag ?? null;
   const currentBranch = config.currentBranch ?? 'feature-branch';
+  const existingTags = new Set(config.existingTags ?? []);
 
   return {
     calls,
@@ -62,6 +64,11 @@ export function createMockGitOperations(
       return currentBranch;
     },
 
+    async tagExists(name, _cwd) {
+      calls.push({ method: 'tagExists', args: [name, _cwd] });
+      return existingTags.has(name);
+    },
+
     async getLastTag(_cwd) {
       calls.push({ method: 'getLastTag', args: [_cwd] });
       return lastTag;
@@ -78,16 +85,24 @@ export interface MockNpmOperations extends NpmOperations {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
   publishedVersions: Map<string, string>;
+  existingPackages: Set<string>;
+  hasTokenValue: boolean;
 }
 
-export function createMockNpmOperations(): MockNpmOperations {
+export function createMockNpmOperations(
+  config: { existingPackages?: string[]; hasToken?: boolean } = {},
+): MockNpmOperations {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   const publishedVersions = new Map<string, string>();
+  const existingPackages = new Set(config.existingPackages ?? []);
+  const hasTokenValue = config.hasToken ?? true;
 
   return {
     calls,
     publishedVersions,
+    existingPackages,
+    hasTokenValue,
 
     async publish(args, cwd) {
       calls.push({ method: 'publish', args: [args, cwd] });
@@ -97,23 +112,48 @@ export function createMockNpmOperations(): MockNpmOperations {
       calls.push({ method: 'view', args: [pkg, version] });
       return publishedVersions.get(`${pkg}@${version}`) ?? null;
     },
+
+    async packageExists(pkg) {
+      calls.push({ method: 'packageExists', args: [pkg] });
+      return existingPackages.has(pkg);
+    },
+
+    async hasToken() {
+      calls.push({ method: 'hasToken', args: [] });
+      return hasTokenValue;
+    },
   };
 }
 
 export interface MockGitHubOperations extends GitHubOperations {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
+  existingReleases: Set<string>;
 }
 
-export function createMockGitHubOperations(): MockGitHubOperations {
+export function createMockGitHubOperations(
+  config: { existingReleases?: string[] } = {},
+): MockGitHubOperations {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
+  const existingReleases = new Set(config.existingReleases ?? []);
 
   return {
     calls,
+    existingReleases,
 
     async createRelease(token: string, params: GitHubReleaseParams) {
       calls.push({ method: 'createRelease', args: [token, params] });
+    },
+
+    async createPR(token, params) {
+      calls.push({ method: 'createPR', args: [token, params] });
+      return { url: 'https://github.com/test/repo/pull/1', number: 1 };
+    },
+
+    async releaseExists(_token, _owner, _repo, tag) {
+      calls.push({ method: 'releaseExists', args: [_token, _owner, _repo, tag] });
+      return existingReleases.has(tag);
     },
   };
 }

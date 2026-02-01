@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { BonvoyPlugin, PRContext, ReleaseContext } from '@bonvoy/core';
+import type { BonvoyPlugin, Context, PRContext, ReleaseContext } from '@bonvoy/core';
 
 import { defaultGitHubOperations, type GitHubOperations } from './operations.js';
 
@@ -11,6 +11,7 @@ export interface GitHubPluginOptions {
   repo?: string;
   draft?: boolean;
   prerelease?: boolean;
+  tagFormat?: string;
 }
 
 export default class GitHubPlugin implements BonvoyPlugin {
@@ -25,6 +26,10 @@ export default class GitHubPlugin implements BonvoyPlugin {
 
   // biome-ignore lint/suspicious/noExplicitAny: Bonvoy type causes circular dependency
   apply(bonvoy: any): void {
+    bonvoy.hooks.validateRepo.tapPromise(this.name, async (context: Context) => {
+      await this.validateReleases(context);
+    });
+
     bonvoy.hooks.makeRelease.tapPromise(this.name, async (context: ReleaseContext) => {
       if (context.isDryRun) {
         context.logger.info('🔍 [dry-run] Would create GitHub releases');
@@ -125,6 +130,43 @@ export default class GitHubPlugin implements BonvoyPlugin {
     throw new Error(
       'Could not determine GitHub repository. Please set "repository" in package.json or provide owner/repo in plugin options.',
     );
+  }
+
+  private async validateReleases(context: Context): Promise<void> {
+    const { changedPackages, versions, rootPath, logger } = context;
+    if (!versions) return;
+
+    const token = this.options.token || process.env.GITHUB_TOKEN;
+    if (!token) return; // Skip validation if no token
+
+    let owner: string;
+    let repo: string;
+    try {
+      ({ owner, repo } = this.getRepoInfo(rootPath));
+    } catch {
+      return; // Skip validation if can't determine repo
+    }
+
+    const tagFormat = this.options.tagFormat ?? '{name}@{version}';
+    const existingReleases: string[] = [];
+
+    for (const pkg of changedPackages) {
+      const version = versions[pkg.name];
+      if (!version) continue;
+
+      const tag = tagFormat.replace('{name}', pkg.name).replace('{version}', version);
+
+      if (await this.ops.releaseExists(token, owner, repo, tag)) {
+        existingReleases.push(tag);
+      }
+    }
+
+    if (existingReleases.length > 0) {
+      logger.error(`❌ GitHub releases already exist: ${existingReleases.join(', ')}`);
+      throw new Error(
+        `Cannot release: GitHub releases already exist (${existingReleases.join(', ')}). Delete them first or bump to a new version.`,
+      );
+    }
   }
 }
 

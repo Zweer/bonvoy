@@ -8,10 +8,13 @@ vi.mock('node:fs');
 
 const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
-// biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
-function createMockOps(): GitHubOperations & { calls: Array<{ method: string; args: any[] }> } {
+function createMockOps(
+  config: { existingReleases?: string[] } = {},
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
+): GitHubOperations & { calls: Array<{ method: string; args: any[] }> } {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
+  const existingReleases = new Set(config.existingReleases ?? []);
   return {
     calls,
     async createRelease(token: string, params: GitHubReleaseParams) {
@@ -20,6 +23,10 @@ function createMockOps(): GitHubOperations & { calls: Array<{ method: string; ar
     async createPR(token: string, params) {
       calls.push({ method: 'createPR', args: [token, params] });
       return { url: 'https://github.com/test/repo/pull/1', number: 1 };
+    },
+    async releaseExists(_token, _owner, _repo, tag) {
+      calls.push({ method: 'releaseExists', args: [_token, _owner, _repo, tag] });
+      return existingReleases.has(tag);
     },
   };
 }
@@ -38,6 +45,7 @@ describe('GitHubPlugin', () => {
 
   const createMockBonvoy = () => ({
     hooks: {
+      validateRepo: { tapPromise: vi.fn() },
       makeRelease: { tapPromise: vi.fn() },
       createPR: { tapPromise: vi.fn() },
     },
@@ -49,6 +57,10 @@ describe('GitHubPlugin', () => {
 
     plugin.apply(mockBonvoy);
 
+    expect(mockBonvoy.hooks.validateRepo.tapPromise).toHaveBeenCalledWith(
+      'github',
+      expect.any(Function),
+    );
     expect(mockBonvoy.hooks.makeRelease.tapPromise).toHaveBeenCalledWith(
       'github',
       expect.any(Function),
@@ -196,6 +208,9 @@ describe('GitHubPlugin', () => {
       async createPR() {
         return { url: '', number: 0 };
       },
+      async releaseExists() {
+        return false;
+      },
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
     const mockBonvoy = createMockBonvoy();
@@ -245,6 +260,9 @@ describe('GitHubPlugin', () => {
       },
       async createPR() {
         return { url: '', number: 0 };
+      },
+      async releaseExists() {
+        return false;
       },
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
@@ -396,6 +414,9 @@ describe('GitHubPlugin', () => {
         async createPR() {
           throw new Error('PR creation failed');
         },
+        async releaseExists() {
+          return false;
+        },
       };
       const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
       const mockBonvoy = createMockBonvoy();
@@ -425,6 +446,9 @@ describe('GitHubPlugin', () => {
         async createPR() {
           throw 'string error';
         },
+        async releaseExists() {
+          return false;
+        },
       };
       const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
       const mockBonvoy = createMockBonvoy();
@@ -445,6 +469,133 @@ describe('GitHubPlugin', () => {
       ).rejects.toBe('string error');
 
       expect(mockLogger.error).toHaveBeenCalledWith('❌ Failed to create PR: string error');
+    });
+  });
+
+  describe('validateRepo hook', () => {
+    it('should throw error when GitHub release already exists', async () => {
+      process.env.GITHUB_TOKEN = 'test-token';
+      const mockOps = createMockOps({ existingReleases: ['@test/package@1.0.0'] });
+      const plugin = new GitHubPlugin({ owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateRepoFn({
+          changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/test' }],
+          versions: { '@test/package': '1.0.0' },
+          rootPath: '/test',
+          isDryRun: false,
+          logger: mockLogger,
+        }),
+      ).rejects.toThrow('GitHub releases already exist');
+    });
+
+    it('should pass validation when release does not exist', async () => {
+      process.env.GITHUB_TOKEN = 'test-token';
+      const mockOps = createMockOps();
+      const plugin = new GitHubPlugin({ owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateRepoFn({
+          changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/test' }],
+          versions: { '@test/package': '1.0.0' },
+          rootPath: '/test',
+          isDryRun: false,
+          logger: mockLogger,
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should skip validation when no token', async () => {
+      delete process.env.GITHUB_TOKEN;
+      const mockOps = createMockOps({ existingReleases: ['@test/package@1.0.0'] });
+      const plugin = new GitHubPlugin({ owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateRepoFn({
+          changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/test' }],
+          versions: { '@test/package': '1.0.0' },
+          rootPath: '/test',
+          isDryRun: false,
+          logger: mockLogger,
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should skip validation when no versions provided', async () => {
+      process.env.GITHUB_TOKEN = 'test-token';
+      const mockOps = createMockOps();
+      const plugin = new GitHubPlugin({ owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateRepoFn({
+          changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/test' }],
+          rootPath: '/test',
+          isDryRun: false,
+          logger: mockLogger,
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should skip validation when repo cannot be determined', async () => {
+      process.env.GITHUB_TOKEN = 'test-token';
+      const mockOps = createMockOps();
+      // No owner/repo in options, and no package.json
+      const plugin = new GitHubPlugin({}, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      vol.fromJSON({}, '/');
+
+      plugin.apply(mockBonvoy);
+
+      const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateRepoFn({
+          changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/test' }],
+          versions: { '@test/package': '1.0.0' },
+          rootPath: '/nonexistent',
+          isDryRun: false,
+          logger: mockLogger,
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should skip package when version not in versions map', async () => {
+      process.env.GITHUB_TOKEN = 'test-token';
+      const mockOps = createMockOps();
+      const plugin = new GitHubPlugin({ owner: 'org', repo: 'repo' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateRepoFn({
+          changedPackages: [
+            { name: '@test/package-a', version: '0.9.0', path: '/test' },
+            { name: '@test/package-b', version: '0.9.0', path: '/test' },
+          ],
+          versions: { '@test/package-a': '1.0.0' }, // package-b not in versions
+          rootPath: '/test',
+          isDryRun: false,
+          logger: mockLogger,
+        }),
+      ).resolves.toBeUndefined();
     });
   });
 });

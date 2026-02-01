@@ -5,7 +5,9 @@ import type { NpmOperations } from '../src/operations.js';
 
 const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
-function createMockOps(): NpmOperations & {
+function createMockOps(
+  config: { existingPackages?: string[]; hasToken?: boolean } = {},
+): NpmOperations & {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   calls: Array<{ method: string; args: any[] }>;
   publishedVersions: Map<string, string>;
@@ -13,6 +15,8 @@ function createMockOps(): NpmOperations & {
   // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
   const calls: Array<{ method: string; args: any[] }> = [];
   const publishedVersions = new Map<string, string>();
+  const existingPackages = new Set(config.existingPackages ?? []);
+  const hasTokenValue = config.hasToken ?? true;
   return {
     calls,
     publishedVersions,
@@ -22,6 +26,14 @@ function createMockOps(): NpmOperations & {
     async view(pkg, version) {
       calls.push({ method: 'view', args: [pkg, version] });
       return publishedVersions.get(`${pkg}@${version}`) ?? null;
+    },
+    async packageExists(pkg) {
+      calls.push({ method: 'packageExists', args: [pkg] });
+      return existingPackages.has(pkg);
+    },
+    async hasToken() {
+      calls.push({ method: 'hasToken', args: [] });
+      return hasTokenValue;
     },
   };
 }
@@ -38,6 +50,7 @@ describe('NpmPlugin', () => {
     plugin = new NpmPlugin({}, mockOps);
     mockBonvoy = {
       hooks: {
+        validateRepo: { tapPromise: vi.fn() },
         publish: { tapPromise: vi.fn() },
       },
     };
@@ -45,6 +58,10 @@ describe('NpmPlugin', () => {
 
   it('should register hooks', () => {
     plugin.apply(mockBonvoy);
+    expect(mockBonvoy.hooks.validateRepo.tapPromise).toHaveBeenCalledWith(
+      'npm',
+      expect.any(Function),
+    );
     expect(mockBonvoy.hooks.publish.tapPromise).toHaveBeenCalledWith('npm', expect.any(Function));
   });
 
@@ -181,5 +198,98 @@ describe('NpmPlugin', () => {
 
     const publishCall = mockOps.calls.find((c) => c.method === 'publish');
     expect(publishCall?.args[0]).not.toContain('--provenance');
+  });
+
+  it('should throw error when npm version already published', async () => {
+    mockOps.publishedVersions.set('@test/package@1.0.0', '1.0.0');
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/path/to/pkg' }],
+      versions: { '@test/package': '1.0.0' },
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).rejects.toThrow('npm versions already exist');
+  });
+
+  it('should throw error when first publish without token', async () => {
+    const opsNoToken = createMockOps({ existingPackages: [], hasToken: false });
+    plugin = new NpmPlugin({ provenance: true }, opsNoToken);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/new-package', version: '0.0.0', path: '/path/to/pkg' }],
+      versions: { '@test/new-package': '1.0.0' },
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).rejects.toThrow('First publish requires NPM_TOKEN');
+  });
+
+  it('should pass validation when package exists and no token', async () => {
+    const opsNoToken = createMockOps({ existingPackages: ['@test/package'], hasToken: false });
+    plugin = new NpmPlugin({ provenance: true }, opsNoToken);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/path/to/pkg' }],
+      versions: { '@test/package': '1.0.0' },
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).resolves.toBeUndefined();
+  });
+
+  it('should skip validation when no versions provided', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/path/to/pkg' }],
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).resolves.toBeUndefined();
+  });
+
+  it('should skip package version check when version not in versions map', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [
+        { name: '@test/package-a', version: '0.9.0', path: '/path/to/pkg-a' },
+        { name: '@test/package-b', version: '0.9.0', path: '/path/to/pkg-b' },
+      ],
+      versions: { '@test/package-a': '1.0.0' }, // package-b not in versions
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).resolves.toBeUndefined();
+  });
+
+  it('should skip OIDC check when provenance is disabled', async () => {
+    const opsNoToken = createMockOps({ existingPackages: [], hasToken: false });
+    plugin = new NpmPlugin({ provenance: false }, opsNoToken);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      changedPackages: [{ name: '@test/new-package', version: '0.0.0', path: '/path/to/pkg' }],
+      versions: { '@test/new-package': '1.0.0' },
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+    await expect(validateRepoFn(context)).resolves.toBeUndefined();
   });
 });

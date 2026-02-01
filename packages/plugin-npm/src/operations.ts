@@ -3,6 +3,8 @@ import { execa } from 'execa';
 export interface NpmOperations {
   publish(args: string[], cwd: string): Promise<void>;
   view(pkg: string, version: string): Promise<string | null>;
+  packageExists(pkg: string): Promise<boolean>;
+  hasToken(): Promise<boolean>;
 }
 
 export const defaultNpmOperations: NpmOperations = {
@@ -20,4 +22,19 @@ export const defaultNpmOperations: NpmOperations = {
       return null;
     }
   },
+
+  /* c8 ignore start - real npm operations */
+  async packageExists(pkg) {
+    try {
+      await execa('npm', ['view', pkg, 'name'], { stdio: 'pipe' });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  async hasToken() {
+    return !!process.env.NPM_TOKEN || !!process.env.NODE_AUTH_TOKEN;
+  },
+  /* c8 ignore stop */
 };

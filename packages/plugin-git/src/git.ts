@@ -1,4 +1,4 @@
-import type { BonvoyPlugin, PublishContext } from '@bonvoy/core';
+import type { BonvoyPlugin, Context, PublishContext } from '@bonvoy/core';
 
 import { defaultGitOperations, type GitOperations } from './operations.js';
 
@@ -24,7 +24,11 @@ export default class GitPlugin implements BonvoyPlugin {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
-  apply(bonvoy: { hooks: { beforePublish: any } }): void {
+  apply(bonvoy: { hooks: { validateRepo: any; beforePublish: any } }): void {
+    bonvoy.hooks.validateRepo.tapPromise(this.name, async (context: Context) => {
+      await this.validateTags(context);
+    });
+
     bonvoy.hooks.beforePublish.tapPromise(this.name, async (context: PublishContext) => {
       context.logger.info('📝 Committing changes...');
       await this.commitChanges(context);
@@ -82,6 +86,31 @@ export default class GitPlugin implements BonvoyPlugin {
         this.config.tagFormat.replace('{name}', pkg.name).replace('{version}', pkg.version),
       );
       await this.ops.pushTags(tags, rootPath);
+    }
+  }
+
+  private async validateTags(context: Context): Promise<void> {
+    const { changedPackages, versions, rootPath, logger } = context;
+    if (!versions) return;
+
+    const existingTags: string[] = [];
+
+    for (const pkg of changedPackages) {
+      const version = versions[pkg.name];
+      if (!version) continue;
+
+      const tag = this.config.tagFormat.replace('{name}', pkg.name).replace('{version}', version);
+
+      if (await this.ops.tagExists(tag, rootPath)) {
+        existingTags.push(tag);
+      }
+    }
+
+    if (existingTags.length > 0) {
+      logger.error(`❌ Git tags already exist: ${existingTags.join(', ')}`);
+      throw new Error(
+        `Cannot release: git tags already exist (${existingTags.join(', ')}). Delete them first or bump to a new version.`,
+      );
     }
   }
 }

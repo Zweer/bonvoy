@@ -39,9 +39,6 @@
     "@bonvoy/core": "^0.1.0",
     "execa": "^9.6.1"
   },
-  "devDependencies": {
-    "vitest": "^4.0.16"
-  },
   "engines": {
     "node": ">= 20.5"
   }

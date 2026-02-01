@@ -38,9 +38,6 @@
     "@bonvoy/core": "^0.1.0",
     "@gitbeaker/rest": "^42.5.0"
   },
-  "devDependencies": {
-    "vitest": "^4.0.16"
-  },
   "engines": {
     "node": ">= 20.5"
   }

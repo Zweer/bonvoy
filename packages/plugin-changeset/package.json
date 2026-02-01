@@ -39,9 +39,6 @@
     "@bonvoy/core": "^0.1.0",
     "gray-matter": "^4.0.3"
   },
-  "devDependencies": {
-    "vitest": "^4.0.16"
-  },
   "engines": {
     "node": ">= 20.5"
   }

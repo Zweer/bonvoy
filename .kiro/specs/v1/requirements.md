@@ -182,8 +182,7 @@ bonvoy/                          # GitHub: Zweer/bonvoy
 │   ├── plugin-gitlab/           # @bonvoy/plugin-gitlab
 │   ├── plugin-slack/            # @bonvoy/plugin-slack
 │   ├── plugin-exec/             # @bonvoy/plugin-exec
-│   ├── plugin-changeset/        # @bonvoy/plugin-changeset
-│   └── plugin-manual/           # @bonvoy/plugin-manual
+│   └── plugin-changeset/        # @bonvoy/plugin-changeset
 │
 └── package.json
 ```
@@ -201,8 +200,7 @@ bonvoy/                          # GitHub: Zweer/bonvoy
 - `@bonvoy/plugin-gitlab` - GitLab releases instead of GitHub
 - `@bonvoy/plugin-slack` - Post release notifications
 - `@bonvoy/plugin-exec` - Run custom shell commands
-- `@bonvoy/plugin-changeset` - Changeset-style `.changeset/*.md` files
-- `@bonvoy/plugin-manual` - Force explicit version from CLI
+- `@bonvoy/plugin-changeset` - Changeset-compatible workflow (see below)
 
 ### Versioning Strategy Plugins
 
@@ -211,10 +209,77 @@ The version determination is pluggable:
 | Strategy | Plugin | Description |
 |----------|--------|-------------|
 | **Conventional** | `@bonvoy/plugin-conventional` (default) | Bump from conventional commit messages |
-| **Changeset** | `@bonvoy/plugin-changeset` | Track changes via `.changeset/*.md` files |
-| **Manual** | `@bonvoy/plugin-manual` | Always require explicit version from CLI |
+| **Changeset** | `@bonvoy/plugin-changeset` | Track changes via `.changeset/*.md` or `.bonvoy/*.md` files |
 
 Strategies can be combined: conventional by default, with manual override when needed.
+
+### Plugin Changeset Specification
+
+`@bonvoy/plugin-changeset` provides a changeset-compatible workflow with extensions.
+
+#### File Locations
+
+Reads from both directories (for migration compatibility):
+- `.changeset/*.md` - Standard changeset location
+- `.bonvoy/*.md` - Bonvoy-native location
+
+#### File Format
+
+Uses changeset-compatible format (YAML frontmatter + Markdown):
+
+```markdown
+---
+"@scope/core": minor
+"@scope/utils": patch
+---
+
+Description of changes that goes into the changelog.
+Can be multi-line.
+```
+
+#### Bonvoy Extension: Explicit Versions
+
+Unlike standard changeset, bonvoy supports explicit versions:
+
+```markdown
+---
+"@scope/core": "2.0.0"
+"@scope/utils": minor
+---
+
+Breaking release with explicit version for core.
+```
+
+#### Multi-file Behavior
+
+When multiple files reference the same package:
+- **Bump**: Takes the highest (major > minor > patch)
+- **Notes**: Concatenates all descriptions
+
+```markdown
+<!-- .changeset/feature-a.md -->
+---
+"@scope/core": minor
+---
+Added feature A
+
+<!-- .changeset/feature-b.md -->
+---
+"@scope/core": patch
+---
+Fixed bug in feature B
+```
+
+Result for `@scope/core`: `minor` bump with both notes in changelog.
+
+#### Behavior
+
+1. Reads all `.md` files from `.changeset/` and `.bonvoy/`
+2. Parses frontmatter for package bumps/versions
+3. Uses markdown body as changelog notes
+4. If notes empty → falls back to conventional commits for that package
+5. Deletes processed files after release
+6. **Error** if both `plugin-changeset` and `plugin-conventional` are active
 
 ## CLI Interface
 
@@ -394,8 +459,7 @@ jobs:
 
 ### Phase 4: Optional Plugins (2-3 days)
 - [x] `@bonvoy/plugin-exec` - Custom shell commands
-- [ ] `@bonvoy/plugin-changeset` - Changeset-style workflow
-- [ ] `@bonvoy/plugin-manual` - Force version from CLI
+- [x] `@bonvoy/plugin-changeset` - Changeset-compatible workflow
 - [ ] `@bonvoy/plugin-gitlab` - GitLab support
 
 ### Phase 5: Polish (1-2 days)

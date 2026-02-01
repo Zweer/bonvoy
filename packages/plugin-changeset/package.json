@@ -1,0 +1,48 @@
+{
+  "name": "@bonvoy/plugin-changeset",
+  "version": "0.1.0",
+  "description": "🚢 Changeset-compatible workflow for bonvoy",
+  "keywords": [
+    "bonvoy",
+    "plugin",
+    "changeset",
+    "release",
+    "versioning"
+  ],
+  "homepage": "https://github.com/Zweer/bonvoy#readme",
+  "bugs": {
+    "url": "https://github.com/Zweer/bonvoy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zweer/bonvoy.git",
+    "directory": "packages/plugin-changeset"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Zweer",
+    "email": "n.olivieriachille@gmail.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@bonvoy/core": "^0.1.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.16"
+  },
+  "engines": {
+    "node": ">= 20.5"
+  }
+}

@@ -140,6 +140,7 @@ jobs:
 | [@bonvoy/cli](./packages/cli) | [![npm](https://img.shields.io/npm/v/@bonvoy/cli)](https://www.npmjs.com/package/@bonvoy/cli) | CLI orchestration and commands |
 | [@bonvoy/core](./packages/core) | [![npm](https://img.shields.io/npm/v/@bonvoy/core)](https://www.npmjs.com/package/@bonvoy/core) | Hook system, config loading, schema validation |
 | [@bonvoy/plugin-changelog](./packages/plugin-changelog) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changelog)](https://www.npmjs.com/package/@bonvoy/plugin-changelog) | Changelog generation (default) |
+| [@bonvoy/plugin-changeset](./packages/plugin-changeset) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changeset)](https://www.npmjs.com/package/@bonvoy/plugin-changeset) | Changeset-compatible workflow (optional) |
 | [@bonvoy/plugin-conventional](./packages/plugin-conventional) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-conventional)](https://www.npmjs.com/package/@bonvoy/plugin-conventional) | Conventional commits parser (default) |
 | [@bonvoy/plugin-exec](./packages/plugin-exec) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-exec)](https://www.npmjs.com/package/@bonvoy/plugin-exec) | Custom shell commands (optional) |
 | [@bonvoy/plugin-git](./packages/plugin-git) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-git)](https://www.npmjs.com/package/@bonvoy/plugin-git) | Git commit, tag, push (default) |
@@ -152,7 +153,6 @@ jobs:
 |---------|-------------|
 | `@bonvoy/plugin-gitlab` | GitLab releases |
 | `@bonvoy/plugin-slack` | Slack notifications |
-| `@bonvoy/plugin-changeset` | Changeset-style workflow |
 
 ## Plugin: Conventional Commits
 

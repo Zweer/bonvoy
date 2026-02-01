@@ -61,6 +61,7 @@ npx bonvoy shipit 2.0.0
 ```bash
 bonvoy shipit              # Release all changed packages
 bonvoy shipit --dry-run    # Preview changes
+bonvoy shipit --json       # Output JSON for CI integration
 bonvoy shipit patch        # Force patch bump
 bonvoy shipit minor        # Force minor bump  
 bonvoy shipit major        # Force major bump

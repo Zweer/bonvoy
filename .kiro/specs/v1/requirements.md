@@ -385,7 +385,7 @@ jobs:
 - [x] `@bonvoy/plugin-npm` - Publish with OIDC
 - [x] Dry-run mode
 - [x] `@bonvoy/plugin-github` - GitHub releases
-- [ ] JSON output for CI
+- [x] JSON output for CI
 
 ### Phase 3: PR Workflow (2 days)
 - [ ] PR creation in `@bonvoy/plugin-github`
@@ -399,9 +399,9 @@ jobs:
 - [ ] `@bonvoy/plugin-gitlab` - GitLab support
 
 ### Phase 5: Polish (1-2 days)
-- [ ] Documentation
+- [ ] Documentation (plugin READMEs)
 - [ ] Error messages refinement
-- [ ] Tests
+- [ ] Tests (100% coverage)
 - [ ] Dogfooding (use bonvoy to release bonvoy!)
 
 ---

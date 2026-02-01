@@ -33,6 +33,9 @@ bonvoy shipit
 # Preview changes (dry run)
 bonvoy shipit --dry-run
 
+# Output JSON for CI integration
+bonvoy shipit --json
+
 # Force specific version bump
 bonvoy shipit patch
 bonvoy shipit minor
@@ -87,6 +90,7 @@ bonvoy version --package @scope/core
 
 - `--config <path>` - Path to config file
 - `--dry-run` - Preview changes without executing
+- `--json` - Output JSON for CI integration
 - `--verbose` - Show detailed output
 - `--help` - Show help information
 

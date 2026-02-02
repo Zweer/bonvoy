@@ -561,4 +561,60 @@ describe('shipitCommand', () => {
     // core was bumped to 1.1.0, so cli's dependency should be updated
     expect(cliPkgJson.dependencies['@test/core']).toBe('^1.1.0');
   });
+
+  it('should not update internal dependency if package is not being released', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/cli/src/index.ts'], // Only cli changes, not core
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/test/packages/cli/package.json': JSON.stringify({
+          name: '@test/cli',
+          version: '1.0.0',
+          dependencies: {
+            '@test/core': '^1.0.0',
+          },
+        }),
+      },
+      '/',
+    );
+
+    const packages = [
+      { name: '@test/core', version: '1.0.0', path: '/test/packages/core' },
+      { name: '@test/cli', version: '1.0.0', path: '/test/packages/cli' },
+    ];
+
+    // Don't force bump - let conventional commits determine which packages to release
+    await shipit(undefined, {
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      packages,
+      plugins: [
+        new ConventionalPlugin(),
+        new ChangelogPlugin(),
+        new GitPlugin({ push: false }, gitOps),
+      ],
+    });
+
+    // core was NOT bumped (no commits touched it), so cli's dependency should remain unchanged
+    const cliPkgJson = JSON.parse(
+      vol.readFileSync('/test/packages/cli/package.json', 'utf-8') as string,
+    );
+    expect(cliPkgJson.dependencies['@test/core']).toBe('^1.0.0');
+  });
 });

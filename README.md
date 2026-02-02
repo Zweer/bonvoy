@@ -187,13 +187,8 @@ The `shipit` command auto-detects the context:
 | [@bonvoy/plugin-notification](./packages/plugin-notification) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-notification)](https://www.npmjs.com/package/@bonvoy/plugin-notification) | Base notification plugin |
 | [@bonvoy/plugin-npm](./packages/plugin-npm) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-npm)](https://www.npmjs.com/package/@bonvoy/plugin-npm) | npm publish with OIDC (default) |
 | [@bonvoy/plugin-slack](./packages/plugin-slack) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-slack)](https://www.npmjs.com/package/@bonvoy/plugin-slack) | Slack notifications (optional) |
-
-### Planned Plugins
-
-| Package | Description |
-|---------|-------------|
-| `@bonvoy/plugin-telegram` | Telegram notifications |
-| `@bonvoy/plugin-teams` | Microsoft Teams notifications |
+| [@bonvoy/plugin-teams](./packages/plugin-teams) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-teams)](https://www.npmjs.com/package/@bonvoy/plugin-teams) | Microsoft Teams notifications (optional) |
+| [@bonvoy/plugin-telegram](./packages/plugin-telegram) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-telegram)](https://www.npmjs.com/package/@bonvoy/plugin-telegram) | Telegram notifications (optional) |
 
 ## Plugin: Conventional Commits
 

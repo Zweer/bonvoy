@@ -10,6 +10,8 @@
     "plugin-github",
     "plugin-notification",
     "plugin-npm",
-    "plugin-slack"
+    "plugin-slack",
+    "plugin-teams",
+    "plugin-telegram"
   ]
 }

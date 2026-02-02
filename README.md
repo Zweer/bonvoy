@@ -179,6 +179,7 @@ The `shipit` command auto-detects the context:
 | [@bonvoy/plugin-changelog](./packages/plugin-changelog) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changelog)](https://www.npmjs.com/package/@bonvoy/plugin-changelog) | Changelog generation (default) |
 | [@bonvoy/plugin-changeset](./packages/plugin-changeset) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changeset)](https://www.npmjs.com/package/@bonvoy/plugin-changeset) | Changeset-compatible workflow (optional) |
 | [@bonvoy/plugin-conventional](./packages/plugin-conventional) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-conventional)](https://www.npmjs.com/package/@bonvoy/plugin-conventional) | Conventional commits parser (default) |
+| [@bonvoy/plugin-discord](./packages/plugin-discord) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-discord)](https://www.npmjs.com/package/@bonvoy/plugin-discord) | Discord notifications (optional) |
 | [@bonvoy/plugin-exec](./packages/plugin-exec) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-exec)](https://www.npmjs.com/package/@bonvoy/plugin-exec) | Custom shell commands (optional) |
 | [@bonvoy/plugin-git](./packages/plugin-git) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-git)](https://www.npmjs.com/package/@bonvoy/plugin-git) | Git commit, tag, push (default) |
 | [@bonvoy/plugin-github](./packages/plugin-github) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-github)](https://www.npmjs.com/package/@bonvoy/plugin-github) | GitHub releases (default) |
@@ -191,7 +192,6 @@ The `shipit` command auto-detects the context:
 
 | Package | Description |
 |---------|-------------|
-| `@bonvoy/plugin-discord` | Discord notifications |
 | `@bonvoy/plugin-telegram` | Telegram notifications |
 | `@bonvoy/plugin-teams` | Microsoft Teams notifications |
 

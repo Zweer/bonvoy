@@ -1,0 +1,40 @@
+{
+  "name": "@bonvoy/plugin-discord",
+  "version": "0.1.0",
+  "description": "🚢 Discord notification plugin for bonvoy",
+  "keywords": [
+    "bonvoy",
+    "plugin",
+    "discord",
+    "notification",
+    "release"
+  ],
+  "homepage": "https://github.com/Zweer/bonvoy#readme",
+  "bugs": {
+    "url": "https://github.com/Zweer/bonvoy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zweer/bonvoy.git",
+    "directory": "packages/plugin-discord"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Zweer",
+    "email": "n.olivieriachille@gmail.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@bonvoy/plugin-notification": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=20.5"
+  }
+}

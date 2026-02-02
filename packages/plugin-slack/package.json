@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-slack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "🚢 Slack notification plugin for bonvoy",
   "keywords": [
     "bonvoy",
@@ -32,7 +32,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/plugin-notification": "^0.1.0",
+    "@bonvoy/plugin-notification": "^0.2.0",
     "@slack/web-api": "^7.13.0"
   },
   "engines": {

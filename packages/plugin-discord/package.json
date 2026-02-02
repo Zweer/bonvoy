@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-discord",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "🚢 Discord notification plugin for bonvoy",
   "keywords": [
     "bonvoy",
@@ -32,7 +32,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/plugin-notification": "^0.1.0"
+    "@bonvoy/plugin-notification": "^0.2.0"
   },
   "engines": {
     "node": ">=20.5"

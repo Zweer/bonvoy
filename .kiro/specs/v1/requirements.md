@@ -118,8 +118,11 @@ The core provides a hook system using [tapable](https://github.com/webpack/tapab
 ├─────────────────────────────────────────────────────────────┤
 │                   OPTIONAL PLUGINS                          │
 │  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐   │
-│  │  gitlab   │ │   slack   │ │   exec    │ │ changeset │   │
+│  │  gitlab   │ │   exec    │ │ changeset │ │   slack   │   │
 │  └───────────┘ └───────────┘ └───────────┘ └───────────┘   │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐                 │
+│  │  discord  │ │ telegram  │ │   teams   │                 │
+│  └───────────┘ └───────────┘ └───────────┘                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -189,7 +192,14 @@ bonvoy/                          # GitHub: Zweer/bonvoy
 │   ├── plugin-gitlab/           # @bonvoy/plugin-gitlab
 │   ├── plugin-slack/            # @bonvoy/plugin-slack
 │   ├── plugin-exec/             # @bonvoy/plugin-exec
-│   └── plugin-changeset/        # @bonvoy/plugin-changeset
+│   ├── plugin-changeset/        # @bonvoy/plugin-changeset
+│   │
+│   │   # NOTIFICATION PLUGINS
+│   ├── plugin-notification/     # @bonvoy/plugin-notification (base)
+│   ├── plugin-slack/            # @bonvoy/plugin-slack
+│   ├── plugin-discord/          # @bonvoy/plugin-discord
+│   ├── plugin-telegram/         # @bonvoy/plugin-telegram
+│   └── plugin-teams/            # @bonvoy/plugin-teams
 │
 └── package.json
 ```
@@ -205,9 +215,15 @@ bonvoy/                          # GitHub: Zweer/bonvoy
 
 **Optional plugins** (must be installed and configured):
 - `@bonvoy/plugin-gitlab` - GitLab releases instead of GitHub
-- `@bonvoy/plugin-slack` - Post release notifications
 - `@bonvoy/plugin-exec` - Run custom shell commands
 - `@bonvoy/plugin-changeset` - Changeset-compatible workflow (see below)
+
+**Notification plugins** (optional, for release notifications):
+- `@bonvoy/plugin-notification` - Base class for notification plugins
+- `@bonvoy/plugin-slack` - Slack notifications (webhook or Bot API)
+- `@bonvoy/plugin-discord` - Discord notifications (webhook)
+- `@bonvoy/plugin-telegram` - Telegram notifications (Bot API)
+- `@bonvoy/plugin-teams` - Microsoft Teams notifications (webhook)
 
 ### Versioning Strategy Plugins
 

@@ -301,6 +301,68 @@ export default class MyPlugin implements BonvoyPlugin {
 }
 ```
 
+## Notification Plugins
+
+Send release notifications to your team via various channels:
+
+### Slack
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-slack', {
+      // Option 1: Webhook
+      webhookUrl: process.env.SLACK_WEBHOOK_URL,
+      // Option 2: Bot API
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: '#releases',
+    }]
+  ]
+};
+```
+
+### Discord
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-discord', {
+      webhookUrl: process.env.DISCORD_WEBHOOK_URL,
+    }]
+  ]
+};
+```
+
+### Telegram
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-telegram', {
+      botToken: process.env.TELEGRAM_BOT_TOKEN,
+      chatId: process.env.TELEGRAM_CHAT_ID,
+    }]
+  ]
+};
+```
+
+### Microsoft Teams
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-teams', {
+      webhookUrl: process.env.TEAMS_WEBHOOK_URL,
+    }]
+  ]
+};
+```
+
+All notification plugins support:
+- `onSuccess` - Send on successful release (default: `true`)
+- `onFailure` - Send on failed release (default: `false`)
+- `includeChangelog` - Include changelog in message (default: `true`)
+
 ## License
 
 MIT

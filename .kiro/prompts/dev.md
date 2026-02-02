@@ -48,7 +48,12 @@ bonvoy/
 │   ├── plugin-changelog/        # @bonvoy/plugin-changelog (default)
 │   ├── plugin-gitlab/           # @bonvoy/plugin-gitlab (optional)
 │   ├── plugin-exec/             # @bonvoy/plugin-exec (optional)
-│   └── plugin-changeset/        # @bonvoy/plugin-changeset (optional)
+│   ├── plugin-changeset/        # @bonvoy/plugin-changeset (optional)
+│   ├── plugin-notification/     # @bonvoy/plugin-notification (base)
+│   ├── plugin-slack/            # @bonvoy/plugin-slack (optional)
+│   ├── plugin-discord/          # @bonvoy/plugin-discord (optional)
+│   ├── plugin-telegram/         # @bonvoy/plugin-telegram (optional)
+│   └── plugin-teams/            # @bonvoy/plugin-teams (optional)
 └── package.json
 ```
 
@@ -64,6 +69,13 @@ Loaded automatically unless disabled:
 - `plugin-gitlab` - GitLab releases (alternative to GitHub)
 - `plugin-exec` - Run custom shell commands
 - `plugin-changeset` - Changeset-compatible workflow
+
+### Notification Plugins
+- `plugin-notification` - Base class for notifications
+- `plugin-slack` - Slack (webhook or Bot API)
+- `plugin-discord` - Discord (webhook)
+- `plugin-telegram` - Telegram (Bot API)
+- `plugin-teams` - Microsoft Teams (webhook)
 
 ## 🎯 Target Use Cases
 

@@ -1,0 +1,41 @@
+{
+  "name": "@bonvoy/plugin-slack",
+  "version": "0.1.0",
+  "description": "🚢 Slack notification plugin for bonvoy",
+  "keywords": [
+    "bonvoy",
+    "plugin",
+    "slack",
+    "notification",
+    "release"
+  ],
+  "homepage": "https://github.com/Zweer/bonvoy#readme",
+  "bugs": {
+    "url": "https://github.com/Zweer/bonvoy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zweer/bonvoy.git",
+    "directory": "packages/plugin-slack"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Zweer",
+    "email": "n.olivieriachille@gmail.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@bonvoy/plugin-notification": "^0.1.0",
+    "@slack/web-api": "^7.13.0"
+  },
+  "engines": {
+    "node": ">=20.5"
+  }
+}

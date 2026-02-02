@@ -7,6 +7,8 @@
     "plugin-exec",
     "plugin-git",
     "plugin-github",
-    "plugin-npm"
+    "plugin-notification",
+    "plugin-npm",
+    "plugin-slack"
   ]
 }

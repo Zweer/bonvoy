@@ -183,13 +183,17 @@ The `shipit` command auto-detects the context:
 | [@bonvoy/plugin-git](./packages/plugin-git) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-git)](https://www.npmjs.com/package/@bonvoy/plugin-git) | Git commit, tag, push (default) |
 | [@bonvoy/plugin-github](./packages/plugin-github) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-github)](https://www.npmjs.com/package/@bonvoy/plugin-github) | GitHub releases (default) |
 | [@bonvoy/plugin-gitlab](./packages/plugin-gitlab) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-gitlab)](https://www.npmjs.com/package/@bonvoy/plugin-gitlab) | GitLab releases (optional) |
+| [@bonvoy/plugin-notification](./packages/plugin-notification) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-notification)](https://www.npmjs.com/package/@bonvoy/plugin-notification) | Base notification plugin |
 | [@bonvoy/plugin-npm](./packages/plugin-npm) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-npm)](https://www.npmjs.com/package/@bonvoy/plugin-npm) | npm publish with OIDC (default) |
+| [@bonvoy/plugin-slack](./packages/plugin-slack) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-slack)](https://www.npmjs.com/package/@bonvoy/plugin-slack) | Slack notifications (optional) |
 
 ### Planned Plugins
 
 | Package | Description |
 |---------|-------------|
-| `@bonvoy/plugin-slack` | Slack notifications |
+| `@bonvoy/plugin-discord` | Discord notifications |
+| `@bonvoy/plugin-telegram` | Telegram notifications |
+| `@bonvoy/plugin-teams` | Microsoft Teams notifications |
 
 ## Plugin: Conventional Commits
 

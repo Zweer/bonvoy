@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-changeset",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "🚢 Changeset-compatible workflow for bonvoy",
   "keywords": [
     "bonvoy",
@@ -36,7 +36,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bonvoy/core": "^0.2.0",
+    "@bonvoy/core": "^0.3.0",
     "gray-matter": "^4.0.3"
   },
   "engines": {

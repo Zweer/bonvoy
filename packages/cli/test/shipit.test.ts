@@ -505,4 +505,60 @@ describe('shipitCommand', () => {
     expect(result.changedPackages).toHaveLength(1);
     expect(result.bumps['test-pkg']).toBe('minor');
   });
+
+  it('should update internal dependencies when releasing packages', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts', 'packages/cli/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/test/packages/cli/package.json': JSON.stringify({
+          name: '@test/cli',
+          version: '1.0.0',
+          dependencies: {
+            '@test/core': '^1.0.0',
+          },
+        }),
+      },
+      '/',
+    );
+
+    const packages = [
+      { name: '@test/core', version: '1.0.0', path: '/test/packages/core' },
+      { name: '@test/cli', version: '1.0.0', path: '/test/packages/cli' },
+    ];
+
+    await shipit('minor', {
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      packages,
+      plugins: [
+        new ConventionalPlugin(),
+        new ChangelogPlugin(),
+        new GitPlugin({ push: false }, gitOps),
+      ],
+    });
+
+    // Verify internal dependency was updated to new version
+    const cliPkgJson = JSON.parse(
+      vol.readFileSync('/test/packages/cli/package.json', 'utf-8') as string,
+    );
+    // core was bumped to 1.1.0, so cli's dependency should be updated
+    expect(cliPkgJson.dependencies['@test/core']).toBe('^1.1.0');
+  });
 });

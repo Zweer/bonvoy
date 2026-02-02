@@ -1,4 +1,5 @@
 import type { BonvoyPlugin, CommitInfo, Context, SemverBump } from '@bonvoy/core';
+// @ts-expect-error - v5 types are not accurate
 import { sync as parseCommit } from 'conventional-commits-parser';
 
 export interface ConventionalConfig {

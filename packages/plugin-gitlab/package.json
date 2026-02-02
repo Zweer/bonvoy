@@ -35,7 +35,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bonvoy/core": "^0.1.0",
+    "@bonvoy/core": "^0.2.0",
     "@gitbeaker/rest": "^42.5.0"
   },
   "engines": {

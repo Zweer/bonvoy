@@ -167,14 +167,41 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.afterChangelog.promise(changelogContext);
 
   if (!options.dryRun) {
+    // First pass: update all package.json versions
     for (const pkg of changedPackages) {
-      // Update package.json version
       const pkgJsonPath = join(pkg.path, 'package.json');
       const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
       pkgJson.version = versions[pkg.name];
       writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
+    }
 
-      // Write changelog
+    // Second pass: update internal dependencies to match new versions
+    const packageNames = new Set(packages.map((p) => p.name));
+    for (const pkg of packages) {
+      const pkgJsonPath = join(pkg.path, 'package.json');
+      const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+      let modified = false;
+
+      for (const depType of ['dependencies', 'devDependencies', 'peerDependencies'] as const) {
+        const deps = pkgJson[depType];
+        if (!deps) continue;
+
+        for (const depName of Object.keys(deps)) {
+          if (packageNames.has(depName) && versions[depName]) {
+            // Update to the new version being released
+            deps[depName] = `^${versions[depName]}`;
+            modified = true;
+          }
+        }
+      }
+
+      if (modified) {
+        writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
+      }
+    }
+
+    // Write changelogs
+    for (const pkg of changedPackages) {
       const changelogPath = join(pkg.path, 'CHANGELOG.md');
       const changelog = changelogContext.changelogs[pkg.name] || '';
       writeFileSync(changelogPath, changelog);

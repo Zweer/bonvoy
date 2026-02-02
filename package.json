@@ -38,7 +38,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsdown && npx tsx scripts/generate-schema.ts",
+    "build": "tsdown",
+    "postbuild": "npm run scripts:schema",
     "clean": "rimraf --glob packages/**/dist",
     "prelint": "npm run build",
     "lint": "concurrently npm:lint:* --prefixColors auto",

@@ -39,7 +39,6 @@
   ],
   "scripts": {
     "build": "tsdown && npx tsx scripts/generate-schema.ts",
-    "changeset": "changeset",
     "clean": "rimraf --glob packages/**/dist",
     "prelint": "npm run build",
     "lint": "concurrently npm:lint:* --prefixColors auto",
@@ -51,14 +50,14 @@
     "lint:sort_package": "sort-package-json \"package.json\" \"packages/*/package.json\"",
     "lint:typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "release": "changeset publish",
+    "scripts:dummy": "tsx scripts/publish-dummy-packages.ts",
+    "scripts:schema": "tsx scripts/generate-schema.ts",
     "pretest": "npm run build",
     "test": "vitest run",
     "posttest": "npm run clean",
     "pretest:coverage": "npm run build",
     "test:coverage": "vitest run --coverage",
-    "posttest:coverage": "npm run clean && coverage-badge-readme",
-    "version": "changeset version"
+    "posttest:coverage": "npm run clean && coverage-badge-readme"
   },
   "commitlint": {
     "extends": [

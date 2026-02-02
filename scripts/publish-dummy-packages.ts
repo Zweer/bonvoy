@@ -1,11 +1,11 @@
-#!/usr/bin/env node
+#!/usr/bin/env npx tsx
 
 /**
  * Script to publish dummy packages to npm for OIDC support.
  * OIDC (provenance) requires the package to already exist on npm.
  * This script creates minimal placeholder packages for first-time publish.
  *
- * Usage: node scripts/publish-dummy-packages.mjs
+ * Usage: npx tsx scripts/publish-dummy-packages.ts
  */
 
 import { execSync } from 'node:child_process';
@@ -14,8 +14,7 @@ import { join } from 'node:path';
 
 const rootPath = process.cwd();
 
-// Check if logged in to npm
-function checkNpmLogin() {
+function checkNpmLogin(): boolean {
   try {
     const whoami = execSync('npm whoami', { encoding: 'utf-8' }).trim();
     console.log(`✅ Logged in as: ${whoami}`);
@@ -26,8 +25,7 @@ function checkNpmLogin() {
   }
 }
 
-// Login to npm
-function npmLogin() {
+function npmLogin(): boolean {
   console.log('🔐 Starting npm login...');
   try {
     execSync('npm login', { stdio: 'inherit' });
@@ -38,8 +36,7 @@ function npmLogin() {
   }
 }
 
-// Check if package exists on npm
-function packageExists(name) {
+function packageExists(name: string): boolean {
   try {
     execSync(`npm view ${name} version`, { encoding: 'utf-8', stdio: 'pipe' });
     return true;
@@ -48,9 +45,8 @@ function packageExists(name) {
   }
 }
 
-// Publish a dummy version of the package
-function publishDummy(pkgPath, pkgJson) {
-  const name = pkgJson.name;
+function publishDummy(pkgPath: string, pkgJson: { name: string }): void {
+  const { name } = pkgJson;
 
   if (packageExists(name)) {
     console.log(`⏭️  ${name} already exists on npm, skipping`);
@@ -60,37 +56,30 @@ function publishDummy(pkgPath, pkgJson) {
   console.log(`📦 Publishing dummy for ${name}...`);
 
   try {
-    // Publish with minimal content (just package.json)
     execSync('npm publish --access public', {
       cwd: pkgPath,
       stdio: 'inherit',
     });
     console.log(`✅ ${name} published successfully`);
   } catch (error) {
-    console.error(`❌ Failed to publish ${name}: ${error.message}`);
+    console.error(`❌ Failed to publish ${name}: ${(error as Error).message}`);
   }
 }
 
-// Main
-async function main() {
+function main(): void {
   console.log('🚢 bonvoy dummy package publisher\n');
 
-  // 1. Check/ensure npm login
-  if (!checkNpmLogin()) {
-    if (!npmLogin()) {
-      process.exit(1);
-    }
+  if (!checkNpmLogin() && !npmLogin()) {
+    process.exit(1);
   }
 
   console.log('');
 
-  // 2. Find all packages
   const packagesDir = join(rootPath, 'packages');
   const packageDirs = readdirSync(packagesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => join(packagesDir, d.name));
 
-  // 3. Process each package
   for (const pkgPath of packageDirs) {
     const pkgJsonPath = join(pkgPath, 'package.json');
     try {

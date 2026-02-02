@@ -33,22 +33,22 @@ Uses [tapable](https://github.com/webpack/tapable) for hooks. Plugins tap into l
 - `beforeChangelog`, `generateChangelog`, `afterChangelog`
 - `beforePublish`, `publish`, `afterPublish`
 - `beforeRelease`, `makeRelease`, `afterRelease`
+- `beforeCreatePR`, `createPR`, `afterCreatePR`
 
 ### Monorepo Structure
 ```
 bonvoy/
 ├── packages/
-│   ├── core/                    # @bonvoy/core
+│   ├── cli/                     # @bonvoy/cli - CLI orchestration
+│   ├── core/                    # @bonvoy/core - Hook system, config, types
 │   ├── plugin-conventional/     # @bonvoy/plugin-conventional (default)
 │   ├── plugin-git/              # @bonvoy/plugin-git (default)
 │   ├── plugin-npm/              # @bonvoy/plugin-npm (default)
 │   ├── plugin-github/           # @bonvoy/plugin-github (default)
 │   ├── plugin-changelog/        # @bonvoy/plugin-changelog (default)
 │   ├── plugin-gitlab/           # @bonvoy/plugin-gitlab (optional)
-│   ├── plugin-slack/            # @bonvoy/plugin-slack (optional)
 │   ├── plugin-exec/             # @bonvoy/plugin-exec (optional)
-│   ├── plugin-changeset/        # @bonvoy/plugin-changeset (optional)
-│   └── plugin-manual/           # @bonvoy/plugin-manual (optional)
+│   └── plugin-changeset/        # @bonvoy/plugin-changeset (optional)
 └── package.json
 ```
 
@@ -59,6 +59,11 @@ Loaded automatically unless disabled:
 - `plugin-npm` - Publish to npm
 - `plugin-github` - Create GitHub releases
 - `plugin-changelog` - Generate CHANGELOG.md
+
+### Optional Plugins
+- `plugin-gitlab` - GitLab releases (alternative to GitHub)
+- `plugin-exec` - Run custom shell commands
+- `plugin-changeset` - Changeset-compatible workflow
 
 ## 🎯 Target Use Cases
 
@@ -76,7 +81,7 @@ npx bonvoy shipit  # Each package gets its own version based on its changes
 ```bash
 npx bonvoy prepare  # Create PR with version bumps + changelog
 # After merge:
-npx bonvoy shipit --from-pr
+npx bonvoy shipit   # Auto-detects merged PR and publishes
 ```
 
 ## 💡 Development Guidelines
@@ -90,9 +95,9 @@ npx bonvoy shipit --from-pr
 
 ### Testing
 - **Vitest** for all tests
-- **High coverage**: Target 90%+
+- **100% coverage**: Currently achieved
 - **Test each package independently**
-- **Mock git, npm, GitHub API**
+- **Mock git, npm, GitHub/GitLab API**
 
 ### Code Quality
 - **Biome** for linting and formatting
@@ -105,6 +110,7 @@ npx bonvoy shipit --from-pr
 - `@octokit/rest` - GitHub API
 - `execa` - Command execution
 - `picocolors` - Terminal colors
+- `zod` - Config validation
 
 ## 📝 Communication Style
 
@@ -113,13 +119,13 @@ npx bonvoy shipit --from-pr
 - **Focus**: Practical solutions
 - **Priority**: Simplicity, testability, extensibility
 
-## 🚀 Implementation Priority
+## ✅ Project Status
 
-1. **Core** - Hook system, CLI, config loading, workspace detection
-2. **plugin-conventional** - Parse commits, determine bump
-3. **plugin-changelog** - Generate CHANGELOG.md
-4. **plugin-git** - Commit, tag, push
-5. **plugin-npm** - Publish packages
-6. **plugin-github** - Create releases
+All phases complete:
+- Phase 1: Core + Essential Plugins ✅
+- Phase 2: Publishing (npm, GitHub) ✅
+- Phase 3: PR Workflow ✅
+- Phase 4: Optional Plugins (GitLab, exec, changeset) ✅
+- Phase 5: Polish (docs, tests, 100% coverage) ✅
 
 Remember: bonvoy should be **simple to use** but **powerful to extend**. The goal is to make releasing as easy as `npx bonvoy shipit`.

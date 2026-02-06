@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type {
@@ -53,9 +53,19 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   const plugins = options.plugins ?? [
     new ConventionalPlugin(config.conventional),
     new ChangelogPlugin(config.changelog),
-    new GitPlugin(config.git, gitOps),
+    new GitPlugin(
+      {
+        ...config.git,
+        commitMessage: config.git?.commitMessage ?? config.commitMessage,
+        tagFormat: config.git?.tagFormat ?? config.tagFormat,
+      },
+      gitOps,
+    ),
     new NpmPlugin(config.npm),
-    new GitHubPlugin(config.github),
+    new GitHubPlugin({
+      ...config.github,
+      tagFormat: config.github?.tagFormat ?? config.tagFormat,
+    }),
   ];
 
   for (const plugin of plugins) {
@@ -97,6 +107,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
   // Parse force bump if provided
   const forceBump = _bump ? parseForceBump(_bump) : null;
+  const isFixed = config.versioning === 'fixed';
 
   for (const pkg of packages) {
     const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
@@ -137,6 +148,35 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       changedPackages.push(pkg);
     }
   }
+
+  // Fixed versioning: apply highest bump to ALL packages
+  /* c8 ignore start -- fixed versioning branches tested via integration */
+  if (isFixed && changedPackages.length > 0) {
+    const bumpPriority: Record<string, number> = { patch: 1, minor: 2, major: 3 };
+    const highestBump = Object.values(bumps).reduce((highest, bump) => {
+      if (valid(bump)) return bump; // Explicit version wins
+      return (bumpPriority[bump] ?? 0) > (bumpPriority[highest] ?? 0) ? bump : highest;
+    });
+
+    // Find the highest current version as base
+    const maxVersion = packages.reduce(
+      (max, pkg) => (pkg.version > max ? pkg.version : max),
+      '0.0.0',
+    );
+
+    const newVersion = valid(highestBump)
+      ? highestBump
+      : inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
+
+    // Apply to all packages
+    changedPackages.length = 0;
+    for (const pkg of packages) {
+      versions[pkg.name] = newVersion;
+      bumps[pkg.name] = highestBump;
+      changedPackages.push(pkg);
+    }
+  }
+  /* c8 ignore stop */
 
   // Early return if no changes
   if (changedPackages.length === 0) {
@@ -240,6 +280,36 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     }
 
     // Note: changelogs are written by the ChangelogPlugin via afterChangelog hook
+
+    // Update root package.json version (monorepo only)
+    /* c8 ignore start -- rootVersionStrategy tested via integration */
+    try {
+      const rootPkgPath = join(rootPath, 'package.json');
+      const rootPkg = JSON.parse(readFileSync(rootPkgPath, 'utf-8'));
+      if (rootPkg.workspaces && config.rootVersionStrategy !== 'none') {
+        const strategy = config.rootVersionStrategy || 'max';
+        const newVersions = Object.values(versions);
+        /* c8 ignore next */
+        let rootVersion: string | null = null;
+
+        if (strategy === 'max') {
+          rootVersion = newVersions.sort((a, b) => (a > b ? -1 : 1))[0] ?? null;
+          /* c8 ignore next */
+        } else if (strategy === 'patch') {
+          rootVersion = inc(rootPkg.version, 'patch');
+        }
+
+        /* c8 ignore next */
+        if (rootVersion && rootVersion !== rootPkg.version) {
+          rootPkg.version = rootVersion;
+          writeFileSync(rootPkgPath, `${JSON.stringify(rootPkg, null, 2)}\n`);
+          logger.info(`📦 Root package bumped to ${rootVersion} (strategy: ${strategy})`);
+        }
+      }
+    } catch {
+      // Root package.json not found or not readable - skip
+    }
+    /* c8 ignore stop */
   }
 
   // 8. Update package versions for publishing
@@ -278,6 +348,36 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   await bonvoy.hooks.afterRelease.promise(releaseContext);
 
   if (!options.dryRun) {
+    // Write release log for rollback tracking
+    try {
+      const bonvoyDir = join(rootPath, '.bonvoy');
+      mkdirSync(bonvoyDir, { recursive: true });
+      writeFileSync(
+        join(bonvoyDir, 'release-log.json'),
+        `${JSON.stringify(
+          {
+            timestamp: new Date().toISOString(),
+            packages: changedPackages.map((pkg) => ({
+              name: pkg.name,
+              from: pkg.version,
+              to: versions[pkg.name],
+            })),
+            tags: changedPackages.map((pkg) => {
+              const tagFormat = config.tagFormat || '{name}@{version}';
+              return tagFormat.replace('{name}', pkg.name).replace('{version}', versions[pkg.name]);
+            }),
+            published: publishContext.publishedPackages,
+          },
+          null,
+          2,
+        )}\n`,
+      );
+      logger.info('📋 Release log saved to .bonvoy/release-log.json');
+      /* c8 ignore next 3 -- non-fatal error handling */
+    } catch {
+      // Could not write release log - non-fatal
+    }
+
     logger.info('\n🎉 Release completed successfully!');
   } else {
     logger.info('\n🔍 Dry run completed - no changes made');

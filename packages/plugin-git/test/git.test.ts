@@ -94,7 +94,7 @@ describe('GitPlugin', () => {
     expect(mockOps.calls).toContainEqual({ method: 'add', args: ['.', '/project'] });
     expect(mockOps.calls).toContainEqual({
       method: 'commit',
-      args: ['chore(release): :bookmark: @test/package-a, @test/package-b [skip ci]', '/project'],
+      args: ['chore: release @test/package-a, @test/package-b', '/project'],
     });
     expect(mockOps.calls).toContainEqual({
       method: 'tag',

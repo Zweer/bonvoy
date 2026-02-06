@@ -777,3 +777,257 @@ describe('shipitCommand', () => {
     expect(changelog).toContain('Changelog');
   });
 });
+
+describe('fixed versioning', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should apply same version to all packages when versioning is fixed', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: core feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+        {
+          hash: 'a2',
+          message: 'fix: utils bug',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/utils/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '0.0.0',
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/test/packages/utils/package.json': JSON.stringify({
+          name: '@test/utils',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    const result = await shipit(undefined, {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      config: { versioning: 'fixed' },
+      packages: [
+        { name: '@test/core', version: '1.0.0', path: '/test/packages/core' },
+        { name: '@test/utils', version: '1.0.0', path: '/test/packages/utils' },
+      ],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    // Both packages should have the same version (minor wins over patch)
+    expect(result.changedPackages).toHaveLength(2);
+    expect(result.versions['@test/core']).toBe('1.1.0');
+    expect(result.versions['@test/utils']).toBe('1.1.0');
+  });
+});
+
+describe('rootVersionStrategy', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should bump root package with max strategy', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '0.0.0',
+          private: true,
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    await shipit(undefined, {
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      config: { rootVersionStrategy: 'max' },
+      packages: [{ name: '@test/core', version: '1.0.0', path: '/test/packages/core' }],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    const rootPkg = JSON.parse(vol.readFileSync('/test/package.json', 'utf-8') as string);
+    expect(rootPkg.version).toBe('1.1.0');
+  });
+
+  it('should bump root package with patch strategy', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '1.0.0',
+          private: true,
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    await shipit(undefined, {
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      config: { rootVersionStrategy: 'patch' },
+      packages: [{ name: '@test/core', version: '1.0.0', path: '/test/packages/core' }],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    const rootPkg = JSON.parse(vol.readFileSync('/test/package.json', 'utf-8') as string);
+    expect(rootPkg.version).toBe('1.0.1');
+  });
+
+  it('should not bump root package with none strategy', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '0.0.0',
+          private: true,
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    await shipit(undefined, {
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      config: { rootVersionStrategy: 'none' },
+      packages: [{ name: '@test/core', version: '1.0.0', path: '/test/packages/core' }],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    const rootPkg = JSON.parse(vol.readFileSync('/test/package.json', 'utf-8') as string);
+    expect(rootPkg.version).toBe('0.0.0');
+  });
+});
+
+describe('fixed versioning - explicit version', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should use explicit version in fixed mode', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '0.0.0',
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/test/packages/utils/package.json': JSON.stringify({
+          name: '@test/utils',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    const result = await shipit('3.0.0', {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      config: { versioning: 'fixed' },
+      packages: [
+        { name: '@test/core', version: '1.0.0', path: '/test/packages/core' },
+        { name: '@test/utils', version: '1.0.0', path: '/test/packages/utils' },
+      ],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    expect(result.versions['@test/core']).toBe('3.0.0');
+    expect(result.versions['@test/utils']).toBe('3.0.0');
+  });
+});

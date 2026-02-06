@@ -77,7 +77,8 @@ Create `bonvoy.config.js` (optional - works without config):
 
 ```javascript
 export default {
-  versioning: 'independent',  // or 'fixed'
+  versioning: 'independent',  // or 'fixed' (all packages share same version)
+  rootVersionStrategy: 'max', // 'max' | 'patch' | 'none' (monorepo root version)
   commitMessage: 'chore: release {packages}',
   tagFormat: '{name}@{version}',
   changelog: {
@@ -90,13 +91,33 @@ export default {
       breaking: '💥 Breaking Changes',
     },
   },
+  conventional: {
+    preset: 'angular',  // 'angular' | 'conventional' | 'atom' | 'custom'
+    // types: { feat: 'minor', fix: 'patch' },  // Custom types (when preset: 'custom')
+  },
+  git: {
+    // commitMessage: '...',  // Overrides top-level commitMessage
+    // tagFormat: '...',      // Overrides top-level tagFormat
+    push: true,               // Push commits and tags to remote
+  },
+  npm: {
+    registry: 'https://registry.npmjs.org',
+    access: 'public',       // 'public' | 'restricted'
+    skipExisting: true,      // Skip already-published versions
+    provenance: true,        // Enable npm provenance (OIDC)
+  },
   github: {
     draft: false,      // Create releases as drafts
     prerelease: false, // Force prerelease flag (auto-detected by default)
   },
+  gitlab: {
+    // host: 'https://gitlab.com',
+    // projectId: 12345,
+  },
   workflow: 'direct',  // or 'pr'
   baseBranch: 'main',
   plugins: [],  // Additional plugins
+  // hooks: { afterRelease: (ctx) => console.log('Released!') },  // Inline hooks
 };
 ```
 

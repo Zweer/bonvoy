@@ -69,4 +69,24 @@ describe('Bonvoy', () => {
     expect(bonvoy.hooks.createPR).toBeDefined();
     expect(bonvoy.hooks.afterCreatePR).toBeDefined();
   });
+
+  it('should apply inline hooks from config', () => {
+    const hookFn = () => {};
+    const bonvoy = new Bonvoy({
+      hooks: { afterRelease: hookFn },
+    });
+
+    // Hook should have been tapped
+    expect(bonvoy.hooks.afterRelease.taps).toHaveLength(1);
+    expect(bonvoy.hooks.afterRelease.taps[0].name).toBe('config');
+  });
+
+  it('should skip invalid hook names in inline hooks', () => {
+    const bonvoy = new Bonvoy({
+      hooks: { nonExistentHook: () => {} },
+    });
+
+    // Should not throw, just skip
+    expect(bonvoy.plugins).toEqual([]);
+  });
 });

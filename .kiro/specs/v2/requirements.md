@@ -94,7 +94,7 @@ Support for publishing to registries beyond npm.
 - Branch → channel configuration
 
 ### Monorepo Dependency Linking
-- Automatically update versions between internal packages
+- ✅ Automatically update versions between internal packages (implemented in shipit)
 - `workspace:*` → real version support
 - Option to bump dependents
 

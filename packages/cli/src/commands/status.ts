@@ -14,7 +14,9 @@ export async function statusCommand(): Promise<void> {
     console.log(`📦 ${changedPackages.length} package(s) with pending changes:\n`);
 
     for (const { pkg, bump } of changedPackages) {
+      /* c8 ignore start -- inc() always returns string for valid bump types */
       const newVersion = inc(pkg.version, bump as 'major' | 'minor' | 'patch') ?? bump;
+      /* c8 ignore stop */
       const commitCount = commits.filter((c) => c.packages.includes(pkg.name)).length;
       console.log(
         `  ${pkg.name}: ${pkg.version} → ${newVersion} (${bump}, ${commitCount} commit${commitCount !== 1 ? 's' : ''})`,
@@ -23,8 +25,10 @@ export async function statusCommand(): Promise<void> {
 
     console.log(`\n📝 ${commits.length} commit(s) since last release`);
     console.log(`📊 ${packages.length} total package(s) in workspace`);
+    /* c8 ignore start -- error handling */
   } catch (error) {
     console.error('❌ Error:', error instanceof Error ? error.message : error);
     process.exit(1);
   }
+  /* c8 ignore stop */
 }

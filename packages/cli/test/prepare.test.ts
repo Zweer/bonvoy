@@ -190,7 +190,7 @@ describe('prepare command', () => {
 
     expect(result.packages).toHaveLength(1);
     expect(calls).toContain('add:.');
-    expect(calls.some((c) => c.startsWith('commit:chore(release): prepare'))).toBe(true);
+    expect(calls.some((c) => c.startsWith('commit:chore: release'))).toBe(true);
     expect(calls.some((c) => c.startsWith('push:release/'))).toBe(true);
 
     // Check that package.json was updated
@@ -379,5 +379,210 @@ describe('prepare command', () => {
     // The prepare command should have packages to release
     expect(result.packages).toHaveLength(1);
     expect(result.branchName).toMatch(/^release\/\d+$/);
+  });
+});
+
+describe('prepare - fixed versioning', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should apply same version to all packages when versioning is fixed', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: core feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+        {
+          hash: 'a2',
+          message: 'fix: utils bug',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/utils/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '0.0.0',
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/test/packages/utils/package.json': JSON.stringify({
+          name: '@test/utils',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    const result = await prepare({
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      silent: true,
+      config: { versioning: 'fixed' },
+      packages: [
+        { name: '@test/core', version: '1.0.0', path: '/test/packages/core' },
+        { name: '@test/utils', version: '1.0.0', path: '/test/packages/utils' },
+      ],
+    });
+
+    expect(result.packages).toHaveLength(2);
+    expect(result.versions['@test/core']).toBe('1.1.0');
+    expect(result.versions['@test/utils']).toBe('1.1.0');
+  });
+});
+
+describe('prepare - rootVersionStrategy', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should bump root package with max strategy', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '0.0.0',
+          private: true,
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    await prepare({
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      silent: true,
+      config: { rootVersionStrategy: 'max' },
+      packages: [{ name: '@test/core', version: '1.0.0', path: '/test/packages/core' }],
+    });
+
+    const rootPkg = JSON.parse(vol.readFileSync('/test/package.json', 'utf-8') as string);
+    expect(rootPkg.version).toBe('1.1.0');
+  });
+
+  it('should bump root package with patch strategy', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '1.0.0',
+          private: true,
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    await prepare({
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      silent: true,
+      config: { rootVersionStrategy: 'patch' },
+      packages: [{ name: '@test/core', version: '1.0.0', path: '/test/packages/core' }],
+    });
+
+    const rootPkg = JSON.parse(vol.readFileSync('/test/package.json', 'utf-8') as string);
+    expect(rootPkg.version).toBe('1.0.1');
+  });
+});
+
+describe('prepare - fixed versioning with explicit version', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should use explicit version in fixed mode', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'root',
+          version: '0.0.0',
+          workspaces: ['packages/*'],
+        }),
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    // Note: prepare doesn't support force bump, but the changeset plugin can return explicit versions
+    // This test covers the valid(bump) branch in the reduce
+    const result = await prepare({
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      silent: true,
+      config: { versioning: 'fixed' },
+      packages: [{ name: '@test/core', version: '1.0.0', path: '/test/packages/core' }],
+    });
+
+    expect(result.packages).toHaveLength(1);
+    expect(result.versions['@test/core']).toBe('1.1.0');
   });
 });

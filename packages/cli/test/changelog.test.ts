@@ -89,4 +89,39 @@ describe('changelogCommand', () => {
     exitSpy.mockRestore();
     cwdSpy.mockRestore();
   });
+
+  it('should skip packages with empty changelog', async () => {
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    vi.mocked(mockGetCommitsSinceTag).mockResolvedValueOnce([
+      {
+        hash: 'abc123',
+        message: 'chore: update deps',
+        author: 'Test',
+        date: '2024-01-01T00:00:00Z',
+        files: ['src/index.ts'],
+      },
+      {
+        hash: 'def456',
+        message: 'feat: feature',
+        author: 'Test',
+        date: '2024-01-01T00:00:00Z',
+        files: ['src/index.ts'],
+      },
+    ]);
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/test');
+
+    await changelogCommand();
+
+    // Should have output something (the feat commit generates changelog)
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+    cwdSpy.mockRestore();
+  });
 });

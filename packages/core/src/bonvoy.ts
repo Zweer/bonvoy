@@ -42,6 +42,17 @@ export class Bonvoy {
       createPR: new AsyncSeriesHook(['prContext']),
       afterCreatePR: new AsyncSeriesHook(['prContext']),
     };
+
+    // Apply inline hooks from config
+    if (config.hooks) {
+      for (const [name, fn] of Object.entries(config.hooks)) {
+        const hook = this.hooks[name as keyof ReleaseHooks];
+        if (hook) {
+          // biome-ignore lint/suspicious/noExplicitAny: Inline hooks have dynamic signatures
+          hook.tap('config', fn as any);
+        }
+      }
+    }
   }
 
   use(plugin: BonvoyPlugin): void {

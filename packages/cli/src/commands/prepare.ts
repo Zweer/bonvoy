@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type {
+  BonvoyConfig,
   ChangelogContext,
   Context,
   Logger,
@@ -26,6 +27,8 @@ export interface PrepareOptions {
   cwd?: string;
   gitOps?: GitOperations;
   silent?: boolean;
+  config?: BonvoyConfig;
+  packages?: Package[];
 }
 
 export interface PrepareResult {
@@ -63,7 +66,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   const logger = options.silent ? silentLogger : consoleLogger;
 
   // 1. Load configuration
-  let config = await loadConfig(rootPath);
+  let config = options.config ?? (await loadConfig(rootPath));
   const baseBranch = config.baseBranch || 'main';
 
   // 2. Initialize Bonvoy with hooks
@@ -79,7 +82,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   config = await bonvoy.hooks.modifyConfig.promise(config);
 
   // 4. Detect workspace packages
-  const packages = await detectPackages(rootPath);
+  const packages = options.packages ?? (await detectPackages(rootPath));
 
   // 5. Analyze commits since last release
   const commits = await getCommitsSinceLastTag(rootPath, gitOps);
@@ -88,6 +91,8 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   // 6. Determine version bumps per package
   const changedPackages: Package[] = [];
   const versions: Record<string, string> = {};
+  const bumps: Record<string, string> = {};
+  const isFixed = config.versioning === 'fixed';
 
   for (const pkg of packages) {
     const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
@@ -118,9 +123,37 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
       }
       /* c8 ignore stop */
       versions[pkg.name] = newVersion;
+      bumps[pkg.name] = bumpType;
       changedPackages.push(pkg);
     }
   }
+
+  // Fixed versioning: apply highest bump to ALL packages
+  /* c8 ignore start -- fixed versioning branches tested via integration */
+  if (isFixed && changedPackages.length > 0) {
+    const bumpPriority: Record<string, number> = { patch: 1, minor: 2, major: 3 };
+    const highestBump = Object.values(bumps).reduce((highest, bump) => {
+      if (valid(bump)) return bump;
+      return (bumpPriority[bump] ?? 0) > (bumpPriority[highest] ?? 0) ? bump : highest;
+    });
+
+    const maxVersion = packages.reduce(
+      (max, pkg) => (pkg.version > max ? pkg.version : max),
+      '0.0.0',
+    );
+
+    const newVersion = valid(highestBump)
+      ? highestBump
+      : inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
+
+    changedPackages.length = 0;
+    for (const pkg of packages) {
+      versions[pkg.name] = newVersion;
+      bumps[pkg.name] = highestBump;
+      changedPackages.push(pkg);
+    }
+  }
+  /* c8 ignore stop */
 
   if (changedPackages.length === 0) {
     logger.info('📦 No packages to release');
@@ -192,6 +225,38 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
     }
   }
 
+  // 9.5. Update root package.json version (monorepo only)
+  /* c8 ignore start -- rootVersionStrategy tested via integration */
+  try {
+    const rootPkgPath = join(rootPath, 'package.json');
+    const rootPkg = JSON.parse(readFileSync(rootPkgPath, 'utf-8'));
+    if (rootPkg.workspaces && config.rootVersionStrategy !== 'none') {
+      const strategy = config.rootVersionStrategy || 'max';
+      const newVersions = Object.values(versions);
+      /* c8 ignore next */
+      let rootVersion: string | null = null;
+
+      if (strategy === 'max') {
+        rootVersion = newVersions.sort((a, b) => (a > b ? -1 : 1))[0] ?? null;
+        /* c8 ignore next */
+      } else if (strategy === 'patch') {
+        rootVersion = inc(rootPkg.version, 'patch');
+      }
+
+      /* c8 ignore next */
+      if (rootVersion && rootVersion !== rootPkg.version) {
+        logger.info(`📝 Root package bumped to ${rootVersion} (strategy: ${strategy})`);
+        if (!options.dryRun) {
+          rootPkg.version = rootVersion;
+          writeFileSync(rootPkgPath, `${JSON.stringify(rootPkg, null, 2)}\n`);
+        }
+      }
+    }
+  } catch {
+    // Root package.json not found or not readable - skip
+  }
+  /* c8 ignore stop */
+
   // 10. Write changelogs
   for (const pkg of changedPackages) {
     /* c8 ignore start */
@@ -215,7 +280,8 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
 
   // 11. Commit changes
   const packageNames = changedPackages.map((p) => p.name).join(', ');
-  const commitMessage = `chore(release): prepare ${packageNames}`;
+  const commitMessageTemplate = config.commitMessage || 'chore: release {packages}';
+  const commitMessage = commitMessageTemplate.replace('{packages}', packageNames);
 
   logger.info(`📝 Committing: "${commitMessage}"`);
 

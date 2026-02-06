@@ -101,4 +101,31 @@ describe('statusCommand', () => {
     exitSpy.mockRestore();
     cwdSpy.mockRestore();
   });
+
+  it('should show singular commit text for single commit', async () => {
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    vi.mocked(mockGetCommitsSinceTag).mockResolvedValueOnce([
+      {
+        hash: 'abc123',
+        message: 'feat: new feature',
+        author: 'Test',
+        date: '2024-01-01T00:00:00Z',
+        files: ['src/index.ts'],
+      },
+    ]);
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/test');
+
+    await statusCommand();
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('1 commit)'));
+
+    consoleSpy.mockRestore();
+    cwdSpy.mockRestore();
+  });
 });

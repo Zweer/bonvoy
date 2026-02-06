@@ -258,6 +258,13 @@
           }
         ]
       }
+    },
+    "hooks": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
     }
   },
   "additionalProperties": false,

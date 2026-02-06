@@ -47,7 +47,8 @@ export default class GitHubPlugin implements BonvoyPlugin {
       for (const pkg of context.changedPackages) {
         const version = context.versions[pkg.name];
         const changelog = context.changelogs[pkg.name] || '';
-        const tagName = `${pkg.name}@${version}`;
+        const tagFormat = this.options.tagFormat ?? '{name}@{version}';
+        const tagName = tagFormat.replace('{name}', pkg.name).replace('{version}', version);
 
         try {
           await this.ops.createRelease(token, {

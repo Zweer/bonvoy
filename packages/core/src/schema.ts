@@ -80,6 +80,7 @@ export const BonvoyConfigSchema = z
         z.union([z.string(), z.tuple([z.string(), z.record(z.string(), z.unknown())] as const)]),
       )
       .default([]),
+    hooks: z.record(z.string(), z.unknown()).optional(),
   })
   // biome-ignore lint/suspicious/noExplicitAny: Required for TypeScript isolated declarations
   .partial() as z.ZodType<any>;

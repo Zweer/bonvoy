@@ -108,7 +108,7 @@ describe('prepare command', () => {
       '/',
     );
 
-    await prepareCommand({ dryRun: true, silent: true });
+    await prepareCommand(undefined, { dryRun: true, silent: true });
 
     cwdSpy.mockRestore();
   });
@@ -119,7 +119,7 @@ describe('prepare command', () => {
 
     vol.fromJSON({}, '/');
 
-    await prepareCommand({ dryRun: true, silent: true });
+    await prepareCommand(undefined, { dryRun: true, silent: true });
 
     expect(exitSpy).toHaveBeenCalledWith(1);
 
@@ -577,5 +577,35 @@ describe('prepare - fixed versioning with explicit version', () => {
 
     expect(result.packages).toHaveLength(1);
     expect(result.versions['@test/core']).toBe('1.1.0');
+  });
+
+  it('should apply force bump when provided', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'chore: update deps',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    const result = await prepare({
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      silent: true,
+      bump: 'minor',
+    });
+
+    expect(result.versions['test-pkg']).toBe('1.1.0');
   });
 });

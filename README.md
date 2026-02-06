@@ -66,6 +66,9 @@ bonvoy shipit patch        # Force patch bump
 bonvoy shipit minor        # Force minor bump  
 bonvoy shipit major        # Force major bump
 bonvoy shipit 2.0.0        # Force specific version
+bonvoy shipit prerelease --preid beta  # Create prerelease (1.0.0 → 1.0.1-beta.0)
+bonvoy shipit prerelease --preid beta  # Increment prerelease (1.0.1-beta.0 → 1.0.1-beta.1)
+bonvoy shipit patch        # Graduate prerelease to stable (1.0.1-beta.3 → 1.0.1)
 bonvoy prepare             # Create release PR (PR workflow)
 bonvoy status              # Show pending changes
 bonvoy changelog           # Preview changelog

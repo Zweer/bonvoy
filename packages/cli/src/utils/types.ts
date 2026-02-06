@@ -5,6 +5,7 @@ export interface ShipitOptions {
   dryRun?: boolean;
   silent?: boolean; // Suppress console output (for JSON mode)
   package?: string[];
+  preid?: string; // Prerelease identifier (alpha, beta, rc)
   cwd?: string;
   plugins?: BonvoyPlugin[];
   gitOps?: GitOperations;

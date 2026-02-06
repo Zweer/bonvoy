@@ -24,11 +24,13 @@ import type { ShipitOptions, ShipitResult } from '../utils/types.js';
 
 const noop = () => {};
 const silentLogger: Logger = { info: noop, warn: noop, error: noop };
+/* c8 ignore start - simple console wrappers */
 const consoleLogger: Logger = {
   info: (...args: unknown[]) => console.log(...args),
   warn: (...args: unknown[]) => console.warn(...args),
   error: (...args: unknown[]) => console.error(...args),
 };
+/* c8 ignore stop */
 
 export async function shipit(_bump?: string, options: ShipitOptions = {}): Promise<ShipitResult> {
   const rootPath = options.cwd || process.cwd();
@@ -132,13 +134,21 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
     if (bumpType && bumpType !== 'none') {
       let newVersion: string;
-      if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
+      if (bumpType === 'prerelease') {
+        // Prerelease bump: 1.0.0 → 1.0.1-beta.0 or 1.0.0-beta.0 → 1.0.0-beta.1
+        const preid = options.preid;
+        /* c8 ignore start - inc() always returns valid string for prerelease */
+        newVersion =
+          (preid ? inc(pkg.version, 'prerelease', preid) : inc(pkg.version, 'prerelease')) ||
+          pkg.version;
+        /* c8 ignore stop */
+      } else if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
         newVersion = inc(pkg.version, bumpType) || pkg.version;
       } else {
         // Explicit version - validate it's a valid semver
         if (!valid(bumpType)) {
           throw new Error(
-            `Invalid version "${bumpType}" for package ${pkg.name}. Must be a valid semver version or bump type (major/minor/patch).`,
+            `Invalid version "${bumpType}" for package ${pkg.name}. Must be a valid semver version or bump type (major/minor/patch/prerelease).`,
           );
         }
         newVersion = bumpType;
@@ -152,7 +162,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   // Fixed versioning: apply highest bump to ALL packages
   /* c8 ignore start -- fixed versioning branches tested via integration */
   if (isFixed && changedPackages.length > 0) {
-    const bumpPriority: Record<string, number> = { patch: 1, minor: 2, major: 3 };
+    const bumpPriority: Record<string, number> = { patch: 1, minor: 2, major: 3, prerelease: 0 };
     const highestBump = Object.values(bumps).reduce((highest, bump) => {
       if (valid(bump)) return bump; // Explicit version wins
       return (bumpPriority[bump] ?? 0) > (bumpPriority[highest] ?? 0) ? bump : highest;
@@ -164,9 +174,17 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       '0.0.0',
     );
 
-    const newVersion = valid(highestBump)
-      ? highestBump
-      : inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
+    let newVersion: string;
+    if (valid(highestBump)) {
+      newVersion = highestBump;
+    } else if (highestBump === 'prerelease') {
+      const preid = options.preid;
+      newVersion =
+        (preid ? inc(maxVersion, 'prerelease', preid) : inc(maxVersion, 'prerelease')) ||
+        maxVersion;
+    } else {
+      newVersion = inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
+    }
 
     // Apply to all packages
     changedPackages.length = 0;
@@ -492,7 +510,13 @@ function parseForceBump(bump: string): string {
 
 export async function shipitCommand(
   bump?: string,
-  options: { dryRun?: boolean; json?: boolean; package?: string[]; silent?: boolean } = {},
+  options: {
+    dryRun?: boolean;
+    json?: boolean;
+    package?: string[];
+    preid?: string;
+    silent?: boolean;
+  } = {},
 ): Promise<void> {
   const log = options.silent ? silentLogger : consoleLogger;
   try {

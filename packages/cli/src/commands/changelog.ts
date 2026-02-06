@@ -7,11 +7,13 @@ import { analyzeStatus } from '../utils/analyze.js';
 
 const noop = () => {};
 const silentLogger: Logger = { info: noop, warn: noop, error: noop };
+/* c8 ignore start - simple console wrappers */
 const consoleLogger: Logger = {
   info: (...args: unknown[]) => console.log(...args),
   warn: (...args: unknown[]) => console.warn(...args),
   error: (...args: unknown[]) => console.error(...args),
 };
+/* c8 ignore stop */
 
 export async function changelogCommand(options: { silent?: boolean } = {}): Promise<void> {
   const log = options.silent ? silentLogger : consoleLogger;

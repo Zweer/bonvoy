@@ -1034,4 +1034,129 @@ describe('fixed versioning - explicit version', () => {
     expect(result.versions['@test/core']).toBe('3.0.0');
     expect(result.versions['@test/utils']).toBe('3.0.0');
   });
+
+  it('should create prerelease version with preid', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    const result = await shipit('prerelease', {
+      dryRun: true,
+      cwd: '/test',
+      silent: true,
+      preid: 'beta',
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    expect(result.versions['test-pkg']).toBe('1.0.1-beta.0');
+    expect(result.bumps['test-pkg']).toBe('prerelease');
+  });
+
+  it('should create prerelease version without preid', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    const result = await shipit('prerelease', {
+      dryRun: true,
+      cwd: '/test',
+      silent: true,
+      // no preid
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    expect(result.versions['test-pkg']).toBe('1.0.1-0');
+  });
+
+  it('should increment existing prerelease version', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.1-beta.0' }) },
+      '/',
+    );
+
+    const result = await shipit('prerelease', {
+      dryRun: true,
+      cwd: '/test',
+      silent: true,
+      preid: 'beta',
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    expect(result.versions['test-pkg']).toBe('1.0.1-beta.1');
+  });
+
+  it('should graduate prerelease to stable with patch bump', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'fix: bug fix',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.1-beta.3' }) },
+      '/',
+    );
+
+    const result = await shipit('patch', {
+      dryRun: true,
+      cwd: '/test',
+      silent: true,
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    // semver.inc('1.0.1-beta.3', 'patch') → '1.0.1' (graduates to stable)
+    expect(result.versions['test-pkg']).toBe('1.0.1');
+  });
 });

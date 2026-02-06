@@ -27,13 +27,16 @@ export function createProgram(): Command {
     .option('--dry-run', 'Preview changes without executing')
     .option('--json', 'Output results as JSON (for CI)')
     .option('--package <name...>', 'Only release specific package(s)')
-    .argument('[bump]', 'Version bump (patch/minor/major/x.y.z)')
+    .option('--preid <identifier>', 'Prerelease identifier (alpha, beta, rc)')
+    .argument('[bump]', 'Version bump (patch/minor/major/prerelease/x.y.z)')
     .action(shipitCommand);
 
   prog
     .command('prepare')
     .description('Create release PR')
     .option('--dry-run', 'Preview changes without creating PR')
+    .option('--preid <identifier>', 'Prerelease identifier (alpha, beta, rc)')
+    .argument('[bump]', 'Version bump (patch/minor/major/prerelease/x.y.z)')
     .action(prepareCommand);
 
   prog.command('status').description('Show pending changes').action(statusCommand);

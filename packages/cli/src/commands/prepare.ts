@@ -29,6 +29,8 @@ export interface PrepareOptions {
   silent?: boolean;
   config?: BonvoyConfig;
   packages?: Package[];
+  preid?: string; // Prerelease identifier (alpha, beta, rc)
+  bump?: string; // Force bump type (patch/minor/major/prerelease/x.y.z)
 }
 
 export interface PrepareResult {
@@ -40,19 +42,22 @@ export interface PrepareResult {
 
 const noop = () => {};
 const silentLogger: Logger = { info: noop, warn: noop, error: noop };
+/* c8 ignore start - simple console wrappers */
 const consoleLogger: Logger = {
   info: (...args: unknown[]) => console.log(...args),
   warn: (...args: unknown[]) => console.warn(...args),
   error: (...args: unknown[]) => console.error(...args),
 };
+/* c8 ignore stop */
 
 /* c8 ignore start - wrapper function with simple branches */
 export async function prepareCommand(
-  options: { dryRun?: boolean; silent?: boolean } = {},
+  bump?: string,
+  options: { dryRun?: boolean; preid?: string; silent?: boolean } = {},
 ): Promise<void> {
   const log = options.silent ? silentLogger : consoleLogger;
   try {
-    const result = await prepare({ dryRun: options.dryRun, silent: options.silent });
+    const result = await prepare({ ...options, bump });
     if (result.packages.length === 0) {
       log.info('No packages to release');
     }
@@ -111,12 +116,22 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
       currentPackage: pkg,
     };
 
-    const bumpType: string | null = await bonvoy.hooks.getVersion.promise(context);
+    let bumpType: string | null = await bonvoy.hooks.getVersion.promise(context);
+
+    // Apply force bump if provided
+    if (options.bump) {
+      bumpType = options.bump;
+    }
 
     /* c8 ignore start - branch coverage for complex conditions */
     if (bumpType && bumpType !== 'none') {
       let newVersion: string;
-      if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
+      if (bumpType === 'prerelease') {
+        const preid = options.preid;
+        newVersion =
+          (preid ? inc(pkg.version, 'prerelease', preid) : inc(pkg.version, 'prerelease')) ||
+          pkg.version;
+      } else if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
         const incremented = inc(pkg.version, bumpType);
         newVersion = incremented !== null ? incremented : pkg.version;
       } else if (valid(bumpType)) {
@@ -134,7 +149,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   // Fixed versioning: apply highest bump to ALL packages
   /* c8 ignore start -- fixed versioning branches tested via integration */
   if (isFixed && changedPackages.length > 0) {
-    const bumpPriority: Record<string, number> = { patch: 1, minor: 2, major: 3 };
+    const bumpPriority: Record<string, number> = { patch: 1, minor: 2, major: 3, prerelease: 0 };
     const highestBump = Object.values(bumps).reduce((highest, bump) => {
       if (valid(bump)) return bump;
       return (bumpPriority[bump] ?? 0) > (bumpPriority[highest] ?? 0) ? bump : highest;
@@ -145,9 +160,17 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
       '0.0.0',
     );
 
-    const newVersion = valid(highestBump)
-      ? highestBump
-      : inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
+    let newVersion: string;
+    if (valid(highestBump)) {
+      newVersion = highestBump;
+    } else if (highestBump === 'prerelease') {
+      const preid = options.preid;
+      newVersion =
+        (preid ? inc(maxVersion, 'prerelease', preid) : inc(maxVersion, 'prerelease')) ||
+        maxVersion;
+    } else {
+      newVersion = inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
+    }
 
     changedPackages.length = 0;
     for (const pkg of packages) {

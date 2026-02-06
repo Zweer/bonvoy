@@ -32,6 +32,7 @@ describe('E2E: Breaking Changes', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -59,6 +60,7 @@ describe('E2E: Breaking Changes', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],

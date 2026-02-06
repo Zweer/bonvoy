@@ -41,20 +41,23 @@ export interface PrepareResult {
 const noop = () => {};
 const silentLogger: Logger = { info: noop, warn: noop, error: noop };
 const consoleLogger: Logger = {
-  info: console.log.bind(console),
-  warn: console.warn.bind(console),
-  error: console.error.bind(console),
+  info: (...args: unknown[]) => console.log(...args),
+  warn: (...args: unknown[]) => console.warn(...args),
+  error: (...args: unknown[]) => console.error(...args),
 };
 
 /* c8 ignore start - wrapper function with simple branches */
-export async function prepareCommand(options: { dryRun?: boolean } = {}): Promise<void> {
+export async function prepareCommand(
+  options: { dryRun?: boolean; silent?: boolean } = {},
+): Promise<void> {
+  const log = options.silent ? silentLogger : consoleLogger;
   try {
-    const result = await prepare({ dryRun: options.dryRun });
+    const result = await prepare({ dryRun: options.dryRun, silent: options.silent });
     if (result.packages.length === 0) {
-      console.log('No packages to release');
+      log.info('No packages to release');
     }
   } catch (error) {
-    console.error('Error:', error instanceof Error ? error.message : error);
+    log.error(`Error: ${error instanceof Error ? error.message : error}`);
     process.exit(1);
   }
 }

@@ -38,6 +38,7 @@ describe('E2E: Edge Cases', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -62,6 +63,7 @@ describe('E2E: Edge Cases', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -114,6 +116,7 @@ describe('E2E: Edge Cases', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -147,6 +150,7 @@ describe('E2E: Edge Cases', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -179,6 +183,7 @@ describe('E2E: Edge Cases', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -231,6 +236,7 @@ describe('E2E: Edge Cases', () => {
     // Only pass @test/core as package - simulates --package filter
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       packages: [{ name: '@test/core', version: '1.0.0', path: '/project/packages/core' }],
@@ -288,6 +294,7 @@ describe('E2E: Edge Cases', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       packages: [

@@ -49,6 +49,7 @@ describe('E2E: Monorepo', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       packages: [
@@ -97,6 +98,7 @@ describe('E2E: Monorepo', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       packages: [
@@ -144,6 +146,7 @@ describe('E2E: Monorepo', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       packages: [

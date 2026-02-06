@@ -30,6 +30,7 @@ describe('E2E: Force Version', () => {
 
     const result = await shipit('3.0.0', {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -53,6 +54,7 @@ describe('E2E: Force Version', () => {
 
     const result = await shipit('major', {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -76,6 +78,7 @@ describe('E2E: Force Version', () => {
 
     const result = await shipit('minor', {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -99,6 +102,7 @@ describe('E2E: Force Version', () => {
 
     const result = await shipit('patch', {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],

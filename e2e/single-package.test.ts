@@ -30,6 +30,7 @@ describe('E2E: Single Package', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -54,6 +55,7 @@ describe('E2E: Single Package', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -78,6 +80,7 @@ describe('E2E: Single Package', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
@@ -102,6 +105,7 @@ describe('E2E: Single Package', () => {
 
     await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: false,
       gitOps,
       plugins: [
@@ -133,6 +137,7 @@ describe('E2E: Single Package', () => {
 
     const result = await shipit(undefined, {
       cwd: '/project',
+      silent: true,
       dryRun: true,
       gitOps,
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],

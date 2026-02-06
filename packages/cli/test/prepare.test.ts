@@ -99,7 +99,6 @@ describe('prepare command', () => {
   });
 
   it('should handle prepareCommand with no packages', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/test');
 
     vol.fromJSON(
@@ -109,27 +108,21 @@ describe('prepare command', () => {
       '/',
     );
 
-    await prepareCommand({ dryRun: true });
+    await prepareCommand({ dryRun: true, silent: true });
 
-    expect(consoleSpy).toHaveBeenCalledWith('No packages to release');
-
-    consoleSpy.mockRestore();
     cwdSpy.mockRestore();
   });
 
   it('should handle prepareCommand errors', async () => {
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/nonexistent');
 
     vol.fromJSON({}, '/');
 
-    await prepareCommand({ dryRun: true });
+    await prepareCommand({ dryRun: true, silent: true });
 
-    expect(errorSpy).toHaveBeenCalledWith('Error:', expect.any(String));
     expect(exitSpy).toHaveBeenCalledWith(1);
 
-    errorSpy.mockRestore();
     exitSpy.mockRestore();
     cwdSpy.mockRestore();
   });

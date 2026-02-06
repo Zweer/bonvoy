@@ -214,7 +214,7 @@ describe('@bonvoy/cli', () => {
 
     await program.parseAsync(['node', 'bonvoy', 'shipit']);
 
-    expect(errorSpy).toHaveBeenCalledWith('❌ Release failed:', 'Config error');
+    expect(errorSpy).toHaveBeenCalledWith('❌ Release failed: Config error');
     expect(exitSpy).toHaveBeenCalledWith(1);
 
     errorSpy.mockRestore();
@@ -231,7 +231,7 @@ describe('@bonvoy/cli', () => {
 
     await program.parseAsync(['node', 'bonvoy', 'shipit']);
 
-    expect(errorSpy).toHaveBeenCalledWith('❌ Release failed:', 'String error');
+    expect(errorSpy).toHaveBeenCalledWith('❌ Release failed: String error');
     expect(exitSpy).toHaveBeenCalledWith(1);
 
     errorSpy.mockRestore();

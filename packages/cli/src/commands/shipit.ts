@@ -25,9 +25,9 @@ import type { ShipitOptions, ShipitResult } from '../utils/types.js';
 const noop = () => {};
 const silentLogger: Logger = { info: noop, warn: noop, error: noop };
 const consoleLogger: Logger = {
-  info: console.log.bind(console),
-  warn: console.warn.bind(console),
-  error: console.error.bind(console),
+  info: (...args: unknown[]) => console.log(...args),
+  warn: (...args: unknown[]) => console.warn(...args),
+  error: (...args: unknown[]) => console.error(...args),
 };
 
 export async function shipit(_bump?: string, options: ShipitOptions = {}): Promise<ShipitResult> {
@@ -492,15 +492,16 @@ function parseForceBump(bump: string): string {
 
 export async function shipitCommand(
   bump?: string,
-  options: { dryRun?: boolean; json?: boolean; package?: string[] } = {},
+  options: { dryRun?: boolean; json?: boolean; package?: string[]; silent?: boolean } = {},
 ): Promise<void> {
+  const log = options.silent ? silentLogger : consoleLogger;
   try {
     if (!options.json) {
-      console.log('🚢 Starting bonvoy release...');
-      if (options.dryRun) console.log('🔍 Dry run mode enabled\n');
+      log.info('🚢 Starting bonvoy release...');
+      if (options.dryRun) log.info('🔍 Dry run mode enabled\n');
     }
 
-    const result = await shipit(bump, { ...options, silent: options.json });
+    const result = await shipit(bump, { ...options, silent: options.json || options.silent });
 
     if (options.json) {
       /* c8 ignore start - JSON output tested via shipit function */
@@ -528,7 +529,7 @@ export async function shipitCommand(
       console.log(JSON.stringify({ success: false, error: errorMessage }));
       process.exit(1);
     }
-    console.error('❌ Release failed:', errorMessage);
+    log.error(`❌ Release failed: ${errorMessage}`);
     process.exit(1);
   }
 }

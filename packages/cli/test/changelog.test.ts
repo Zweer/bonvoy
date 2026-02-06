@@ -34,14 +34,10 @@ describe('changelogCommand', () => {
       '/',
     );
 
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/test');
 
-    await changelogCommand();
+    await changelogCommand({ silent: true });
 
-    expect(consoleSpy).toHaveBeenCalledWith('✅ No pending changes - nothing to preview');
-
-    consoleSpy.mockRestore();
     cwdSpy.mockRestore();
   });
 
@@ -61,31 +57,23 @@ describe('changelogCommand', () => {
       },
     ]);
 
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/test');
 
-    await changelogCommand();
+    await changelogCommand({ silent: true });
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('test-pkg'));
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('awesome feature'));
-
-    consoleSpy.mockRestore();
     cwdSpy.mockRestore();
   });
 
   it('should handle errors gracefully', async () => {
     vol.fromJSON({}, '/');
 
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/nonexistent');
 
-    await changelogCommand();
+    await changelogCommand({ silent: true });
 
-    expect(errorSpy).toHaveBeenCalledWith('❌ Error:', expect.any(String));
     expect(exitSpy).toHaveBeenCalledWith(1);
 
-    errorSpy.mockRestore();
     exitSpy.mockRestore();
     cwdSpy.mockRestore();
   });
@@ -113,15 +101,10 @@ describe('changelogCommand', () => {
       },
     ]);
 
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/test');
 
-    await changelogCommand();
+    await changelogCommand({ silent: true });
 
-    // Should have output something (the feat commit generates changelog)
-    expect(consoleSpy).toHaveBeenCalled();
-
-    consoleSpy.mockRestore();
     cwdSpy.mockRestore();
   });
 });

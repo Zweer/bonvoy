@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { Command } from '@commander-js/extra-typings';
+import { Command } from '@commander-js/extra-typings';
 
 import { changelogCommand } from './commands/changelog.js';
 import { prepareCommand } from './commands/prepare.js';
@@ -14,7 +14,6 @@ import { statusCommand } from './commands/status.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function createProgram(): Command {
-  const { Command } = require('commander');
   const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
 
   const prog = new Command()

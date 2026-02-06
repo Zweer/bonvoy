@@ -134,6 +134,7 @@ export interface ChangelogContext extends VersionContext {
 
 export interface PublishContext extends ChangelogContext {
   publishedPackages: string[];
+  preid?: string; // Prerelease identifier for npm tag
 }
 
 export interface ReleaseContext extends PublishContext {

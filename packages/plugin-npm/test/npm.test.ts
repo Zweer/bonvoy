@@ -292,4 +292,40 @@ describe('NpmPlugin', () => {
     const validateRepoFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
     await expect(validateRepoFn(context)).resolves.toBeUndefined();
   });
+
+  it('should use preid as npm tag for prereleases', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.1-beta.0', path: '/path/to/pkg' }],
+      isDryRun: false,
+      logger: mockLogger,
+      preid: 'beta',
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await publishFn(context);
+
+    const publishCall = mockOps.calls.find((c) => c.method === 'publish');
+    expect(publishCall?.args[0]).toContain('--tag');
+    expect(publishCall?.args[0]).toContain('beta');
+  });
+
+  it('should use next tag for prerelease versions without preid', async () => {
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.1-alpha.0', path: '/path/to/pkg' }],
+      isDryRun: false,
+      logger: mockLogger,
+      // no preid
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await publishFn(context);
+
+    const publishCall = mockOps.calls.find((c) => c.method === 'publish');
+    expect(publishCall?.args[0]).toContain('--tag');
+    expect(publishCall?.args[0]).toContain('next');
+  });
 });

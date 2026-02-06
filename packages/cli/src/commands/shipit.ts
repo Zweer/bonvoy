@@ -135,12 +135,10 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     if (bumpType && bumpType !== 'none') {
       let newVersion: string;
       if (bumpType === 'prerelease') {
-        // Prerelease bump: 1.0.0 → 1.0.1-beta.0 or 1.0.0-beta.0 → 1.0.0-beta.1
-        const preid = options.preid;
+        // Prerelease bump: 1.0.0 → 1.0.1-next.0 or 1.0.0-beta.0 → 1.0.0-beta.1
+        const preid = options.preid || 'next';
         /* c8 ignore start - inc() always returns valid string for prerelease */
-        newVersion =
-          (preid ? inc(pkg.version, 'prerelease', preid) : inc(pkg.version, 'prerelease')) ||
-          pkg.version;
+        newVersion = inc(pkg.version, 'prerelease', preid) || pkg.version;
         /* c8 ignore stop */
       } else if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
         newVersion = inc(pkg.version, bumpType) || pkg.version;
@@ -178,10 +176,8 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     if (valid(highestBump)) {
       newVersion = highestBump;
     } else if (highestBump === 'prerelease') {
-      const preid = options.preid;
-      newVersion =
-        (preid ? inc(maxVersion, 'prerelease', preid) : inc(maxVersion, 'prerelease')) ||
-        maxVersion;
+      const preid = options.preid || 'next';
+      newVersion = inc(maxVersion, 'prerelease', preid) || maxVersion;
     } else {
       newVersion = inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
     }
@@ -349,6 +345,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     bumps,
     changelogs,
     publishedPackages: [] as string[],
+    preid: options.preid,
   };
 
   await bonvoy.hooks.beforePublish.promise(publishContext);

@@ -43,7 +43,7 @@ export default class NpmPlugin implements BonvoyPlugin {
   }
 
   private async publishPackages(context: PublishContext): Promise<void> {
-    const { packages, logger } = context;
+    const { packages, logger, preid } = context;
 
     for (const pkg of packages) {
       if (this.config.skipExisting && (await this.isAlreadyPublished(pkg))) {
@@ -51,13 +51,14 @@ export default class NpmPlugin implements BonvoyPlugin {
         continue;
       }
 
-      await this.publishPackage(pkg, logger);
+      await this.publishPackage(pkg, logger, preid);
     }
   }
 
   private async publishPackage(
     pkg: { name: string; version: string; path: string },
     logger: PublishContext['logger'],
+    preid?: string,
   ): Promise<void> {
     const args: string[] = [];
 
@@ -73,6 +74,13 @@ export default class NpmPlugin implements BonvoyPlugin {
 
     if (this.config.registry !== 'https://registry.npmjs.org') {
       args.push('--registry', this.config.registry);
+    }
+
+    // Use preid as npm tag for prereleases, fallback to 'next' if version contains '-'
+    if (preid) {
+      args.push('--tag', preid);
+    } else if (pkg.version.includes('-')) {
+      args.push('--tag', 'next');
     }
 
     logger.info(`Publishing ${pkg.name}@${pkg.version}...`);

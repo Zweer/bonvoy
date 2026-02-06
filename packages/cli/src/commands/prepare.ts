@@ -127,10 +127,8 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
     if (bumpType && bumpType !== 'none') {
       let newVersion: string;
       if (bumpType === 'prerelease') {
-        const preid = options.preid;
-        newVersion =
-          (preid ? inc(pkg.version, 'prerelease', preid) : inc(pkg.version, 'prerelease')) ||
-          pkg.version;
+        const preid = options.preid || 'next';
+        newVersion = inc(pkg.version, 'prerelease', preid) || pkg.version;
       } else if (bumpType === 'major' || bumpType === 'minor' || bumpType === 'patch') {
         const incremented = inc(pkg.version, bumpType);
         newVersion = incremented !== null ? incremented : pkg.version;
@@ -164,10 +162,8 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
     if (valid(highestBump)) {
       newVersion = highestBump;
     } else if (highestBump === 'prerelease') {
-      const preid = options.preid;
-      newVersion =
-        (preid ? inc(maxVersion, 'prerelease', preid) : inc(maxVersion, 'prerelease')) ||
-        maxVersion;
+      const preid = options.preid || 'next';
+      newVersion = inc(maxVersion, 'prerelease', preid) || maxVersion;
     } else {
       newVersion = inc(maxVersion, highestBump as 'major' | 'minor' | 'patch') || maxVersion;
     }

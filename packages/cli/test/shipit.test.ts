@@ -1095,7 +1095,7 @@ describe('fixed versioning - explicit version', () => {
       plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
     });
 
-    expect(result.versions['test-pkg']).toBe('1.0.1-0');
+    expect(result.versions['test-pkg']).toBe('1.0.1-next.0');
   });
 
   it('should increment existing prerelease version', async () => {

@@ -45,7 +45,17 @@ describe('config', () => {
           },
         },
         workflow: 'direct',
+        conventional: { preset: 'angular' },
+        git: { push: true },
+        npm: {
+          registry: 'https://registry.npmjs.org',
+          access: 'public',
+          dryRun: false,
+          skipExisting: true,
+          provenance: true,
+        },
         github: { draft: false },
+        gitlab: {},
         baseBranch: 'main',
         plugins: [],
       });

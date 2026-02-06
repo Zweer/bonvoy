@@ -240,7 +240,7 @@ describe('shipit command', () => {
       config: { changelog: { global: true } },
       plugins: [
         new ConventionalPlugin(),
-        new ChangelogPlugin(),
+        new ChangelogPlugin({ global: true }),
         new GitPlugin({ push: false }, gitOps),
       ],
     });
@@ -616,5 +616,164 @@ describe('shipitCommand', () => {
       vol.readFileSync('/test/packages/cli/package.json', 'utf-8') as string,
     );
     expect(cliPkgJson.dependencies['@test/core']).toBe('^1.0.0');
+  });
+
+  it('should call beforeShipIt hook', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      },
+      '/',
+    );
+
+    const beforeShipItCalls: unknown[] = [];
+    const mockPlugin = {
+      name: 'test-before-shipit',
+      apply(bonvoy: import('@bonvoy/core').Bonvoy) {
+        bonvoy.hooks.beforeShipIt.tap('test-before-shipit', (ctx) => {
+          beforeShipItCalls.push(ctx);
+        });
+      },
+    };
+
+    await shipit(undefined, {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), mockPlugin],
+    });
+
+    expect(beforeShipItCalls).toHaveLength(1);
+  });
+
+  it('should filter packages with --package option', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['packages/core/src/index.ts', 'packages/cli/src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/packages/core/package.json': JSON.stringify({
+          name: '@test/core',
+          version: '1.0.0',
+        }),
+        '/test/packages/cli/package.json': JSON.stringify({
+          name: '@test/cli',
+          version: '1.0.0',
+        }),
+      },
+      '/',
+    );
+
+    const packages = [
+      { name: '@test/core', version: '1.0.0', path: '/test/packages/core' },
+      { name: '@test/cli', version: '1.0.0', path: '/test/packages/cli' },
+    ];
+
+    const result = await shipit('minor', {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      packages,
+      package: ['@test/core'],
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin()],
+    });
+
+    // Only @test/core should be released
+    expect(result.changedPackages).toHaveLength(1);
+    expect(result.changedPackages[0].name).toBe('@test/core');
+    expect(result.versions['@test/cli']).toBeUndefined();
+  });
+
+  it('should generate changelog content via plugin', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add awesome feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      },
+      '/',
+    );
+
+    const result = await shipit(undefined, {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin()],
+    });
+
+    // Changelog should contain the commit message
+    expect(result.changelogs['test-pkg']).toContain('add awesome feature');
+  });
+
+  it('should write changelog files via plugin when not dry-run', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: add feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      },
+      '/',
+    );
+
+    await shipit(undefined, {
+      dryRun: false,
+      cwd: '/test',
+      gitOps,
+      plugins: [
+        new ConventionalPlugin(),
+        new ChangelogPlugin(),
+        new GitPlugin({ push: false }, gitOps),
+      ],
+    });
+
+    // Changelog should be written by the plugin
+    const changelog = vol.readFileSync('/test/CHANGELOG.md', 'utf-8') as string;
+    expect(changelog).toContain('add feature');
+    expect(changelog).toContain('Changelog');
   });
 });

@@ -13,6 +13,8 @@ import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import { defaultGitOperations, type GitOperations } from '@bonvoy/plugin-git';
+import GitHubPlugin from '@bonvoy/plugin-github';
+import GitLabPlugin from '@bonvoy/plugin-gitlab';
 import { inc, valid } from 'semver';
 
 import { detectPackages } from '../utils/detect-packages.js';
@@ -69,6 +71,8 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   // 3. Load plugins
   bonvoy.use(new ConventionalPlugin(config.conventional));
   bonvoy.use(new ChangelogPlugin(config.changelog));
+  bonvoy.use(new GitHubPlugin(config.github));
+  bonvoy.use(new GitLabPlugin(config.gitlab));
 
   // 4. Detect workspace packages
   const packages = await detectPackages(rootPath);

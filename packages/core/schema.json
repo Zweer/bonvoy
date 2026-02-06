@@ -79,6 +79,109 @@
       "default": "main",
       "type": "string"
     },
+    "conventional": {
+      "default": {
+        "preset": "angular"
+      },
+      "type": "object",
+      "properties": {
+        "preset": {
+          "default": "angular",
+          "type": "string",
+          "enum": [
+            "angular",
+            "conventional",
+            "atom",
+            "custom"
+          ]
+        },
+        "types": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "major",
+              "minor",
+              "patch",
+              "none"
+            ]
+          }
+        }
+      },
+      "required": [
+        "preset"
+      ],
+      "additionalProperties": false
+    },
+    "git": {
+      "default": {
+        "push": true
+      },
+      "type": "object",
+      "properties": {
+        "commitMessage": {
+          "type": "string"
+        },
+        "tagFormat": {
+          "type": "string"
+        },
+        "push": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "push"
+      ],
+      "additionalProperties": false
+    },
+    "npm": {
+      "default": {
+        "registry": "https://registry.npmjs.org",
+        "access": "public",
+        "dryRun": false,
+        "skipExisting": true,
+        "provenance": true
+      },
+      "type": "object",
+      "properties": {
+        "registry": {
+          "default": "https://registry.npmjs.org",
+          "type": "string"
+        },
+        "access": {
+          "default": "public",
+          "type": "string",
+          "enum": [
+            "public",
+            "restricted"
+          ]
+        },
+        "dryRun": {
+          "default": false,
+          "type": "boolean"
+        },
+        "skipExisting": {
+          "default": true,
+          "type": "boolean"
+        },
+        "provenance": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "registry",
+        "access",
+        "dryRun",
+        "skipExisting",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
     "github": {
       "default": {
         "draft": false
@@ -105,6 +208,29 @@
       "required": [
         "draft"
       ],
+      "additionalProperties": false
+    },
+    "gitlab": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "plugins": {

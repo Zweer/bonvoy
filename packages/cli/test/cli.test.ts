@@ -10,6 +10,8 @@ vi.mock('@bonvoy/core', () => ({
   }) {
     this.use = vi.fn();
     this.hooks = {
+      beforeShipIt: { promise: vi.fn() },
+      validateRepo: { promise: vi.fn() },
       getVersion: { promise: vi.fn().mockResolvedValue('none') },
       beforeChangelog: { promise: vi.fn() },
       generateChangelog: { promise: vi.fn() },
@@ -20,6 +22,9 @@ vi.mock('@bonvoy/core', () => ({
       beforeRelease: { promise: vi.fn() },
       makeRelease: { promise: vi.fn() },
       afterRelease: { promise: vi.fn() },
+      beforeCreatePR: { promise: vi.fn() },
+      createPR: { promise: vi.fn() },
+      afterCreatePR: { promise: vi.fn() },
     };
   }),
   loadConfig: vi.fn().mockResolvedValue({}),
@@ -54,6 +59,10 @@ vi.mock('@bonvoy/plugin-npm', () => ({
 }));
 
 vi.mock('@bonvoy/plugin-github', () => ({
+  default: vi.fn(),
+}));
+
+vi.mock('@bonvoy/plugin-gitlab', () => ({
   default: vi.fn(),
 }));
 

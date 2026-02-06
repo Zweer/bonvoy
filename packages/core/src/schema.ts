@@ -29,6 +29,34 @@ export const BonvoyConfigSchema = z
       }),
     workflow: z.enum(['direct', 'pr']).default('direct'),
     baseBranch: z.string().default('main'),
+    conventional: z
+      .object({
+        preset: z.enum(['angular', 'conventional', 'atom', 'custom']).default('angular'),
+        types: z.record(z.string(), z.enum(['major', 'minor', 'patch', 'none'])).optional(),
+      })
+      .default({ preset: 'angular' }),
+    git: z
+      .object({
+        commitMessage: z.string().optional(),
+        tagFormat: z.string().optional(),
+        push: z.boolean().default(true),
+      })
+      .default({ push: true }),
+    npm: z
+      .object({
+        registry: z.string().default('https://registry.npmjs.org'),
+        access: z.enum(['public', 'restricted']).default('public'),
+        dryRun: z.boolean().default(false),
+        skipExisting: z.boolean().default(true),
+        provenance: z.boolean().default(true),
+      })
+      .default({
+        registry: 'https://registry.npmjs.org',
+        access: 'public',
+        dryRun: false,
+        skipExisting: true,
+        provenance: true,
+      }),
     github: z
       .object({
         token: z.string().optional(),
@@ -40,6 +68,13 @@ export const BonvoyConfigSchema = z
       .default({
         draft: false,
       }),
+    gitlab: z
+      .object({
+        token: z.string().optional(),
+        host: z.string().optional(),
+        projectId: z.union([z.string(), z.number()]).optional(),
+      })
+      .default({}),
     plugins: z
       .array(
         z.union([z.string(), z.tuple([z.string(), z.record(z.string(), z.unknown())] as const)]),

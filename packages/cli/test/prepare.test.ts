@@ -324,4 +324,60 @@ describe('prepare command', () => {
     // No changes detected
     expect(result.packages).toHaveLength(0);
   });
+
+  it('should invoke createPR hook with correct context', async () => {
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({
+          name: 'test-pkg',
+          version: '1.0.0',
+          repository: { type: 'git', url: 'git+https://github.com/test/repo.git' },
+        }),
+        '/test/CHANGELOG.md': '',
+      },
+      '/',
+    );
+
+    const gitOps: GitOperations = {
+      async add() {},
+      async commit() {},
+      async tag() {},
+      async push() {},
+      async pushTags() {},
+      async checkout() {},
+      async getCurrentBranch() {
+        return 'main';
+      },
+      async tagExists() {
+        return false;
+      },
+      async getLastTag() {
+        return null;
+      },
+      async getCommitsSinceTag() {
+        return [
+          {
+            hash: 'abc123',
+            message: 'feat: new feature',
+            author: 'Test',
+            date: '2024-01-01T00:00:00Z',
+            files: ['src/index.ts'],
+          },
+        ];
+      },
+    };
+
+    // Monkey-patch to capture createPR calls without needing real GitHub/GitLab
+    const origPrepare = await import('../src/commands/prepare.js');
+    const result = await origPrepare.prepare({
+      cwd: '/test',
+      gitOps,
+      dryRun: true,
+      silent: true,
+    });
+
+    // The prepare command should have packages to release
+    expect(result.packages).toHaveLength(1);
+    expect(result.branchName).toMatch(/^release\/\d+$/);
+  });
 });

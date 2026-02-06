@@ -62,11 +62,29 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   }
 
   // 3. Detect workspace packages
-  const packages = options.packages ?? (await detectPackages(rootPath));
+  let packages = options.packages ?? (await detectPackages(rootPath));
+
+  // 3.5. Filter packages if --package option is provided
+  if (options.package?.length) {
+    const selected = new Set(options.package);
+    packages = packages.filter((p) => selected.has(p.name));
+  }
 
   // 4. Analyze commits since last release
   const commits = await getCommitsSinceLastTag(rootPath, gitOps);
   const commitsWithPackages = assignCommitsToPackages(commits, packages, rootPath);
+
+  // 4.5. Run beforeShipIt hook (used by changeset, exec plugins)
+  const initialContext: Context = {
+    config,
+    packages,
+    changedPackages: [],
+    rootPath,
+    isDryRun: options.dryRun || false,
+    logger,
+    commits: commitsWithPackages,
+  };
+  await bonvoy.hooks.beforeShipIt.promise(initialContext);
 
   // 5. Determine version bumps per package
   const changedPackages: Package[] = [];
@@ -148,26 +166,35 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   };
   await bonvoy.hooks.validateRepo.promise(validateContext);
 
-  // 7. Generate changelogs
-  const changelogContext: ChangelogContext = {
-    config,
-    packages,
-    changedPackages,
-    rootPath,
-    isDryRun: options.dryRun || false,
-    logger,
-    commits: commitsWithPackages,
-    versions,
-    bumps,
-    changelogs: {},
-  };
+  // 7. Generate changelogs per package
+  const changelogs: Record<string, string> = {};
 
-  await bonvoy.hooks.beforeChangelog.promise(changelogContext);
-  await bonvoy.hooks.generateChangelog.promise(changelogContext);
-  await bonvoy.hooks.afterChangelog.promise(changelogContext);
+  for (const pkg of changedPackages) {
+    const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
+    const changelogContext: ChangelogContext = {
+      config,
+      packages,
+      changedPackages,
+      rootPath,
+      isDryRun: options.dryRun || false,
+      logger,
+      commits: pkgCommits,
+      currentPackage: pkg,
+      versions,
+      bumps,
+      changelogs,
+    };
+
+    await bonvoy.hooks.beforeChangelog.promise(changelogContext);
+    const generated = await bonvoy.hooks.generateChangelog.promise(changelogContext);
+    if (typeof generated === 'string' && generated) {
+      changelogs[pkg.name] = generated;
+    }
+    await bonvoy.hooks.afterChangelog.promise(changelogContext);
+  }
 
   if (!options.dryRun) {
-    // First pass: update all package.json versions
+    // Update all package.json versions
     for (const pkg of changedPackages) {
       const pkgJsonPath = join(pkg.path, 'package.json');
       const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
@@ -175,7 +202,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
     }
 
-    // Second pass: update internal dependencies to match new versions
+    // Update internal dependencies to match new versions
     const packageNames = new Set(packages.map((p) => p.name));
     for (const pkg of packages) {
       const pkgJsonPath = join(pkg.path, 'package.json');
@@ -188,7 +215,6 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
         for (const depName of Object.keys(deps)) {
           if (packageNames.has(depName) && versions[depName]) {
-            // Update to the new version being released
             deps[depName] = `^${versions[depName]}`;
             modified = true;
           }
@@ -200,18 +226,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       }
     }
 
-    // Write changelogs
-    for (const pkg of changedPackages) {
-      const changelogPath = join(pkg.path, 'CHANGELOG.md');
-      const changelog = changelogContext.changelogs[pkg.name] || '';
-      writeFileSync(changelogPath, changelog);
-    }
-
-    // Write global changelog if enabled
-    if (config.changelog?.global) {
-      const globalChangelog = Object.values(changelogContext.changelogs).join('\n\n');
-      writeFileSync(join(rootPath, 'CHANGELOG.md'), globalChangelog);
-    }
+    // Note: changelogs are written by the ChangelogPlugin via afterChangelog hook
   }
 
   // 8. Update package versions for publishing
@@ -222,9 +237,17 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
   // 9. Publish packages
   const publishContext = {
-    ...changelogContext,
+    config,
     packages: packagesWithNewVersions,
-    publishedPackages: [],
+    changedPackages,
+    rootPath,
+    isDryRun: options.dryRun || false,
+    logger,
+    commits: commitsWithPackages,
+    versions,
+    bumps,
+    changelogs,
+    publishedPackages: [] as string[],
   };
 
   await bonvoy.hooks.beforePublish.promise(publishContext);
@@ -252,7 +275,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     changedPackages,
     versions,
     bumps,
-    changelogs: changelogContext.changelogs,
+    changelogs,
     commits: commitsWithPackages,
   };
 }

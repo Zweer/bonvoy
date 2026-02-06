@@ -56,43 +56,19 @@ bonvoy prepare
 bonvoy prepare --dry-run
 ```
 
-### `status` - Show pending changes
+### `status` - Show pending changes (coming soon)
 
 ```bash
 # Show packages with unreleased changes
 bonvoy status
-
-# Show detailed commit analysis
-bonvoy status --verbose
 ```
 
-### `changelog` - Preview changelog
+### `changelog` - Preview changelog (coming soon)
 
 ```bash
 # Show changelog for all packages
 bonvoy changelog
-
-# Show changelog for specific package
-bonvoy changelog --package @scope/core
 ```
-
-### `version` - Show computed versions
-
-```bash
-# Show version bumps that would be applied
-bonvoy version
-
-# Show versions for specific packages
-bonvoy version --package @scope/core
-```
-
-## Global Options
-
-- `--config <path>` - Path to config file
-- `--dry-run` - Preview changes without executing
-- `--json` - Output JSON for CI integration
-- `--verbose` - Show detailed output
-- `--help` - Show help information
 
 ## Configuration
 

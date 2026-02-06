@@ -6,13 +6,18 @@ import { createProgram } from '../src/cli.js';
 vi.mock('@bonvoy/core', () => ({
   Bonvoy: vi.fn().mockImplementation(function (this: {
     use: ReturnType<typeof vi.fn>;
+    plugins: Array<{ name: string }>;
     hooks: Record<string, { promise: ReturnType<typeof vi.fn> }>;
   }) {
     this.use = vi.fn();
+    this.plugins = [];
     this.hooks = {
+      modifyConfig: { promise: vi.fn().mockImplementation((c: unknown) => Promise.resolve(c)) },
       beforeShipIt: { promise: vi.fn() },
       validateRepo: { promise: vi.fn() },
       getVersion: { promise: vi.fn().mockResolvedValue('none') },
+      version: { promise: vi.fn() },
+      afterVersion: { promise: vi.fn() },
       beforeChangelog: { promise: vi.fn() },
       generateChangelog: { promise: vi.fn() },
       afterChangelog: { promise: vi.fn() },

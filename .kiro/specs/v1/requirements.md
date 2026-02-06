@@ -319,16 +319,15 @@ bonvoy shipit 2.0.0              # Force specific version
 
 # PR workflow
 bonvoy prepare                   # Create release PR
-bonvoy shipit --from-pr          # Release from merged PR
+bonvoy shipit                    # Auto-detects merged PR via .bonvoy/release-pr.json
 
 # Package selection
 bonvoy shipit --package @scope/core
 bonvoy shipit --package @scope/core --package @scope/utils
 
 # Other commands
-bonvoy status                    # Show pending changes
-bonvoy changelog                 # Preview changelog
-bonvoy version                   # Show computed versions
+bonvoy status                    # Show pending changes (coming soon)
+bonvoy changelog                 # Preview changelog (coming soon)
 ```
 
 ## Configuration

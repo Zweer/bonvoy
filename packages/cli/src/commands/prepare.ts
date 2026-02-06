@@ -8,6 +8,7 @@ import type {
   Package,
   PRContext,
   PRTrackingFile,
+  VersionContext,
 } from '@bonvoy/core';
 import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
@@ -62,7 +63,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   const logger = options.silent ? silentLogger : consoleLogger;
 
   // 1. Load configuration
-  const config = await loadConfig(rootPath);
+  let config = await loadConfig(rootPath);
   const baseBranch = config.baseBranch || 'main';
 
   // 2. Initialize Bonvoy with hooks
@@ -73,6 +74,9 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   bonvoy.use(new ChangelogPlugin(config.changelog));
   bonvoy.use(new GitHubPlugin(config.github));
   bonvoy.use(new GitLabPlugin(config.gitlab));
+
+  // 3.5. Allow plugins to modify config
+  config = await bonvoy.hooks.modifyConfig.promise(config);
 
   // 4. Detect workspace packages
   const packages = await detectPackages(rootPath);
@@ -122,6 +126,21 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
     logger.info('📦 No packages to release');
     return { branchName: '', packages: [], versions: {} };
   }
+
+  // 6.5. Run version hooks
+  const versionContext: VersionContext = {
+    config,
+    packages,
+    changedPackages,
+    rootPath,
+    isDryRun: options.dryRun || false,
+    logger,
+    commits: commitsWithPackages,
+    versions,
+    bumps: {},
+  };
+  await bonvoy.hooks.version.promise(versionContext);
+  await bonvoy.hooks.afterVersion.promise(versionContext);
 
   // 7. Generate changelogs
   const changelogs: Record<string, string> = {};

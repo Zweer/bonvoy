@@ -28,7 +28,14 @@ export default class ChangesetPlugin implements BonvoyPlugin {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Hook types vary by implementation
-  apply(bonvoy: { hooks: Record<string, any> }): void {
+  apply(bonvoy: { hooks: Record<string, any>; plugins: Array<{ name: string }> }): void {
+    // Check for conflicting conventional plugin
+    if (bonvoy.plugins.some((p) => p.name === 'conventional')) {
+      throw new Error(
+        'plugin-changeset and plugin-conventional cannot be used together. Remove one of them from your configuration.',
+      );
+    }
+
     // Read and parse changeset files early
     bonvoy.hooks.beforeShipIt.tapPromise(this.name, async (context: Context) => {
       this.files = readChangesetFiles(context.rootPath, this.ops);

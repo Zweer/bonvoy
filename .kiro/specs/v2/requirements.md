@@ -6,22 +6,22 @@
 
 Plugins to notify the team after a release.
 
-### plugin-slack (Priority: High)
+### ✅ plugin-slack — COMPLETED
 - Slack webhook for release notifications
 - Channel, mentions, message format configuration
 - Slack Blocks support (rich formatting)
 
-### plugin-discord (Priority: High)
+### ✅ plugin-discord — COMPLETED
 - Discord webhook
 - Embed with changelog and links
 - Color and avatar configuration
 
-### plugin-telegram (Priority: Medium)
+### ✅ plugin-telegram — COMPLETED
 - Telegram Bot API
 - Markdown support in messages
 - Multiple chat_id configuration
 
-### plugin-teams (Priority: Medium)
+### ✅ plugin-teams — COMPLETED
 - Microsoft Teams webhook (Adaptive Cards)
 - Teams channel integration
 
@@ -105,17 +105,17 @@ Support for publishing to registries beyond npm.
 
 ## 📋 Implementation Priority
 
-### Phase 1: Basic Notifications
-1. `plugin-slack`
-2. `plugin-discord`
+### ~~Phase 1: Basic Notifications~~ ✅ COMPLETED
+1. ~~`plugin-slack`~~ ✅
+2. ~~`plugin-discord`~~ ✅
 
 ### Phase 2: New Registries
 3. `plugin-jsr`
 4. `plugin-docker`
 
-### Phase 3: Advanced Notifications
-5. `plugin-telegram`
-6. `plugin-teams`
+### ~~Phase 3: Advanced Notifications~~ ✅ COMPLETED
+5. ~~`plugin-telegram`~~ ✅
+6. ~~`plugin-teams`~~ ✅
 
 ### Phase 4: Other Languages
 7. `plugin-pypi`
@@ -127,5 +127,5 @@ Support for publishing to registries beyond npm.
 
 ---
 
-*Status: Planning*
+*Status: Notifications complete, registries next*
 *Target: bonvoy v2.0.0*

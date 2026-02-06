@@ -8,6 +8,7 @@ import type {
   Package,
   PRTrackingFile,
   ReleaseContext,
+  VersionContext,
 } from '@bonvoy/core';
 import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
@@ -36,7 +37,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
 
   // 0. Auto-detect: check if we're on main with a merged release PR
   const trackingFilePath = join(rootPath, '.bonvoy', 'release-pr.json');
-  const config = options.config ?? (await loadConfig(rootPath));
+  let config = options.config ?? (await loadConfig(rootPath));
   const baseBranch = config.baseBranch || 'main';
   const currentBranch = await gitOps.getCurrentBranch(rootPath);
 
@@ -60,6 +61,9 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   for (const plugin of plugins) {
     bonvoy.use(plugin);
   }
+
+  // 2.5. Allow plugins to modify config
+  config = await bonvoy.hooks.modifyConfig.promise(config);
 
   // 3. Detect workspace packages
   let packages = options.packages ?? (await detectPackages(rootPath));
@@ -165,6 +169,15 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     versions,
   };
   await bonvoy.hooks.validateRepo.promise(validateContext);
+
+  // 6.5. Run version hooks (allows plugins to modify versions)
+  const versionContext: VersionContext = {
+    ...validateContext,
+    versions,
+    bumps,
+  };
+  await bonvoy.hooks.version.promise(versionContext);
+  await bonvoy.hooks.afterVersion.promise(versionContext);
 
   // 7. Generate changelogs per package
   const changelogs: Record<string, string> = {};

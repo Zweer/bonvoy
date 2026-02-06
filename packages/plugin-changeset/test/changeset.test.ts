@@ -34,6 +34,23 @@ describe('ChangesetPlugin', () => {
     expect(plugin.name).toBe('changeset');
   });
 
+  it('should throw if conventional plugin is already registered', () => {
+    const plugin = new ChangesetPlugin();
+    const mockBonvoy = {
+      plugins: [{ name: 'conventional' }],
+      hooks: {
+        beforeShipIt: { tapPromise: vi.fn() },
+        getVersion: { tap: vi.fn() },
+        generateChangelog: { tap: vi.fn() },
+        afterRelease: { tapPromise: vi.fn() },
+      },
+    };
+
+    expect(() => plugin.apply(mockBonvoy)).toThrow(
+      'plugin-changeset and plugin-conventional cannot be used together',
+    );
+  });
+
   it('should read changeset files on beforeShipIt', async () => {
     const mockOps = createMockOps({
       '/test/.changeset/feature.md': `---
@@ -44,6 +61,7 @@ Added feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -70,6 +88,7 @@ Added feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -101,6 +120,7 @@ Breaking change`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -130,6 +150,7 @@ Feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -159,6 +180,7 @@ Added awesome feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -192,6 +214,7 @@ Fix B`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -221,6 +244,7 @@ Feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -250,6 +274,7 @@ Feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -279,6 +304,7 @@ Feature`,
     const plugin = new ChangesetPlugin({ deleteAfterRelease: false }, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -308,6 +334,7 @@ Feature from bonvoy dir`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -332,6 +359,7 @@ Feature from bonvoy dir`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -358,6 +386,7 @@ Feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -387,6 +416,7 @@ Feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },
@@ -416,6 +446,7 @@ Feature`,
     const plugin = new ChangesetPlugin({}, mockOps);
 
     const mockBonvoy = {
+      plugins: [],
       hooks: {
         beforeShipIt: { tapPromise: vi.fn() },
         getVersion: { tap: vi.fn() },

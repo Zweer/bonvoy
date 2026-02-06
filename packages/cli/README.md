@@ -56,14 +56,14 @@ bonvoy prepare
 bonvoy prepare --dry-run
 ```
 
-### `status` - Show pending changes (coming soon)
+### `status` - Show pending changes
 
 ```bash
 # Show packages with unreleased changes
 bonvoy status
 ```
 
-### `changelog` - Preview changelog (coming soon)
+### `changelog` - Preview changelog
 
 ```bash
 # Show changelog for all packages

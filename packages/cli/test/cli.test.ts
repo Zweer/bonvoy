@@ -192,8 +192,7 @@ describe('@bonvoy/cli', () => {
 
     await program.parseAsync(['node', 'bonvoy', 'status']);
 
-    expect(consoleSpy).toHaveBeenCalledWith('📊 Checking status...');
-    expect(consoleSpy).toHaveBeenCalledWith('Not implemented yet');
+    expect(consoleSpy).toHaveBeenCalledWith('✅ No pending changes');
   });
 
   it('should execute changelog command', async () => {
@@ -201,8 +200,7 @@ describe('@bonvoy/cli', () => {
 
     await program.parseAsync(['node', 'bonvoy', 'changelog']);
 
-    expect(consoleSpy).toHaveBeenCalledWith('📝 Generating changelog preview...');
-    expect(consoleSpy).toHaveBeenCalledWith('Not implemented yet');
+    expect(consoleSpy).toHaveBeenCalledWith('✅ No pending changes - nothing to preview');
   });
 
   it('should handle shipit errors', async () => {

@@ -326,8 +326,8 @@ bonvoy shipit --package @scope/core
 bonvoy shipit --package @scope/core --package @scope/utils
 
 # Other commands
-bonvoy status                    # Show pending changes (coming soon)
-bonvoy changelog                 # Preview changelog (coming soon)
+bonvoy status                    # Show pending changes
+bonvoy changelog                 # Preview changelog
 ```
 
 ## Configuration

@@ -73,7 +73,9 @@ bonvoy changelog           # Preview changelog
 
 ## Configuration
 
-Create `bonvoy.config.js` (optional - works without config):
+Create `bonvoy.config.js` (optional - works without config).
+
+Supported formats: `.js`, `.mjs`, `.ts`, `.json`, `.yaml`, `.yml`, `.toml`, `.bonvoyrc`, or `"bonvoy"` key in `package.json`.
 
 ```javascript
 export default {

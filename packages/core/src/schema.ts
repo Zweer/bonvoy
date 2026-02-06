@@ -64,6 +64,7 @@ export const BonvoyConfigSchema = z
         repo: z.string().optional(),
         draft: z.boolean().default(false),
         prerelease: z.boolean().optional(),
+        tagFormat: z.string().optional(),
       })
       .default({
         draft: false,
@@ -73,6 +74,7 @@ export const BonvoyConfigSchema = z
         token: z.string().optional(),
         host: z.string().optional(),
         projectId: z.union([z.string(), z.number()]).optional(),
+        tagFormat: z.string().optional(),
       })
       .default({}),
     plugins: z

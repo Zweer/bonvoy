@@ -121,7 +121,6 @@ npx bonvoy shipit   # Auto-detects merged PR and publishes
 - `semver` - Version manipulation
 - `@octokit/rest` - GitHub API
 - `execa` - Command execution
-- `picocolors` - Terminal colors
 - `zod` - Config validation
 
 ## 📝 Communication Style

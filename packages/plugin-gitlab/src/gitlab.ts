@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { BonvoyPlugin, PRContext, ReleaseContext } from '@bonvoy/core';
+import type { BonvoyPlugin, Context, PRContext, ReleaseContext } from '@bonvoy/core';
 
 import { defaultGitLabOperations, type GitLabOperations } from './operations.js';
 
@@ -9,6 +9,7 @@ export interface GitLabPluginOptions {
   token?: string;
   host?: string;
   projectId?: string | number;
+  tagFormat?: string;
 }
 
 export default class GitLabPlugin implements BonvoyPlugin {
@@ -23,6 +24,10 @@ export default class GitLabPlugin implements BonvoyPlugin {
 
   // biome-ignore lint/suspicious/noExplicitAny: Bonvoy type causes circular dependency
   apply(bonvoy: any): void {
+    bonvoy.hooks.validateRepo.tapPromise(this.name, async (context: Context) => {
+      await this.validateReleases(context);
+    });
+
     bonvoy.hooks.makeRelease.tapPromise(this.name, async (context: ReleaseContext) => {
       if (context.isDryRun) {
         context.logger.info('🔍 [dry-run] Would create GitLab releases');
@@ -41,7 +46,8 @@ export default class GitLabPlugin implements BonvoyPlugin {
       for (const pkg of context.changedPackages) {
         const version = context.versions[pkg.name];
         const changelog = context.changelogs[pkg.name] || '';
-        const tagName = `${pkg.name}@${version}`;
+        const tagFormat = this.options.tagFormat ?? '{name}@{version}';
+        const tagName = tagFormat.replace('{name}', pkg.name).replace('{version}', version);
 
         try {
           await this.ops.createRelease(token, host, {
@@ -94,6 +100,43 @@ export default class GitLabPlugin implements BonvoyPlugin {
         throw error;
       }
     });
+  }
+
+  private async validateReleases(context: Context): Promise<void> {
+    const { changedPackages, versions, logger } = context;
+    if (!versions) return;
+
+    const token = this.options.token || process.env.GITLAB_TOKEN;
+    if (!token) return;
+
+    const host = this.options.host || process.env.GITLAB_HOST || 'https://gitlab.com';
+    let projectId: string | number;
+    try {
+      projectId = this.getProjectId(context.rootPath);
+    } catch {
+      return;
+    }
+
+    const tagFormat = this.options.tagFormat ?? '{name}@{version}';
+    const existing: string[] = [];
+
+    for (const pkg of changedPackages) {
+      const version = versions[pkg.name];
+      /* c8 ignore start -- defensive: version always present for changedPackages */
+      if (!version) continue;
+      /* c8 ignore stop */
+      const tag = tagFormat.replace('{name}', pkg.name).replace('{version}', version);
+      if (await this.ops.releaseExists(token, host, projectId, tag)) {
+        existing.push(tag);
+      }
+    }
+
+    if (existing.length > 0) {
+      logger.error(`❌ GitLab releases already exist: ${existing.join(', ')}`);
+      throw new Error(
+        `Cannot release: GitLab releases already exist (${existing.join(', ')}). Delete them first or bump to a new version.`,
+      );
+    }
   }
 
   private getProjectId(rootPath: string): string | number {

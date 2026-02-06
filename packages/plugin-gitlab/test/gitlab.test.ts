@@ -21,6 +21,9 @@ function createMockOps(): GitLabOperations & { calls: any[] } {
       calls.push({ method: 'createMR', token, host, params });
       return { url: 'https://gitlab.com/test/repo/-/merge_requests/1', iid: 1 };
     },
+    async releaseExists(_token, _host, _projectId, _tagName) {
+      return false;
+    },
   };
 }
 
@@ -39,6 +42,7 @@ describe('GitLabPlugin', () => {
 
   const createMockBonvoy = () => ({
     hooks: {
+      validateRepo: { tapPromise: vi.fn() },
       makeRelease: { tapPromise: vi.fn() },
       createPR: { tapPromise: vi.fn() },
     },
@@ -244,6 +248,9 @@ describe('GitLabPlugin', () => {
       async createMR() {
         return { url: '', iid: 0 };
       },
+      async releaseExists() {
+        return false;
+      },
     };
     const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
     const mockBonvoy = createMockBonvoy();
@@ -271,6 +278,9 @@ describe('GitLabPlugin', () => {
       },
       async createMR() {
         return { url: '', iid: 0 };
+      },
+      async releaseExists() {
+        return false;
       },
     };
     const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
@@ -366,6 +376,128 @@ describe('GitLabPlugin', () => {
     expect(mockOps.calls[0].params.projectId).toBe('org%2Fsubgroup%2Frepo');
   });
 
+  it('should use custom tagFormat', async () => {
+    const mockOps = createMockOps();
+    const plugin = new GitLabPlugin(
+      { token: 'test-token', projectId: 'proj', tagFormat: 'v{version}/{name}' },
+      mockOps,
+    );
+    const mockBonvoy = createMockBonvoy();
+
+    plugin.apply(mockBonvoy);
+
+    const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
+    await hookFn({
+      isDryRun: false,
+      logger: mockLogger,
+      changedPackages: [{ name: '@test/pkg', version: '1.0.0', path: '/test/pkg' }],
+      versions: { '@test/pkg': '1.1.0' },
+      changelogs: {},
+      rootPath: '/test',
+    });
+
+    expect(mockOps.calls[0].params.tagName).toBe('v1.1.0/@test/pkg');
+  });
+
+  describe('validateRepo hook', () => {
+    it('should pass when no releases exist', async () => {
+      const mockOps = createMockOps();
+      const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateFn({
+          isDryRun: false,
+          logger: mockLogger,
+          changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+          versions: { 'test-pkg': '1.1.0' },
+          rootPath: '/test',
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should throw when releases already exist', async () => {
+      const mockOps = createMockOps();
+      mockOps.releaseExists = async () => true;
+      const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateFn({
+          isDryRun: false,
+          logger: mockLogger,
+          changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+          versions: { 'test-pkg': '1.1.0' },
+          rootPath: '/test',
+        }),
+      ).rejects.toThrow('Cannot release: GitLab releases already exist');
+    });
+
+    it('should skip validation without token', async () => {
+      const mockOps = createMockOps();
+      const plugin = new GitLabPlugin({ projectId: 'proj' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateFn({
+          isDryRun: false,
+          logger: mockLogger,
+          changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+          versions: { 'test-pkg': '1.1.0' },
+          rootPath: '/test',
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should skip validation without versions', async () => {
+      const mockOps = createMockOps();
+      const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      plugin.apply(mockBonvoy);
+
+      const validateFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateFn({
+          isDryRun: false,
+          logger: mockLogger,
+          changedPackages: [],
+          rootPath: '/test',
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should skip validation when project cannot be determined', async () => {
+      const mockOps = createMockOps();
+      const plugin = new GitLabPlugin({ token: 'test-token' }, mockOps);
+      const mockBonvoy = createMockBonvoy();
+
+      vol.fromJSON({ '/test/package.json': JSON.stringify({ name: 'test' }) }, '/');
+
+      plugin.apply(mockBonvoy);
+
+      const validateFn = mockBonvoy.hooks.validateRepo.tapPromise.mock.calls[0][1];
+      await expect(
+        validateFn({
+          isDryRun: false,
+          logger: mockLogger,
+          changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
+          versions: { 'test-pkg': '1.1.0' },
+          rootPath: '/test',
+        }),
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('createPR hook', () => {
     it('should skip MR creation in dry-run mode', async () => {
       const mockOps = createMockOps();
@@ -445,6 +577,9 @@ describe('GitLabPlugin', () => {
         async createMR() {
           throw new Error('MR creation failed');
         },
+        async releaseExists() {
+          return false;
+        },
       };
       const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
       const mockBonvoy = createMockBonvoy();
@@ -473,6 +608,9 @@ describe('GitLabPlugin', () => {
         async createRelease() {},
         async createMR() {
           throw 'string error';
+        },
+        async releaseExists() {
+          return false;
         },
       };
       const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);

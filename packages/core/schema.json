@@ -203,6 +203,9 @@
         },
         "prerelease": {
           "type": "boolean"
+        },
+        "tagFormat": {
+          "type": "string"
         }
       },
       "required": [
@@ -229,6 +232,9 @@
               "type": "number"
             }
           ]
+        },
+        "tagFormat": {
+          "type": "string"
         }
       },
       "additionalProperties": false

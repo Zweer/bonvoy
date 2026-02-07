@@ -25,9 +25,9 @@ npm install @bonvoy/plugin-git
 // bonvoy.config.js
 export default {
   git: {
-    commitMessage: 'chore(release): :bookmark: {packages} [skip ci]', // default
-    tagFormat: '{name}@{version}',                                     // default
-    push: true,                                                        // default
+    commitMessage: 'chore: :bookmark: release',  // default
+    tagFormat: '{name}@{version}',                // default
+    push: true,                                   // default
   },
 };
 ```
@@ -36,9 +36,12 @@ export default {
 
 | Placeholder | Description |
 |-------------|-------------|
-| `{packages}` | Comma-separated list of released package names |
+| `{packages}` | Comma-separated list of released package names (for subject) |
+| `{details}` | Package list with versions, one per line (for body) |
 | `{name}` | Package name (for tag format) |
 | `{version}` | Package version (for tag format) |
+
+> **Note:** If neither `{details}` is used in the commit message, package details are automatically appended as the commit body.
 
 ## Hooks
 

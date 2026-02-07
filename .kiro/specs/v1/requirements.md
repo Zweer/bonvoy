@@ -345,7 +345,7 @@ interface BonvoyConfig {
   rootVersionStrategy?: 'max' | 'patch' | 'none';
   
   // Git
-  commitMessage?: string;  // default: "chore: release {packages}"
+  commitMessage?: string;  // default: "chore: :bookmark: release"
   tagFormat?: string;      // default: "{name}@{version}"
   
   // Changelog
@@ -373,7 +373,7 @@ interface BonvoyConfig {
 export default {
   versioning: 'independent',
   rootVersionStrategy: 'max',
-  commitMessage: 'chore: release {packages}',
+  commitMessage: 'chore: :bookmark: release',
   tagFormat: '{name}@{version}',
   changelog: {
     global: false,

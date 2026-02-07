@@ -88,9 +88,9 @@ Support for publishing to registries beyond npm.
 
 ## 🚀 Core Features
 
-### Pre-release Channels
-- Support for `next`, `beta`, `canary`, `alpha` channels
-- Automatic publish to npm dist-tag
+### ✅ Pre-release Channels — COMPLETED
+- ✅ Support for `next`, `beta`, `canary`, `alpha` channels
+- ✅ Automatic publish to npm dist-tag
 - Branch → channel configuration
 
 ### Monorepo Dependency Linking
@@ -123,9 +123,9 @@ Support for publishing to registries beyond npm.
 
 ### Phase 5: Integrations
 9. `plugin-sentry`
-10. Pre-release channels
+10. ~~Pre-release channels~~ ✅ (implemented in v1)
 
 ---
 
-*Status: Notifications complete, registries next*
+*Status: Notifications and pre-release channels complete, registries next*
 *Target: bonvoy v2.0.0*

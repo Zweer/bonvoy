@@ -42,9 +42,9 @@
     "@bonvoy/plugin-gitlab": "^0.2.2",
     "@bonvoy/plugin-npm": "^0.3.0",
     "@commander-js/extra-typings": "^14.0.0",
-    "commander": "^14.0.2",
-    "execa": "^9.5.2",
-    "semver": "^7.6.3"
+    "commander": "^14.0.3",
+    "execa": "^9.6.1",
+    "semver": "^7.7.4"
   },
   "engines": {
     "node": ">=20.5"

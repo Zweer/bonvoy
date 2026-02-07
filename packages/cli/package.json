@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/cli",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "🚢 CLI for bonvoy release automation",
   "keywords": [
     "release",
@@ -34,13 +34,13 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/core": "^0.4.0",
+    "@bonvoy/core": "^0.5.0",
     "@bonvoy/plugin-changelog": "^0.1.1",
     "@bonvoy/plugin-conventional": "^0.1.1",
     "@bonvoy/plugin-git": "^0.4.0",
     "@bonvoy/plugin-github": "^0.4.0",
     "@bonvoy/plugin-gitlab": "^0.2.2",
-    "@bonvoy/plugin-npm": "^0.2.0",
+    "@bonvoy/plugin-npm": "^0.3.0",
     "@commander-js/extra-typings": "^14.0.0",
     "commander": "^14.0.2",
     "execa": "^9.5.2",

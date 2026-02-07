@@ -1,4 +1,37 @@
 
+## [0.5.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(npm): :sparkles: add npm dist-tag support for prereleases
+
+### 🐛 Bug Fixes
+
+- fix(cli): :bug: sync package-lock.json and root deps after version bumps
+
+
+## [0.5.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(npm): :sparkles: add npm dist-tag support for prereleases
+
+### 🐛 Bug Fixes
+
+- fix(cli): :bug: sync package-lock.json and root deps after version bumps
+
+
+## [0.5.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(npm): :sparkles: add npm dist-tag support for prereleases
+
+### 🐛 Bug Fixes
+
+- fix(cli): :bug: sync package-lock.json and root deps after version bumps
+
+
 ## [0.4.0] - 2026-02-06
 
 ### ✨ Features

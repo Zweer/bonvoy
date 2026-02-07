@@ -36,7 +36,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bonvoy/core": "^0.4.0",
+    "@bonvoy/core": "^0.5.0",
     "execa": "^9.6.1"
   },
   "engines": {

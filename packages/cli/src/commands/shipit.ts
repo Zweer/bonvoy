@@ -16,6 +16,7 @@ import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import GitPlugin, { defaultGitOperations } from '@bonvoy/plugin-git';
 import GitHubPlugin from '@bonvoy/plugin-github';
 import NpmPlugin from '@bonvoy/plugin-npm';
+import { execa } from 'execa';
 import { inc, valid } from 'semver';
 
 import { detectPackages } from '../utils/detect-packages.js';
@@ -269,10 +270,14 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
     }
 
-    // Update internal dependencies to match new versions
+    // Update internal dependencies to match new versions (including root package.json)
     const packageNames = new Set(packages.map((p) => p.name));
-    for (const pkg of packages) {
-      const pkgJsonPath = join(pkg.path, 'package.json');
+    const pkgJsonPaths = packages.map((p) => join(p.path, 'package.json'));
+    const rootPkgJsonPath = join(rootPath, 'package.json');
+    if (existsSync(rootPkgJsonPath)) {
+      pkgJsonPaths.push(rootPkgJsonPath);
+    }
+    for (const pkgJsonPath of pkgJsonPaths) {
       const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
       let modified = false;
 
@@ -294,6 +299,14 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     }
 
     // Note: changelogs are written by the ChangelogPlugin via afterChangelog hook
+
+    // Sync package-lock.json after version bumps
+    try {
+      await execa('npm', ['install', '--package-lock-only'], { cwd: rootPath });
+      logger.info('🔒 package-lock.json synced');
+    } catch {
+      // No lock file or npm not available - skip
+    }
 
     // Update root package.json version (monorepo only)
     /* c8 ignore start -- rootVersionStrategy tested via integration */

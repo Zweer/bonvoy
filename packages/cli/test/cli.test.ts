@@ -76,6 +76,7 @@ vi.mock('execa', () => ({
 }));
 
 vi.mock('node:fs', () => ({
+  existsSync: vi.fn(() => false),
   readFileSync: vi.fn((path: string) => {
     if (path.includes('packages/cli/package.json')) {
       return JSON.stringify({ name: '@bonvoy/cli', version: '0.0.0' });

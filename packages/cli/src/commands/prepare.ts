@@ -17,6 +17,7 @@ import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import { defaultGitOperations, type GitOperations } from '@bonvoy/plugin-git';
 import GitHubPlugin from '@bonvoy/plugin-github';
 import GitLabPlugin from '@bonvoy/plugin-gitlab';
+import { execa } from 'execa';
 import { inc, valid } from 'semver';
 
 import { detectPackages } from '../utils/detect-packages.js';
@@ -278,6 +279,16 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
     // Root package.json not found or not readable - skip
   }
   /* c8 ignore stop */
+
+  // 9.7. Sync package-lock.json after version bumps
+  if (!options.dryRun) {
+    try {
+      await execa('npm', ['install', '--package-lock-only'], { cwd: rootPath });
+      logger.info('🔒 package-lock.json synced');
+    } catch {
+      // No lock file or npm not available - skip
+    }
+  }
 
   // 10. Write changelogs
   for (const pkg of changedPackages) {

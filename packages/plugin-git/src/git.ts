@@ -16,7 +16,7 @@ export default class GitPlugin implements BonvoyPlugin {
 
   constructor(config: GitPluginConfig = {}, ops?: GitOperations) {
     this.config = {
-      commitMessage: config.commitMessage ?? 'chore: release {packages}',
+      commitMessage: config.commitMessage ?? 'chore: :bookmark: release',
       tagFormat: config.tagFormat ?? '{name}@{version}',
       push: config.push ?? true,
     };
@@ -47,14 +47,20 @@ export default class GitPlugin implements BonvoyPlugin {
 
     if (packages.length === 0) return;
 
+    const packageList = packages.map((pkg) => `- ${pkg.name}@${pkg.version}`).join('\n');
     const packageNames = packages.map((pkg) => pkg.name).join(', ');
-    const message = this.config.commitMessage.replace('{packages}', packageNames);
+    const message = this.config.commitMessage
+      .replace('{packages}', packageNames)
+      .replace('{details}', packageList);
 
-    logger.info(`  Commit message: "${message}"`);
+    // Append package details as commit body if not already included via {details}
+    const fullMessage = message.includes(packageList) ? message : `${message}\n\n${packageList}`;
+
+    logger.info(`  Commit message: "${fullMessage}"`);
 
     if (!isDryRun) {
       await this.ops.add('.', rootPath);
-      await this.ops.commit(message, rootPath);
+      await this.ops.commit(fullMessage, rootPath);
     }
   }
 

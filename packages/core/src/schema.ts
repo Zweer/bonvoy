@@ -4,7 +4,7 @@ export const BonvoyConfigSchema = z
   .object({
     versioning: z.enum(['independent', 'fixed']).default('independent'),
     rootVersionStrategy: z.enum(['max', 'patch', 'none']).default('max'),
-    commitMessage: z.string().default('chore: release {packages}'),
+    commitMessage: z.string().default('chore: :bookmark: release'),
     tagFormat: z.string().default('{name}@{version}'),
     changelog: z
       .object({

@@ -94,7 +94,10 @@ describe('GitPlugin', () => {
     expect(mockOps.calls).toContainEqual({ method: 'add', args: ['.', '/project'] });
     expect(mockOps.calls).toContainEqual({
       method: 'commit',
-      args: ['chore: release @test/package-a, @test/package-b', '/project'],
+      args: [
+        'chore: :bookmark: release\n\n- @test/package-a@1.0.0\n- @test/package-b@2.0.0',
+        '/project',
+      ],
     });
     expect(mockOps.calls).toContainEqual({
       method: 'tag',
@@ -127,7 +130,27 @@ describe('GitPlugin', () => {
 
     expect(mockOps.calls).toContainEqual({
       method: 'commit',
-      args: ['release: @test/package', '/project'],
+      args: ['release: @test/package\n\n- @test/package@1.0.0', '/project'],
+    });
+  });
+
+  it('should use {details} placeholder in commit message', async () => {
+    plugin = new GitPlugin({ commitMessage: 'release\n\n{details}' }, mockOps);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/package', version: '1.0.0' }],
+      rootPath: '/project',
+      isDryRun: false,
+      logger: mockLogger,
+    };
+
+    const beforePublishFn = mockBonvoy.hooks.beforePublish.tapPromise.mock.calls[0][1];
+    await beforePublishFn(context);
+
+    expect(mockOps.calls).toContainEqual({
+      method: 'commit',
+      args: ['release\n\n- @test/package@1.0.0', '/project'],
     });
   });
 

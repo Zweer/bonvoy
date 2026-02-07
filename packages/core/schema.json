@@ -20,7 +20,7 @@
       ]
     },
     "commitMessage": {
-      "default": "chore: release {packages}",
+      "default": "chore: :bookmark: release",
       "type": "string"
     },
     "tagFormat": {

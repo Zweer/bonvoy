@@ -312,9 +312,13 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   }
 
   // 11. Commit changes
+  const packageList = changedPackages.map((p) => `- ${p.name}@${versions[p.name]}`).join('\n');
   const packageNames = changedPackages.map((p) => p.name).join(', ');
-  const commitMessageTemplate = config.commitMessage || 'chore: release {packages}';
-  const commitMessage = commitMessageTemplate.replace('{packages}', packageNames);
+  const commitMessageTemplate = config.commitMessage || 'chore: :bookmark: release';
+  const subject = commitMessageTemplate
+    .replace('{packages}', packageNames)
+    .replace('{details}', packageList);
+  const commitMessage = subject.includes(packageList) ? subject : `${subject}\n\n${packageList}`;
 
   logger.info(`📝 Committing: "${commitMessage}"`);
 

@@ -84,7 +84,7 @@ Supported formats: `.js`, `.mjs`, `.ts`, `.json`, `.yaml`, `.yml`, `.toml`, `.bo
 export default {
   versioning: 'independent',  // or 'fixed' (all packages share same version)
   rootVersionStrategy: 'max', // 'max' | 'patch' | 'none' (monorepo root version)
-  commitMessage: 'chore: release {packages}',
+  commitMessage: 'chore: :bookmark: release',
   tagFormat: '{name}@{version}',
   changelog: {
     global: false,  // Generate global changelog at repo root

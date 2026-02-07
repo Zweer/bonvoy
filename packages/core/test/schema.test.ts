@@ -44,7 +44,7 @@ describe('schema generation', () => {
     const result = BonvoyConfigSchema.parse({});
 
     expect(result).toHaveProperty('versioning', 'independent');
-    expect(result).toHaveProperty('commitMessage', 'chore: release {packages}');
+    expect(result).toHaveProperty('commitMessage', 'chore: :bookmark: release');
     expect(result).toHaveProperty('changelog.global', false);
     expect(result).toHaveProperty('changelog.sections.feat', '✨ Features');
   });

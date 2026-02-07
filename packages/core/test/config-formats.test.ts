@@ -12,7 +12,7 @@ describe('config formats integration', () => {
   const expectedConfig = {
     versioning: 'independent',
     rootVersionStrategy: 'max',
-    commitMessage: 'chore: release {packages}',
+    commitMessage: 'chore: :bookmark: release',
     tagFormat: '{name}@{version}',
     changelog: {
       global: false,

@@ -1,6 +1,7 @@
 import { vol } from 'memfs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { BonvoyConfig } from '../../core/src/schema.js';
 import type { GitOperations } from '../../plugin-git/src/operations.js';
 import { prepare, prepareCommand } from '../src/commands/prepare.js';
 
@@ -183,12 +184,67 @@ describe('prepare command', () => {
 
     expect(result.packages).toHaveLength(1);
     expect(calls).toContain('add:.');
-    expect(calls.some((c) => c.startsWith('commit:chore: release'))).toBe(true);
+    expect(calls.some((c) => c.startsWith('commit:chore: :bookmark: release'))).toBe(true);
     expect(calls.some((c) => c.startsWith('push:release/'))).toBe(true);
 
     // Check that package.json was updated
     const pkgJson = JSON.parse(vol.readFileSync('/test/package.json', 'utf-8') as string);
     expect(pkgJson.version).toBe('1.1.0');
+  });
+
+  it('should use {details} placeholder in commit message', async () => {
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      },
+      '/',
+    );
+
+    const calls: string[] = [];
+    const gitOps: GitOperations = {
+      async add(files) {
+        calls.push(`add:${files}`);
+      },
+      async commit(msg) {
+        calls.push(`commit:${msg}`);
+      },
+      async tag() {},
+      async push() {},
+      async pushTags() {},
+      async checkout(branch) {
+        calls.push(`checkout:${branch}`);
+      },
+      async getCurrentBranch() {
+        return 'main';
+      },
+      async tagExists() {
+        return false;
+      },
+      async getLastTag() {
+        return null;
+      },
+      async getCommitsSinceTag() {
+        return [
+          {
+            hash: 'abc123',
+            message: 'feat: new feature',
+            author: 'Test',
+            date: '2024-01-01T00:00:00Z',
+            files: ['src/index.ts'],
+          },
+        ];
+      },
+    };
+
+    await prepare({
+      cwd: '/test',
+      gitOps,
+      dryRun: false,
+      silent: true,
+      config: { commitMessage: 'release\n\n{details}' } as BonvoyConfig,
+    });
+
+    expect(calls.some((c) => c === 'commit:release\n\n- test-pkg@1.1.0')).toBe(true);
   });
 
   it('should write existing changelog when present', async () => {

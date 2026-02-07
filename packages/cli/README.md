@@ -77,7 +77,7 @@ Create `bonvoy.config.js` in your project root:
 ```javascript
 export default {
   versioning: 'independent',
-  commitMessage: 'chore: release {packages}',
+  commitMessage: 'chore: :bookmark: release',
   tagFormat: '{name}@{version}',
   workflow: 'direct',
   plugins: [

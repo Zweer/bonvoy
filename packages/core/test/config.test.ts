@@ -32,7 +32,7 @@ describe('config', () => {
       expect(config).toEqual({
         versioning: 'independent',
         rootVersionStrategy: 'max',
-        commitMessage: 'chore: release {packages}',
+        commitMessage: 'chore: :bookmark: release',
         tagFormat: '{name}@{version}',
         changelog: {
           global: false,

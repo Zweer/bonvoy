@@ -1,4 +1,15 @@
 
+## [0.4.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+### 📚 Documentation
+
+- docs: :memo: update commitMessage default in docs and requirements
+
+
 ## [0.3.0] - 2026-02-06
 
 ### ✨ Features

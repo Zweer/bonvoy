@@ -1,6 +1,61 @@
 
 ## @bonvoy/cli
 
+## [0.6.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+## @bonvoy/core
+
+## [0.5.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+## @bonvoy/plugin-git
+
+## [0.4.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+### 📚 Documentation
+
+- docs: :memo: update commitMessage default in docs and requirements
+
+
+## @bonvoy/cli
+
+## [0.6.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+## @bonvoy/core
+
+## [0.5.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+
+## @bonvoy/cli
+
+## [0.6.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+
+## @bonvoy/cli
+
 ## [0.5.0] - 2026-02-07
 
 ### ✨ Features

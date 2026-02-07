@@ -1,4 +1,25 @@
 
+## [0.6.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+
+## [0.6.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+
+## [0.6.0] - 2026-02-07
+
+### ✨ Features
+
+- feat(git): :sparkles: improve release commit message format
+
+
 ## [0.5.0] - 2026-02-07
 
 ### ✨ Features

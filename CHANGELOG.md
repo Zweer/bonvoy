@@ -1,4 +1,17 @@
 
+## bonvoy
+
+## [0.7.0] - 2026-02-08
+
+### ✨ Features
+
+- feat: :sparkles: rename @bonvoy/cli to bonvoy, add blog
+
+### ### chore
+
+- chore: :arrow_up: update dependencies and docs to actions v6, add dependabot
+
+
 ## @bonvoy/cli
 
 ## [0.6.0] - 2026-02-07

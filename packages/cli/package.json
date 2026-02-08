@@ -1,5 +1,5 @@
 {
-  "name": "@bonvoy/cli",
+  "name": "bonvoy",
   "version": "0.7.0",
   "description": "🚢 CLI for bonvoy release automation",
   "keywords": [

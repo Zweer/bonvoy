@@ -18,7 +18,7 @@ Moving to bonvoy from another release tool? Here's how.
 
 1. Install bonvoy:
    ```bash
-   npm install -D @bonvoy/core
+   npm install -D bonvoy
    npm uninstall @changesets/cli @changesets/changelog-github
    ```
 
@@ -62,7 +62,7 @@ bonvoy reads both `.changeset/` and `.bonvoy/` directories.
 
 1. Install bonvoy:
    ```bash
-   npm install -D @bonvoy/core
+   npm install -D bonvoy
    npm uninstall semantic-release @semantic-release/*
    ```
 
@@ -93,7 +93,7 @@ Your conventional commits work the same way. No changes to your commit workflow.
 
 1. Install bonvoy:
    ```bash
-   npm install -D @bonvoy/core
+   npm install -D bonvoy
    npm uninstall release-it @release-it/*
    ```
 
@@ -123,7 +123,7 @@ Your conventional commits work the same way. No changes to your commit workflow.
 
 1. Install bonvoy:
    ```bash
-   npm install -D @bonvoy/core
+   npm install -D bonvoy
    ```
 
 2. Remove release-please config:

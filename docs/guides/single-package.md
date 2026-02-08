@@ -5,7 +5,7 @@ bonvoy works great for single-package repos too.
 ## Setup
 
 ```bash
-npm install -D @bonvoy/core
+npm install -D bonvoy
 ```
 
 No config file needed.

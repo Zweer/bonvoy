@@ -5,7 +5,7 @@ Get from zero to your first release in under 2 minutes.
 ## Installation
 
 ```bash
-npm install -D @bonvoy/core
+npm install -D bonvoy
 ```
 
 This installs the core package, which includes all default plugins:

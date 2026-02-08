@@ -30,7 +30,7 @@ A plugin-based release automation tool for npm packages and monorepos.
 ## Quick Start
 
 ```bash
-npm install -D @bonvoy/core
+npm install -D bonvoy
 ```
 
 ```bash

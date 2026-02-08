@@ -50,6 +50,6 @@ features:
 bonvoy gives you the best of all worlds: **simple by default, powerful when you need it**.
 
 ```bash
-npm install -D @bonvoy/core
+npm install -D bonvoy
 npx bonvoy shipit
 ```

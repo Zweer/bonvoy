@@ -1,6 +1,7 @@
 import type { BonvoyPlugin, CommitInfo, Context, SemverBump } from '@bonvoy/core';
-// @ts-expect-error - v5 types are not accurate
-import { sync as parseCommit } from 'conventional-commits-parser';
+import { CommitParser } from 'conventional-commits-parser';
+
+const commitParser = new CommitParser();
 
 export interface ConventionalConfig {
   preset?: 'angular' | 'conventional' | 'atom' | 'custom';
@@ -91,7 +92,7 @@ export default class ConventionalPlugin implements BonvoyPlugin {
       }
 
       // Use conventional-commits-parser for normal commits
-      const parsed = parseCommit(message);
+      const parsed = commitParser.parse(message);
       if (!parsed.type) return null;
 
       return {

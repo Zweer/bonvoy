@@ -1,6 +1,6 @@
-import { parse as parseToml } from '@iarna/toml';
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
+import { parse as parseToml } from 'smol-toml';
 
 import { type BonvoyConfig, BonvoyConfigSchema } from './schema.js';
 

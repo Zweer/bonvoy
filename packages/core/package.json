@@ -33,9 +33,9 @@
     "schema.json"
   ],
   "dependencies": {
-    "@iarna/toml": "^3.0.0",
     "cosmiconfig": "^9.0.0",
     "deepmerge": "^4.3.1",
+    "smol-toml": "^1.6.0",
     "tapable": "^2.3.0",
     "zod": "^4.3.6"
   },

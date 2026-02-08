@@ -13,7 +13,8 @@
     "web_fetch",
     "introspect",
     "thinking",
-    "code"
+    "code",
+    "@github"
   ],
   "toolAliases": {},
   "allowedTools": [
@@ -25,7 +26,8 @@
     "web_fetch",
     "introspect",
     "thinking",
-    "code"
+    "code",
+    "@github/*"
   ],
   "toolsSettings": {
     "write": {
@@ -41,6 +43,11 @@
     "shell": {
       "autoAllowReadonly": true,
       "deniedCommands": ["git commit .*", "git push .*"]
+    }
+  },
+  "mcpServers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/"
     }
   }
 }

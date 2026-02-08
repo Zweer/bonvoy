@@ -159,7 +159,7 @@ Years of frustration releasing packages in monorepos, both at work and personal 
 
 ## Status
 
-- [ ] Article 1: not started
-- [ ] Article 2: not started
-- [ ] Article 3: not started
-- [ ] Article 4: not started
+- [x] Article 1: docs/blog/why-i-built-bonvoy.md
+- [x] Article 2: docs/blog/zero-config-monorepo-releases.md
+- [x] Article 3: docs/blog/migrating-from-changesets.md
+- [x] Article 4: docs/blog/plugin-system-with-tapable.md

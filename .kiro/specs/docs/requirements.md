@@ -79,6 +79,10 @@ docs/
 - [x] Placeholder ship logo SVG
 - [x] FIRST_RELEASE.md removed (content in getting-started.md)
 - [x] README.md slimmed down with links to docs
+- [x] Base path `/bonvoy/` for GitHub Pages sub-path
+- [x] Blog section added (`docs/blog/`)
+- [x] Install commands updated: `npm install -D bonvoy` (unscoped package)
+- [x] `@bonvoy/cli` renamed to `bonvoy`, root renamed to `bonvoy-monorepo`
 
 ## Blog Section
 

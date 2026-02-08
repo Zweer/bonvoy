@@ -11,11 +11,12 @@
 - **Concise** — no 5-paragraph intros. Get to the point
 
 ### Publishing
-- **Cadence**: 1 article per week for 4 weeks
+- **Cadence**: 1 article per week
 - **Day**: Tuesday or Wednesday morning (peak engagement on dev.to)
 - **Cross-post**: X/Twitter thread the day after each article
 - **Language**: English
 - **Canonical URL**: docs site (`/blog/`), then cross-post to dev.to/Medium
+- **Drafts**: `drafts/` folder at repo root, move to `docs/blog/` + add to sidebar when publishing
 
 ---
 
@@ -58,86 +59,49 @@ Years of frustration releasing packages in monorepos, both at work and personal 
 
 6. → **"ok, I'll build my own"**
 
-### Key Narrative Strengths
-- Not a caprice — years of attempts, not "tried one tool and gave up"
-- Contributed code — PRs on auto, tried to fix things before leaving
-- Both work and personal — real need, not a toy project
-- Exhausted ALL options before building bonvoy
-
 ---
 
-## Article 1: "Why I built yet another release tool for npm"
+## Articles
 
+### Article 1: "Why I built yet another release tool for npm" ✅ LIVE
+- **Location**: `docs/blog/why-i-built-bonvoy.md`
 - **Goal**: emotional connection, make readers say "I have this problem too!"
-- **Structure**: frustration → research → decision → solution → demo
-- **Hook**: open with a specific frustration moment
-- **Closes with**: link to docs + `npm install`
 - **Target**: dev.to + Reddit r/javascript
-- **SEO**: "npm release tool", "monorepo release", "changesets alternative"
 
-### Outline
-1. The moment (personal story, specific frustration)
-2. The journey (table of tools tried + why each failed, with issue links)
-3. What I actually wanted (design principles)
-4. What I built (bonvoy intro + quick demo)
-5. Try it (link to docs, install command)
-
----
-
-## Article 2: "Zero-config monorepo releases in 2 minutes"
-
+### Article 2: "Zero-config monorepo releases in 2 minutes" 📝 DRAFT
+- **Location**: `drafts/zero-config-monorepo-releases.md`
 - **Goal**: show simplicity, drive installs
-- **Structure**: pure step-by-step tutorial
-- **Hook**: "What if releasing your monorepo was as simple as one command?"
-- **Includes**: terminal recording / screenshots
 - **Target**: dev.to + Medium
-- **SEO**: "monorepo release tutorial", "npm workspaces release"
 
-### Outline
-1. What we're building (2 sentences)
-2. Setup (npm init, workspaces, install bonvoy)
-3. Write some code + conventional commits
-4. `bonvoy shipit --dry-run` (show output)
-5. `bonvoy shipit` (show result)
-6. Verify (npm, GitHub releases, tags)
-7. Add CI (GitHub Actions snippet)
-
----
-
-## Article 3: "I migrated from changesets to bonvoy — here's what changed"
-
+### Article 3: "I migrated from changesets to bonvoy" 📝 DRAFT
+- **Location**: `drafts/migrating-from-changesets.md`
 - **Goal**: capture frustrated changesets users
-- **Structure**: before/after side-by-side
-- **Hook**: "I loved changesets. Until I didn't."
-- **SEO**: "changesets alternative", "changesets problems", "migrate from changesets"
 - **Target**: dev.to + Medium
 
-### Outline
-1. Why I used changesets (what's good about it)
-2. Where it fell short (specific pain points)
-3. Side-by-side: changesets workflow vs bonvoy workflow
-4. Migration steps (5 minutes)
-5. What I gained / what I lost (honest)
-6. Should you migrate? (decision framework)
-
----
-
-## Article 4: "How I built a plugin system with tapable (and you can too)"
-
+### Article 4: "Plugin system with tapable" 📝 DRAFT
+- **Location**: `drafts/plugin-system-with-tapable.md`
 - **Goal**: technical credibility, attract advanced devs
-- **Structure**: architectural deep-dive
-- **Hook**: "webpack's secret weapon isn't webpack — it's tapable"
 - **Target**: dev.to + Hacker News
-- **SEO**: "tapable tutorial", "plugin system javascript"
 
-### Outline
-1. What is tapable (1 paragraph)
-2. Why I chose it over EventEmitter
-3. bonvoy's hook system (code walkthrough)
-4. Writing a plugin (step-by-step)
-5. Sync vs async vs waterfall hooks
-6. Testing plugins
-7. The pattern: how to add a plugin system to any tool
+### Article 5: "Migrating from semantic-release" 📝 DRAFT
+- **Location**: `drafts/migrating-from-semantic-release.md`
+- **Goal**: capture the largest user base
+- **Target**: dev.to + Medium
+
+### Article 6: "Migrating from release-it" 📝 DRAFT
+- **Location**: `drafts/migrating-from-release-it.md`
+- **Goal**: capture single-package users moving to monorepo
+- **Target**: dev.to + Medium
+
+### Article 7: "Migrating from release-please" 📝 DRAFT
+- **Location**: `drafts/migrating-from-release-please.md`
+- **Goal**: capture users frustrated by GitHub Action chaos
+- **Target**: dev.to + Medium
+
+### Article 8: "Migrating from auto + lerna" 📝 DRAFT
+- **Location**: `drafts/migrating-from-auto-lerna.md`
+- **Goal**: capture users stuck with lerna dependency issues
+- **Target**: dev.to + Medium
 
 ---
 
@@ -157,9 +121,10 @@ Years of frustration releasing packages in monorepos, both at work and personal 
 - [ ] Social card: Open Graph image for link previews
 - [ ] Comparison table image: shareable on social
 
-## Status
+## Publishing Workflow
 
-- [x] Article 1: docs/blog/why-i-built-bonvoy.md
-- [x] Article 2: docs/blog/zero-config-monorepo-releases.md
-- [x] Article 3: docs/blog/migrating-from-changesets.md
-- [x] Article 4: docs/blog/plugin-system-with-tapable.md
+To publish a draft:
+1. `mv drafts/<article>.md docs/blog/`
+2. Add entry to sidebar in `docs/.vitepress/config.ts`
+3. Commit and push
+4. Cross-post to dev.to/Medium with canonical URL pointing to docs site

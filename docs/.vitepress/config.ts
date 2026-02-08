@@ -67,12 +67,7 @@ export default defineConfig({
       },
       {
         text: 'Blog',
-        items: [
-          { text: 'Why I Built bonvoy', link: '/blog/why-i-built-bonvoy' },
-          { text: 'Zero-Config Monorepo Releases', link: '/blog/zero-config-monorepo-releases' },
-          { text: 'Migrating from Changesets', link: '/blog/migrating-from-changesets' },
-          { text: 'Plugin System with Tapable', link: '/blog/plugin-system-with-tapable' },
-        ],
+        items: [{ text: 'Why I Built bonvoy', link: '/blog/why-i-built-bonvoy' }],
       },
     ],
 

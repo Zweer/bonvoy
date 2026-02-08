@@ -3,7 +3,8 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'bonvoy',
   description: 'A plugin-based release automation tool for npm packages and monorepos',
-  head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
+  base: '/bonvoy/',
+  head: [['link', { rel: 'icon', href: '/bonvoy/favicon.ico' }]],
 
   themeConfig: {
     logo: '/logo.svg',

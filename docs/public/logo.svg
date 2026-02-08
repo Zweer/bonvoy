@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Water -->
+  <path d="M8 88 Q24 80 40 88 Q56 96 72 88 Q88 80 104 88 Q120 96 128 88 L128 128 L0 128 Z" fill="#3b82f6" opacity="0.3"/>
+  <path d="M0 96 Q16 88 32 96 Q48 104 64 96 Q80 88 96 96 Q112 104 128 96 L128 128 L0 128 Z" fill="#3b82f6" opacity="0.5"/>
+  <!-- Hull -->
+  <path d="M24 84 L36 60 L92 60 L104 84 Z" fill="#1e40af" rx="4"/>
+  <!-- Cabin -->
+  <rect x="48" y="44" width="32" height="16" rx="3" fill="#2563eb"/>
+  <!-- Smokestack -->
+  <rect x="58" y="24" width="12" height="20" rx="2" fill="#ef4444"/>
+  <rect x="56" y="22" width="16" height="4" rx="1" fill="#dc2626"/>
+  <!-- Smoke -->
+  <circle cx="64" cy="16" r="4" fill="#94a3b8" opacity="0.6"/>
+  <circle cx="72" cy="10" r="3" fill="#94a3b8" opacity="0.4"/>
+  <circle cx="68" cy="6" r="2.5" fill="#94a3b8" opacity="0.2"/>
+  <!-- Porthole -->
+  <circle cx="52" cy="72" r="4" fill="#60a5fa" stroke="#1e3a5f" stroke-width="1.5"/>
+  <circle cx="64" cy="72" r="4" fill="#60a5fa" stroke="#1e3a5f" stroke-width="1.5"/>
+  <circle cx="76" cy="72" r="4" fill="#60a5fa" stroke="#1e3a5f" stroke-width="1.5"/>
+</svg>

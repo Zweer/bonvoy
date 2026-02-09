@@ -1,4 +1,30 @@
 
+## @bonvoy/plugin-npm
+
+## [0.4.0] - 2026-02-09
+
+### 🐛 Bug Fixes
+
+- fix: :speech_balloon: improve error messages for rollback status and npm OIDC
+
+## bonvoy
+
+## [0.9.0] - 2026-02-09
+
+### 🐛 Bug Fixes
+
+- fix: :speech_balloon: improve error messages for rollback status and npm OIDC
+
+
+## @bonvoy/plugin-npm
+
+## [0.4.0] - 2026-02-09
+
+### 🐛 Bug Fixes
+
+- fix: :speech_balloon: improve error messages for rollback status and npm OIDC
+
+
 ## @bonvoy/core
 
 ## [0.6.0] - 2026-02-09

@@ -1,4 +1,11 @@
 
+## [0.9.0] - 2026-02-09
+
+### 🐛 Bug Fixes
+
+- fix: :speech_balloon: improve error messages for rollback status and npm OIDC
+
+
 ## [0.8.0] - 2026-02-09
 
 ### ✨ Features

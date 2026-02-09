@@ -239,6 +239,23 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
   }
 
   // 9. Update package.json versions
+  logger.info(`📦 Preparing ${changedPackages.length} package(s):\n`);
+  for (const pkg of changedPackages) {
+    const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
+    logger.info(`  • ${pkg.name}: ${pkg.version} → ${versions[pkg.name]}`);
+    /* c8 ignore start -- log-only branch, tested in shipit */
+    for (const c of pkgCommits) {
+      const match = c.message.match(/^(feat|fix|perf)(!)?[:(]/);
+      if (match) {
+        const type = match[1];
+        const prefix = match[2] ? '💥' : type === 'feat' ? '✨' : type === 'fix' ? '🐛' : '⚡';
+        logger.info(`    ${prefix} ${c.message}`);
+      }
+    }
+    /* c8 ignore stop */
+  }
+  logger.info('');
+
   for (const pkg of changedPackages) {
     const pkgJsonPath = join(pkg.path, 'package.json');
     const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));

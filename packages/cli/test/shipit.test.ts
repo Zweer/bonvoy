@@ -1606,3 +1606,80 @@ describe('shipit dry-run error', () => {
     ).rejects.toThrow('Dry-run error');
   });
 });
+
+describe('shipit log output', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should log commit justification for each package bump', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'a1',
+          message: 'feat: add API',
+          author: 'T',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/a.ts'],
+        },
+        {
+          hash: 'a2',
+          message: 'fix: resolve bug',
+          author: 'T',
+          date: '2024-01-02T00:00:00Z',
+          files: ['src/b.ts'],
+        },
+        {
+          hash: 'a3',
+          message: 'perf: optimize query',
+          author: 'T',
+          date: '2024-01-03T00:00:00Z',
+          files: ['src/c.ts'],
+        },
+        {
+          hash: 'a4',
+          message: 'feat!: breaking change',
+          author: 'T',
+          date: '2024-01-04T00:00:00Z',
+          files: ['src/d.ts'],
+        },
+        {
+          hash: 'a5',
+          message: 'chore: update deps',
+          author: 'T',
+          date: '2024-01-05T00:00:00Z',
+          files: ['src/e.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+
+    await shipit(undefined, {
+      dryRun: true,
+      cwd: '/test',
+      gitOps,
+      logger,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    const messages = logger.info.mock.calls.map((c: string[]) => c[0]);
+    expect(messages).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('test-pkg: 1.0.0 → 2.0.0'),
+        expect.stringContaining('✨ feat: add API'),
+        expect.stringContaining('🐛 fix: resolve bug'),
+        expect.stringContaining('⚡ perf: optimize query'),
+        expect.stringContaining('💥 feat!: breaking change'),
+      ]),
+    );
+    // chore should NOT appear
+    expect(messages.join('\n')).not.toContain('update deps');
+  });
+});

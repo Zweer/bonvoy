@@ -45,7 +45,7 @@ const consoleLogger: Logger = {
 export async function shipit(_bump?: string, options: ShipitOptions = {}): Promise<ShipitResult> {
   const rootPath = options.cwd || process.cwd();
   const gitOps = options.gitOps ?? defaultGitOperations;
-  const logger = options.silent ? silentLogger : consoleLogger;
+  const logger = options.logger ?? (options.silent ? silentLogger : consoleLogger);
 
   // 0. Auto-detect: check if we're on main with a merged release PR
   const trackingFilePath = join(rootPath, '.bonvoy', 'release-pr.json');
@@ -233,9 +233,21 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     };
   }
 
-  logger.info(`📦 Releasing ${changedPackages.length} package(s):`);
+  logger.info(`📦 Releasing ${changedPackages.length} package(s):\n`);
   for (const pkg of changedPackages) {
-    logger.info(`  • ${pkg.name}: ${pkg.version} → ${versions[pkg.name]}`);
+    /* c8 ignore start -- bumps always populated by getVersion */
+    const bump = bumps[pkg.name] || 'patch';
+    /* c8 ignore stop */
+    logger.info(`  • ${pkg.name}: ${pkg.version} → ${versions[pkg.name]} (${bump})`);
+    const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
+    for (const c of pkgCommits) {
+      const match = c.message.match(/^(feat|fix|perf)(!)?[:(]/);
+      if (match) {
+        const type = match[1];
+        const prefix = match[2] ? '💥' : type === 'feat' ? '✨' : type === 'fix' ? '🐛' : '⚡';
+        logger.info(`    ${prefix} ${c.message}`);
+      }
+    }
   }
   logger.info('');
 

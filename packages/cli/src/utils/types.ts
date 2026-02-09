@@ -1,4 +1,4 @@
-import type { BonvoyConfig, BonvoyPlugin, CommitInfo, Package } from '@bonvoy/core';
+import type { BonvoyConfig, BonvoyPlugin, CommitInfo, Logger, Package } from '@bonvoy/core';
 import type { GitOperations } from '@bonvoy/plugin-git';
 
 export interface ShipitOptions {
@@ -12,6 +12,7 @@ export interface ShipitOptions {
   gitOps?: GitOperations;
   packages?: Package[]; // Allow injecting packages directly (for testing)
   config?: BonvoyConfig; // Allow injecting config directly (for testing)
+  logger?: Logger; // Custom logger (for testing or programmatic usage)
 }
 
 export interface ShipitResult {

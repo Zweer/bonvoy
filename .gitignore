@@ -1,6 +1,9 @@
 # Build output
 dist/
 
+# bonvoy release log (generated at runtime)
+.bonvoy/release-log.json
+
 # Logs
 logs
 *.log

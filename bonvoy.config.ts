@@ -2,7 +2,7 @@ import type { BonvoyConfig } from '@bonvoy/core';
 
 export default {
   versioning: 'independent',
-  commitMessage: 'chore: :bookmark: release {packages}',
+  commitMessage: 'chore: :bookmark: release',
   tagFormat: '{name}@{version}',
   baseBranch: 'main',
   changelog: {

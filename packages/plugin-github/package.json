@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-github",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "🚢 GitHub releases plugin for bonvoy",
   "keywords": [
     "bonvoy",
@@ -31,7 +31,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/core": "^0.7.0",
+    "@bonvoy/core": "^0.8.0",
     "@octokit/rest": "^22.0.1",
     "execa": "^9.6.1"
   },

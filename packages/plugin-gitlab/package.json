@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-gitlab",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "🚢 GitLab releases plugin for bonvoy",
   "keywords": [
     "bonvoy",
@@ -35,7 +35,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bonvoy/core": "^0.7.0",
+    "@bonvoy/core": "^0.8.0",
     "@gitbeaker/rest": "^43.8.0"
   },
   "engines": {

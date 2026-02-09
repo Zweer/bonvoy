@@ -1,4 +1,55 @@
 
+## @bonvoy/core
+
+## [0.7.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+## @bonvoy/plugin-github
+
+## [0.5.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+## @bonvoy/plugin-gitlab
+
+## [0.3.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+
+## @bonvoy/core
+
+## [0.7.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+## @bonvoy/plugin-github
+
+## [0.5.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+
+## @bonvoy/core
+
+## [0.7.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+
 ## bonvoy
 
 ## [0.9.1] - 2026-02-09

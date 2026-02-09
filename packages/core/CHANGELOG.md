@@ -1,4 +1,25 @@
 
+## [0.7.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+
+## [0.7.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+
+## [0.7.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :recycle: add retry with backoff for transient API errors
+
+
 ## [0.6.0] - 2026-02-09
 
 ### ✨ Features

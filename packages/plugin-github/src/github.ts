@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { BonvoyPlugin, Context, PRContext, ReleaseContext } from '@bonvoy/core';
+import type {
+  BonvoyPlugin,
+  Context,
+  PRContext,
+  ReleaseContext,
+  RollbackContext,
+} from '@bonvoy/core';
 
 import { defaultGitHubOperations, type GitHubOperations } from './operations.js';
 
@@ -51,7 +57,7 @@ export default class GitHubPlugin implements BonvoyPlugin {
         const tagName = tagFormat.replace('{name}', pkg.name).replace('{version}', version);
 
         try {
-          await this.ops.createRelease(token, {
+          const { id } = await this.ops.createRelease(token, {
             owner,
             repo,
             tag_name: tagName,
@@ -59,6 +65,12 @@ export default class GitHubPlugin implements BonvoyPlugin {
             body: changelog,
             draft: this.options.draft || false,
             prerelease: this.options.prerelease || version.includes('-'),
+          });
+
+          context.actionLog.record({
+            plugin: 'github',
+            action: 'release',
+            data: { tag: tagName, id, owner, repo },
           });
 
           context.logger.info(`✅ Created GitHub release: ${tagName}`);
@@ -104,6 +116,10 @@ export default class GitHubPlugin implements BonvoyPlugin {
         throw error;
       }
     });
+
+    bonvoy.hooks.rollback.tapPromise(this.name, async (context: RollbackContext) => {
+      await this.rollback(context);
+    });
   }
 
   private getRepoInfo(rootPath: string): { owner: string; repo: string } {
@@ -131,6 +147,36 @@ export default class GitHubPlugin implements BonvoyPlugin {
     throw new Error(
       'Could not determine GitHub repository. Please set "repository" in package.json or provide owner/repo in plugin options.',
     );
+  }
+
+  private async rollback(context: RollbackContext): Promise<void> {
+    const { logger } = context;
+    const actions = context.actions.filter((a) => a.plugin === 'github').reverse();
+
+    const token = this.options.token || process.env.GITHUB_TOKEN;
+    if (!token) {
+      if (actions.length > 0) {
+        logger.warn('⚠️  GITHUB_TOKEN not found, cannot rollback GitHub releases');
+      }
+      return;
+    }
+
+    for (const action of actions) {
+      if (action.action !== 'release') continue;
+      const { tag, id, owner, repo } = action.data as {
+        tag: string;
+        id: number;
+        owner: string;
+        repo: string;
+      };
+      try {
+        logger.info(`  ↩️  Deleting GitHub release: ${tag}`);
+        await this.ops.deleteRelease(token, owner, repo, id);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        logger.warn(`  ⚠️  Failed to delete GitHub release ${tag}: ${msg}`);
+      }
+    }
   }
 
   private async validateReleases(context: Context): Promise<void> {

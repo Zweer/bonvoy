@@ -47,6 +47,7 @@ permissions:
 |------|--------|
 | `makeRelease` | Creates a GitHub release for each published package |
 | `createPR` | Creates a pull request (PR workflow) |
+| `rollback` | Deletes GitHub releases by ID |
 
 ## Release Format
 

@@ -5,6 +5,7 @@ export interface NpmOperations {
   view(pkg: string, version: string): Promise<string | null>;
   packageExists(pkg: string): Promise<boolean>;
   hasToken(): Promise<boolean>;
+  unpublish(pkg: string, version: string): Promise<void>;
 }
 
 export const defaultNpmOperations: NpmOperations = {
@@ -35,6 +36,10 @@ export const defaultNpmOperations: NpmOperations = {
 
   async hasToken() {
     return !!process.env.NPM_TOKEN || !!process.env.NODE_AUTH_TOKEN;
+  },
+
+  async unpublish(pkg, version) {
+    await execa('npm', ['unpublish', `${pkg}@${version}`], { stdio: 'pipe' });
   },
   /* c8 ignore stop */
 };

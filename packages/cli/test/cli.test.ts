@@ -30,10 +30,20 @@ vi.mock('@bonvoy/core', () => ({
       beforeCreatePR: { promise: vi.fn() },
       createPR: { promise: vi.fn() },
       afterCreatePR: { promise: vi.fn() },
+      rollback: { promise: vi.fn() },
     };
   }),
   loadConfig: vi.fn().mockResolvedValue({}),
   assignCommitsToPackages: vi.fn().mockReturnValue([]),
+  ActionLog: class {
+    record = vi.fn();
+    entries = vi.fn().mockReturnValue([]);
+    complete = vi.fn();
+    markRolledBack = vi.fn();
+    markRollbackFailed = vi.fn();
+    static load = vi.fn().mockReturnValue({ status: 'completed', actions: [] });
+  },
+  noopActionLog: { record: vi.fn(), entries: () => [] },
 }));
 
 vi.mock('@bonvoy/plugin-conventional', () => ({
@@ -56,6 +66,11 @@ vi.mock('@bonvoy/plugin-git', () => ({
     getCurrentBranch: vi.fn().mockResolvedValue('feature-branch'),
     getLastTag: vi.fn().mockResolvedValue(null),
     getCommitsSinceTag: vi.fn().mockResolvedValue([]),
+    getHeadSha: vi.fn().mockResolvedValue('mock-sha'),
+    resetHard: vi.fn(),
+    deleteTag: vi.fn(),
+    deleteRemoteTags: vi.fn(),
+    forcePush: vi.fn(),
   },
 }));
 
@@ -135,7 +150,7 @@ describe('@bonvoy/cli', () => {
     const commandNames = program.commands
       .map((cmd) => cmd.name())
       .filter((name) => name !== 'help');
-    expect(commandNames).toEqual(['shipit', 'prepare', 'status', 'changelog']);
+    expect(commandNames).toEqual(['shipit', 'prepare', 'status', 'changelog', 'rollback']);
   });
 
   it('should execute shipit with dry-run', async () => {

@@ -22,6 +22,7 @@ bonvoy shipit [bump] [options]
 | `--json` | Output results as JSON (for CI pipelines) |
 | `--package <name>` | Only release specific package(s). Repeatable |
 | `--preid <id>` | Prerelease identifier: `alpha`, `beta`, `rc`, etc. Default: `next` |
+| `--force` | Ignore stale release log and proceed (see [Rollback](/guides/rollback)) |
 
 ### Examples
 
@@ -130,3 +131,30 @@ bonvoy changelog
 ```
 
 Shows the changelog content without making any changes.
+
+## `bonvoy rollback`
+
+Roll back the last release using the action log.
+
+```bash
+bonvoy rollback [options]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview what would be rolled back without executing |
+| `--force` | Skip stale release log check |
+
+### Examples
+
+```bash
+# Roll back the last release
+bonvoy rollback
+
+# Preview rollback actions
+bonvoy rollback --dry-run
+```
+
+See the [Rollback Guide](/guides/rollback) for details on how rollback works.

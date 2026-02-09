@@ -47,6 +47,7 @@ Set to `false` to commit and tag locally without pushing. Useful for testing.
 | Hook | Action |
 |------|--------|
 | `beforePublish` | Stages all changes, commits, creates tags, pushes |
+| `rollback` | Resets HEAD, deletes local/remote tags, force-pushes |
 
 ## What It Does
 

@@ -16,6 +16,12 @@ export interface GitOperations {
     Array<{ hash: string; message: string; author: string; date: string; files: string[] }>
   >;
   getLastTag(cwd: string): Promise<string | null>;
+  // Rollback operations
+  getHeadSha(cwd: string): Promise<string>;
+  resetHard(sha: string, cwd: string): Promise<void>;
+  deleteTag(name: string, cwd: string): Promise<void>;
+  deleteRemoteTags(tags: string[], cwd: string): Promise<void>;
+  forcePush(cwd: string, branch: string): Promise<void>;
 }
 
 export const defaultGitOperations: GitOperations = {
@@ -109,4 +115,29 @@ export const defaultGitOperations: GitOperations = {
 
     return commits;
   },
+
+  /* c8 ignore start - real git operations */
+  async getHeadSha(cwd) {
+    const { stdout } = await execa('git', ['rev-parse', 'HEAD'], { cwd });
+    return stdout.trim();
+  },
+
+  async resetHard(sha, cwd) {
+    await execa('git', ['reset', '--hard', sha], { cwd });
+  },
+
+  async deleteTag(name, cwd) {
+    await execa('git', ['tag', '-d', name], { cwd });
+  },
+
+  async deleteRemoteTags(tags, cwd) {
+    for (const tag of tags) {
+      await execa('git', ['push', '--delete', 'origin', tag], { cwd });
+    }
+  },
+
+  async forcePush(cwd, branch) {
+    await execa('git', ['push', '--force-with-lease', 'origin', branch], { cwd });
+  },
+  /* c8 ignore stop */
 };

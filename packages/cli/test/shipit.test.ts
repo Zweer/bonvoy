@@ -39,6 +39,13 @@ function createMockGitOps(config: {
     async getCommitsSinceTag() {
       return config.commits ?? [];
     },
+    async getHeadSha() {
+      return 'mock-sha';
+    },
+    async resetHard() {},
+    async deleteTag() {},
+    async deleteRemoteTags() {},
+    async forcePush() {},
   };
 }
 
@@ -1158,5 +1165,444 @@ describe('fixed versioning - explicit version', () => {
 
     // semver.inc('1.0.1-beta.3', 'patch') → '1.0.1' (graduates to stable)
     expect(result.versions['test-pkg']).toBe('1.0.1');
+  });
+});
+
+describe('shipit stale log check', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should abort when previous release log is in-progress', async () => {
+    const gitOps = createMockGitOps({ commits: [], lastTag: null });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+        '/test/.bonvoy/release-log.json': JSON.stringify({
+          startedAt: '2026-01-01T00:00:00Z',
+          config: { tagFormat: '{name}@{version}', rootPath: '/test' },
+          packages: [],
+          actions: [],
+          status: 'in-progress',
+        }),
+      },
+      '/',
+    );
+
+    await expect(
+      shipit(undefined, {
+        cwd: '/test',
+        silent: true,
+        dryRun: true,
+        gitOps,
+        plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+      }),
+    ).rejects.toThrow('Previous release may have failed');
+  });
+
+  it('should proceed with --force when previous log is in-progress', async () => {
+    const gitOps = createMockGitOps({ commits: [], lastTag: null });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+        '/test/.bonvoy/release-log.json': JSON.stringify({
+          startedAt: '2026-01-01T00:00:00Z',
+          config: { tagFormat: '{name}@{version}', rootPath: '/test' },
+          packages: [],
+          actions: [],
+          status: 'in-progress',
+        }),
+      },
+      '/',
+    );
+
+    // Should not throw with force
+    const result = await shipit(undefined, {
+      cwd: '/test',
+      silent: true,
+      dryRun: true,
+      force: true,
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    expect(result.changedPackages).toHaveLength(0);
+  });
+
+  it('should proceed when previous log has completed status', async () => {
+    const gitOps = createMockGitOps({ commits: [], lastTag: null });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+        '/test/.bonvoy/release-log.json': JSON.stringify({
+          startedAt: '2026-01-01T00:00:00Z',
+          config: { tagFormat: '{name}@{version}', rootPath: '/test' },
+          packages: [],
+          actions: [],
+          status: 'completed',
+        }),
+      },
+      '/',
+    );
+
+    const result = await shipit(undefined, {
+      cwd: '/test',
+      silent: true,
+      dryRun: true,
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    expect(result.changedPackages).toHaveLength(0);
+  });
+
+  it('should proceed when log file is corrupted', async () => {
+    const gitOps = createMockGitOps({ commits: [], lastTag: null });
+
+    vol.fromJSON(
+      {
+        '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+        '/test/.bonvoy/release-log.json': 'not valid json',
+      },
+      '/',
+    );
+
+    const result = await shipit(undefined, {
+      cwd: '/test',
+      silent: true,
+      dryRun: true,
+      gitOps,
+      plugins: [new ConventionalPlugin(), new ChangelogPlugin(), new GitPlugin({}, gitOps)],
+    });
+
+    expect(result.changedPackages).toHaveLength(0);
+  });
+});
+
+describe('shipit auto-rollback', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should auto-rollback when publish fails', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: new feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    // Create a plugin that throws during publish
+    const failingPlugin = {
+      name: 'failing',
+      // biome-ignore lint/suspicious/noExplicitAny: Mock plugin for testing
+      apply(bonvoy: any) {
+        bonvoy.hooks.publish.tapPromise('failing', async () => {
+          throw new Error('Publish exploded');
+        });
+      },
+    };
+
+    await expect(
+      shipit(undefined, {
+        cwd: '/test',
+        silent: true,
+        dryRun: false,
+        gitOps,
+        plugins: [
+          new ConventionalPlugin(),
+          new ChangelogPlugin(),
+          new GitPlugin({ push: false }, gitOps),
+          failingPlugin,
+        ],
+      }),
+    ).rejects.toThrow('Publish exploded');
+
+    // Release log should exist with rollback status
+    const logContent = vol.readFileSync('/test/.bonvoy/release-log.json', 'utf-8') as string;
+    const log = JSON.parse(logContent);
+    expect(log.status).toBe('rolled-back');
+  });
+});
+
+describe('shipit auto-rollback failure', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should mark as rollback-failed when rollback itself fails', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc123',
+          message: 'feat: new feature',
+          author: 'Test',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/index.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    // Plugin that fails during publish AND fails during rollback
+    const failingPlugin = {
+      name: 'failing',
+      // biome-ignore lint/suspicious/noExplicitAny: Mock plugin for testing
+      apply(bonvoy: any) {
+        bonvoy.hooks.publish.tapPromise('failing', async () => {
+          throw new Error('Publish failed');
+        });
+        bonvoy.hooks.rollback.tapPromise('failing', async () => {
+          throw new Error('Rollback also failed');
+        });
+      },
+    };
+
+    await expect(
+      shipit(undefined, {
+        cwd: '/test',
+        silent: true,
+        dryRun: false,
+        gitOps,
+        plugins: [
+          new ConventionalPlugin(),
+          new ChangelogPlugin(),
+          new GitPlugin({ push: false }, gitOps),
+          failingPlugin,
+        ],
+      }),
+    ).rejects.toThrow('Publish failed');
+
+    const logContent = vol.readFileSync('/test/.bonvoy/release-log.json', 'utf-8') as string;
+    const log = JSON.parse(logContent);
+    expect(log.status).toBe('rollback-failed');
+  });
+});
+
+describe('shipit auto-rollback edge cases', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should handle non-Error throws during publish', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc',
+          message: 'feat: x',
+          author: 'T',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/x.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    const failingPlugin = {
+      name: 'failing',
+      // biome-ignore lint/suspicious/noExplicitAny: Mock plugin for testing
+      apply(bonvoy: any) {
+        bonvoy.hooks.publish.tapPromise('failing', async () => {
+          throw 'string publish error';
+        });
+      },
+    };
+
+    await expect(
+      shipit(undefined, {
+        cwd: '/test',
+        silent: true,
+        dryRun: false,
+        gitOps,
+        plugins: [
+          new ConventionalPlugin(),
+          new ChangelogPlugin(),
+          new GitPlugin({ push: false }, gitOps),
+          failingPlugin,
+        ],
+      }),
+    ).rejects.toBe('string publish error');
+  });
+
+  it('should handle non-Error throws during rollback', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc',
+          message: 'feat: x',
+          author: 'T',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/x.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    const failingPlugin = {
+      name: 'failing',
+      // biome-ignore lint/suspicious/noExplicitAny: Mock plugin for testing
+      apply(bonvoy: any) {
+        bonvoy.hooks.publish.tapPromise('failing', async () => {
+          throw new Error('Publish failed');
+        });
+        bonvoy.hooks.rollback.tapPromise('failing', async () => {
+          throw 'string rollback error';
+        });
+      },
+    };
+
+    await expect(
+      shipit(undefined, {
+        cwd: '/test',
+        silent: true,
+        dryRun: false,
+        gitOps,
+        plugins: [
+          new ConventionalPlugin(),
+          new ChangelogPlugin(),
+          new GitPlugin({ push: false }, gitOps),
+          failingPlugin,
+        ],
+      }),
+    ).rejects.toThrow('Publish failed');
+
+    const log = JSON.parse(vol.readFileSync('/test/.bonvoy/release-log.json', 'utf-8') as string);
+    expect(log.status).toBe('rollback-failed');
+  });
+});
+
+describe('shipit error before actions', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should not rollback when error occurs before any actions', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc',
+          message: 'feat: x',
+          author: 'T',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/x.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    // Plugin that fails during validation (before any actions are recorded)
+    const failingPlugin = {
+      name: 'failing',
+      // biome-ignore lint/suspicious/noExplicitAny: Mock plugin for testing
+      apply(bonvoy: any) {
+        bonvoy.hooks.validateRepo.tapPromise('failing', async () => {
+          throw new Error('Validation failed');
+        });
+      },
+    };
+
+    await expect(
+      shipit(undefined, {
+        cwd: '/test',
+        silent: true,
+        dryRun: false,
+        gitOps,
+        plugins: [
+          new ConventionalPlugin(),
+          new ChangelogPlugin(),
+          new GitPlugin({ push: false }, gitOps),
+          failingPlugin,
+        ],
+      }),
+    ).rejects.toThrow('Validation failed');
+
+    // Log should still be in-progress (no rollback attempted since no actions)
+    const log = JSON.parse(vol.readFileSync('/test/.bonvoy/release-log.json', 'utf-8') as string);
+    expect(log.status).toBe('in-progress');
+  });
+});
+
+describe('shipit dry-run error', () => {
+  beforeEach(() => {
+    vol.reset();
+  });
+
+  it('should not attempt rollback in dry-run mode', async () => {
+    const gitOps = createMockGitOps({
+      commits: [
+        {
+          hash: 'abc',
+          message: 'feat: x',
+          author: 'T',
+          date: '2024-01-01T00:00:00Z',
+          files: ['src/x.ts'],
+        },
+      ],
+      lastTag: null,
+    });
+
+    vol.fromJSON(
+      { '/test/package.json': JSON.stringify({ name: 'test-pkg', version: '1.0.0' }) },
+      '/',
+    );
+
+    const failingPlugin = {
+      name: 'failing',
+      // biome-ignore lint/suspicious/noExplicitAny: Mock plugin for testing
+      apply(bonvoy: any) {
+        bonvoy.hooks.beforeRelease.tapPromise('failing', async () => {
+          throw new Error('Dry-run error');
+        });
+      },
+    };
+
+    await expect(
+      shipit(undefined, {
+        cwd: '/test',
+        silent: true,
+        dryRun: true,
+        gitOps,
+        plugins: [
+          new ConventionalPlugin(),
+          new ChangelogPlugin(),
+          new GitPlugin({ push: false }, gitOps),
+          failingPlugin,
+        ],
+      }),
+    ).rejects.toThrow('Dry-run error');
   });
 });

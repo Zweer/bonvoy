@@ -1,5 +1,5 @@
 import type { ChangelogContext, Logger } from '@bonvoy/core';
-import { Bonvoy, loadConfig } from '@bonvoy/core';
+import { Bonvoy, loadConfig, noopActionLog } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 
@@ -40,6 +40,7 @@ export async function changelogCommand(options: { silent?: boolean } = {}): Prom
         changedPackages: packages,
         rootPath: process.cwd(),
         isDryRun: true,
+        actionLog: noopActionLog,
         /* c8 ignore start -- noop logger functions */
         logger: { info() {}, warn() {}, error() {} },
         /* c8 ignore stop */

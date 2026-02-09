@@ -6,6 +6,7 @@ export interface ShipitOptions {
   silent?: boolean; // Suppress console output (for JSON mode)
   package?: string[];
   preid?: string; // Prerelease identifier (alpha, beta, rc)
+  force?: boolean; // Skip stale release log check
   cwd?: string;
   plugins?: BonvoyPlugin[];
   gitOps?: GitOperations;

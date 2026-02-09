@@ -42,6 +42,21 @@ function createMockOps(
     async getCommitsSinceTag() {
       return [];
     },
+    async getHeadSha() {
+      return 'abc123';
+    },
+    async resetHard(sha, cwd) {
+      calls.push({ method: 'resetHard', args: [sha, cwd] });
+    },
+    async deleteTag(name, cwd) {
+      calls.push({ method: 'deleteTag', args: [name, cwd] });
+    },
+    async deleteRemoteTags(tags, cwd) {
+      calls.push({ method: 'deleteRemoteTags', args: [tags, cwd] });
+    },
+    async forcePush(cwd, branch) {
+      calls.push({ method: 'forcePush', args: [cwd, branch] });
+    },
   };
 }
 
@@ -59,6 +74,7 @@ describe('GitPlugin', () => {
       hooks: {
         validateRepo: { tapPromise: vi.fn() },
         beforePublish: { tapPromise: vi.fn() },
+        rollback: { tapPromise: vi.fn() },
       },
     };
   });
@@ -85,6 +101,7 @@ describe('GitPlugin', () => {
       ],
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -122,6 +139,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -142,6 +160,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -162,6 +181,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -179,6 +199,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package-a', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -197,6 +218,7 @@ describe('GitPlugin', () => {
       packages: [],
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -215,6 +237,7 @@ describe('GitPlugin', () => {
       packages: [{ name: '@test/package', version: '1.0.0' }],
       rootPath: '/project',
       isDryRun: true,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -240,6 +263,7 @@ describe('GitPlugin', () => {
       versions: { '@test/package': '1.0.0' },
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -255,6 +279,7 @@ describe('GitPlugin', () => {
       versions: { '@test/package': '1.0.0' },
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -269,6 +294,7 @@ describe('GitPlugin', () => {
       changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/project' }],
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -287,6 +313,7 @@ describe('GitPlugin', () => {
       versions: { '@test/package-a': '1.0.0' }, // package-b not in versions
       rootPath: '/project',
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 

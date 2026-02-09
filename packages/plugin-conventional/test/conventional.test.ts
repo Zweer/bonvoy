@@ -43,6 +43,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
     const result = await bonvoy.hooks.getVersion.promise(context);
@@ -58,6 +59,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -74,6 +76,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -90,6 +93,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -106,6 +110,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -122,6 +127,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -143,6 +149,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -159,6 +166,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -175,6 +183,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -191,6 +200,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -210,6 +220,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -229,6 +240,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -248,6 +260,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -268,6 +281,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -286,6 +300,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -302,6 +317,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -318,6 +334,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -334,6 +351,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 
@@ -351,6 +369,7 @@ describe('ConventionalPlugin', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: mockLogger,
     };
 

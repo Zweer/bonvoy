@@ -93,7 +93,7 @@
 - ✅ **Minimal config**: Works with zero config, customizable when needed
 - ✅ **Fast**: Complete release in < 60 seconds
 - ✅ **Clear errors**: Helpful messages with solutions
-- ✅ **Rollback tracking**: Log what happened for manual recovery
+- ✅ **Rollback**: Automatic rollback on failure + manual `bonvoy rollback` command
 
 ## Architecture
 
@@ -163,6 +163,9 @@ interface ReleaseHooks {
   beforeCreatePR: Hook<[PRContext], void>;
   createPR: Hook<[PRContext], void>;
   afterCreatePR: Hook<[PRContext], void>;
+  
+  // Rollback (on failure or manual)
+  rollback: Hook<[RollbackContext], void>;
 }
 ```
 

@@ -1,5 +1,5 @@
 import type { CommitInfo, Context, Package } from '@bonvoy/core';
-import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
+import { assignCommitsToPackages, Bonvoy, loadConfig, noopActionLog } from '@bonvoy/core';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import { defaultGitOperations, type GitOperations } from '@bonvoy/plugin-git';
 
@@ -41,6 +41,7 @@ export async function analyzeStatus(options: {
       changedPackages: [pkg],
       rootPath,
       isDryRun: true,
+      actionLog: noopActionLog,
       logger: { info: noop, warn: noop, error: noop },
       commits: pkgCommits,
       currentPackage: pkg,

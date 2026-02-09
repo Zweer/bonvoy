@@ -29,6 +29,12 @@ export interface GitLabOperations {
     projectId: string | number,
     tagName: string,
   ): Promise<boolean>;
+  deleteRelease(
+    token: string,
+    host: string,
+    projectId: string | number,
+    tagName: string,
+  ): Promise<void>;
 }
 
 export const defaultGitLabOperations: GitLabOperations = {
@@ -64,6 +70,11 @@ export const defaultGitLabOperations: GitLabOperations = {
     } catch {
       return false;
     }
+  },
+
+  async deleteRelease(token, host, projectId, tagName) {
+    const api = new Gitlab({ token, host });
+    await api.ProjectReleases.remove(projectId, tagName);
   },
   /* v8 ignore stop */
 };

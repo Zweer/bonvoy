@@ -1,4 +1,4 @@
-import type { BonvoyPlugin, Context, PublishContext } from '@bonvoy/core';
+import type { BonvoyPlugin, Context, PublishContext, RollbackContext } from '@bonvoy/core';
 
 import { defaultNpmOperations, type NpmOperations } from './operations.js';
 
@@ -28,7 +28,7 @@ export default class NpmPlugin implements BonvoyPlugin {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Hook types are complex and vary by implementation
-  apply(bonvoy: { hooks: { validateRepo: any; publish: any } }): void {
+  apply(bonvoy: { hooks: { validateRepo: any; publish: any; rollback: any } }): void {
     bonvoy.hooks.validateRepo.tapPromise(this.name, async (context: Context) => {
       await this.validatePackages(context);
     });
@@ -40,10 +40,14 @@ export default class NpmPlugin implements BonvoyPlugin {
       }
       await this.publishPackages(context);
     });
+
+    bonvoy.hooks.rollback.tapPromise(this.name, async (context: RollbackContext) => {
+      await this.rollback(context);
+    });
   }
 
   private async publishPackages(context: PublishContext): Promise<void> {
-    const { packages, logger, preid } = context;
+    const { packages, logger, preid, actionLog } = context;
 
     for (const pkg of packages) {
       if (this.config.skipExisting && (await this.isAlreadyPublished(pkg))) {
@@ -52,6 +56,11 @@ export default class NpmPlugin implements BonvoyPlugin {
       }
 
       await this.publishPackage(pkg, logger, preid);
+      actionLog.record({
+        plugin: 'npm',
+        action: 'publish',
+        data: { name: pkg.name, version: pkg.version },
+      });
     }
   }
 
@@ -91,6 +100,23 @@ export default class NpmPlugin implements BonvoyPlugin {
   private async isAlreadyPublished(pkg: { name: string; version: string }): Promise<boolean> {
     const version = await this.ops.view(pkg.name, pkg.version);
     return version === pkg.version;
+  }
+
+  private async rollback(context: RollbackContext): Promise<void> {
+    const { logger } = context;
+    const actions = context.actions.filter((a) => a.plugin === 'npm').reverse();
+
+    for (const action of actions) {
+      if (action.action !== 'publish') continue;
+      const { name, version } = action.data as { name: string; version: string };
+      try {
+        logger.info(`  ↩️  Unpublishing ${name}@${version} (best-effort)`);
+        await this.ops.unpublish(name, version);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        logger.warn(`  ⚠️  Failed to unpublish ${name}@${version}: ${msg}`);
+      }
+    }
   }
 
   private async validatePackages(context: Context): Promise<void> {

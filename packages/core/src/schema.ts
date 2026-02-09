@@ -110,6 +110,27 @@ export interface Logger {
   error(message: string): void;
 }
 
+export interface ActionEntry {
+  plugin: string;
+  action: string;
+  timestamp: string;
+  data: Record<string, unknown>;
+  status: 'completed' | 'failed';
+}
+
+export interface ReleaseLog {
+  startedAt: string;
+  config: { tagFormat: string; rootPath: string };
+  packages: Array<{ name: string; from: string; to: string }>;
+  actions: ActionEntry[];
+  status: 'in-progress' | 'completed' | 'rolled-back' | 'rollback-failed';
+}
+
+export interface ActionLogHelper {
+  record(entry: Omit<ActionEntry, 'timestamp' | 'status'>): void;
+  entries(): ActionEntry[];
+}
+
 export interface Context {
   config: BonvoyConfig;
   packages: Package[];
@@ -117,6 +138,7 @@ export interface Context {
   rootPath: string;
   isDryRun: boolean;
   logger: Logger;
+  actionLog: ActionLogHelper;
   commits?: CommitInfo[]; // Commit filtrati per il package corrente
   currentPackage?: Package; // Package che stiamo processando
   versions?: Record<string, string>; // Versioni calcolate (disponibile in validateRepo)
@@ -139,6 +161,11 @@ export interface PublishContext extends ChangelogContext {
 
 export interface ReleaseContext extends PublishContext {
   releases: Record<string, ReleaseInfo>;
+}
+
+export interface RollbackContext extends Context {
+  actions: ActionEntry[];
+  errors: Error[];
 }
 
 export interface PRContext extends Context {
@@ -216,6 +243,9 @@ export interface ReleaseHooks {
   beforeCreatePR: import('tapable').Hook<[PRContext], void>;
   createPR: import('tapable').Hook<[PRContext], void>;
   afterCreatePR: import('tapable').Hook<[PRContext], void>;
+
+  // Rollback
+  rollback: import('tapable').Hook<[RollbackContext], void>;
 }
 
 // Re-export tapable types

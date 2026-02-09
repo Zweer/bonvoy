@@ -58,6 +58,7 @@ permissions:
 | Hook | Action |
 |------|--------|
 | `publish` | Publishes each changed package to npm |
+| `rollback` | Unpublishes packages (best-effort) |
 
 ## Behavior
 

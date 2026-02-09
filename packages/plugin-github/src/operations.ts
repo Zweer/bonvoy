@@ -25,16 +25,18 @@ export interface GitHubPRResult {
 }
 
 export interface GitHubOperations {
-  createRelease(token: string, params: GitHubReleaseParams): Promise<void>;
+  createRelease(token: string, params: GitHubReleaseParams): Promise<{ id: number }>;
   createPR(token: string, params: GitHubPRParams): Promise<GitHubPRResult>;
   releaseExists(token: string, owner: string, repo: string, tag: string): Promise<boolean>;
+  deleteRelease(token: string, owner: string, repo: string, releaseId: number): Promise<void>;
 }
 
 export const defaultGitHubOperations: GitHubOperations = {
   /* c8 ignore start - real API calls */
   async createRelease(token, params) {
     const octokit = new Octokit({ auth: token });
-    await octokit.repos.createRelease({ ...params });
+    const { data } = await octokit.repos.createRelease({ ...params });
+    return { id: data.id };
   },
 
   async createPR(token, params) {
@@ -51,6 +53,11 @@ export const defaultGitHubOperations: GitHubOperations = {
     } catch {
       return false;
     }
+  },
+
+  async deleteRelease(token, owner, repo, releaseId) {
+    const octokit = new Octokit({ auth: token });
+    await octokit.repos.deleteRelease({ owner, repo, release_id: releaseId });
   },
   /* c8 ignore stop */
 };

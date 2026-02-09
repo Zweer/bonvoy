@@ -25,6 +25,7 @@ A plugin-based release automation tool for npm packages and monorepos.
 - ⚡ **Zero config** — works immediately for npm + GitHub
 - 🎯 **Flexible workflows** — direct release or PR-based
 - 📝 **Conventional commits** — automatic changelog from commit messages
+- ↩️ **Automatic rollback** — failed releases are rolled back automatically
 - 🛡️ **Validated config** — runtime validation with Zod
 
 ## Quick Start
@@ -38,6 +39,7 @@ npx bonvoy shipit              # Release all changed packages
 npx bonvoy shipit --dry-run    # Preview changes
 npx bonvoy shipit minor        # Force minor bump
 npx bonvoy shipit 2.0.0        # Force specific version
+npx bonvoy rollback            # Roll back a failed release
 ```
 
 ## How It Works
@@ -109,6 +111,7 @@ Visit the **[full documentation](https://zweer.github.io/bonvoy)** for:
 - [Monorepo Guide](https://zweer.github.io/bonvoy/guides/monorepo) — npm workspaces setup
 - [PR Workflow](https://zweer.github.io/bonvoy/guides/pr-workflow) — release-please style
 - [CI/CD Guide](https://zweer.github.io/bonvoy/guides/ci-cd) — GitHub Actions + GitLab CI
+- [Rollback & Recovery](https://zweer.github.io/bonvoy/guides/rollback) — automatic and manual rollback
 - [Migration](https://zweer.github.io/bonvoy/guides/migration) — from changesets, semantic-release, release-it
 - [Writing Plugins](https://zweer.github.io/bonvoy/guides/writing-plugins) — extend bonvoy
 - [Comparison](https://zweer.github.io/bonvoy/comparison) — vs other tools

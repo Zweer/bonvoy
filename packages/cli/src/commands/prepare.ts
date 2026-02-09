@@ -11,7 +11,7 @@ import type {
   PRTrackingFile,
   VersionContext,
 } from '@bonvoy/core';
-import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
+import { assignCommitsToPackages, Bonvoy, loadConfig, noopActionLog } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import { defaultGitOperations, type GitOperations } from '@bonvoy/plugin-git';
@@ -112,6 +112,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
       changedPackages: [pkg],
       rootPath,
       isDryRun: options.dryRun || false,
+      actionLog: noopActionLog,
       logger,
       commits: pkgCommits,
       currentPackage: pkg,
@@ -190,6 +191,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
     changedPackages,
     rootPath,
     isDryRun: options.dryRun || false,
+    actionLog: noopActionLog,
     logger,
     commits: commitsWithPackages,
     versions,
@@ -208,6 +210,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
       changedPackages,
       rootPath,
       isDryRun: options.dryRun || false,
+      actionLog: noopActionLog,
       logger,
       commits: pkgCommits,
       currentPackage: pkg,
@@ -338,6 +341,7 @@ export async function prepare(options: PrepareOptions = {}): Promise<PrepareResu
     changedPackages,
     rootPath,
     isDryRun: options.dryRun || false,
+    actionLog: noopActionLog,
     logger,
     branchName,
     baseBranch,

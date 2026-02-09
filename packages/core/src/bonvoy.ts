@@ -41,6 +41,9 @@ export class Bonvoy {
       beforeCreatePR: new AsyncSeriesHook(['prContext']),
       createPR: new AsyncSeriesHook(['prContext']),
       afterCreatePR: new AsyncSeriesHook(['prContext']),
+
+      // Rollback
+      rollback: new AsyncSeriesHook(['rollbackContext']),
     };
 
     // Apply inline hooks from config

@@ -78,6 +78,27 @@ export function createMockGitOperations(
       calls.push({ method: 'getCommitsSinceTag', args: [_tag, _cwd] });
       return commits;
     },
+
+    async getHeadSha(_cwd) {
+      calls.push({ method: 'getHeadSha', args: [_cwd] });
+      return 'mock-sha-before';
+    },
+
+    async resetHard(sha, cwd) {
+      calls.push({ method: 'resetHard', args: [sha, cwd] });
+    },
+
+    async deleteTag(name, cwd) {
+      calls.push({ method: 'deleteTag', args: [name, cwd] });
+    },
+
+    async deleteRemoteTags(tags, cwd) {
+      calls.push({ method: 'deleteRemoteTags', args: [tags, cwd] });
+    },
+
+    async forcePush(cwd, branch) {
+      calls.push({ method: 'forcePush', args: [cwd, branch] });
+    },
   };
 }
 
@@ -122,6 +143,10 @@ export function createMockNpmOperations(
       calls.push({ method: 'hasToken', args: [] });
       return hasTokenValue;
     },
+
+    async unpublish(pkg, version) {
+      calls.push({ method: 'unpublish', args: [pkg, version] });
+    },
   };
 }
 
@@ -144,6 +169,7 @@ export function createMockGitHubOperations(
 
     async createRelease(token: string, params: GitHubReleaseParams) {
       calls.push({ method: 'createRelease', args: [token, params] });
+      return { id: 123 };
     },
 
     async createPR(token, params) {
@@ -154,6 +180,10 @@ export function createMockGitHubOperations(
     async releaseExists(_token, _owner, _repo, tag) {
       calls.push({ method: 'releaseExists', args: [_token, _owner, _repo, tag] });
       return existingReleases.has(tag);
+    },
+
+    async deleteRelease(_token, _owner, _repo, _releaseId) {
+      calls.push({ method: 'deleteRelease', args: [_token, _owner, _repo, _releaseId] });
     },
   };
 }

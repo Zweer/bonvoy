@@ -32,6 +32,7 @@ describe('types', () => {
       changedPackages: [],
       rootPath: '/test',
       isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
       logger: { info: () => {}, warn: () => {}, error: () => {} },
     };
 

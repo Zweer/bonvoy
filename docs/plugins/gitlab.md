@@ -40,6 +40,7 @@ GitLab personal access token or CI job token. Defaults to `GITLAB_TOKEN` environ
 |------|--------|
 | `makeRelease` | Creates a GitLab release for each published package |
 | `createPR` | Creates a merge request (PR workflow) |
+| `rollback` | Deletes GitLab releases by tag |
 
 ## GitLab CI
 

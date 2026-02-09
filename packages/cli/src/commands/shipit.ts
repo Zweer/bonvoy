@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type {
@@ -8,9 +8,16 @@ import type {
   Package,
   PRTrackingFile,
   ReleaseContext,
+  RollbackContext,
   VersionContext,
 } from '@bonvoy/core';
-import { assignCommitsToPackages, Bonvoy, loadConfig } from '@bonvoy/core';
+import {
+  ActionLog,
+  assignCommitsToPackages,
+  Bonvoy,
+  loadConfig,
+  noopActionLog,
+} from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import GitPlugin, { defaultGitOperations } from '@bonvoy/plugin-git';
@@ -22,6 +29,8 @@ import { inc, valid } from 'semver';
 import { detectPackages } from '../utils/detect-packages.js';
 import { getCommitsSinceLastTag } from '../utils/git.js';
 import type { ShipitOptions, ShipitResult } from '../utils/types.js';
+
+const RELEASE_LOG_PATH = '.bonvoy/release-log.json';
 
 const noop = () => {};
 const silentLogger: Logger = { info: noop, warn: noop, error: noop };
@@ -47,6 +56,22 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   if (currentBranch === baseBranch && existsSync(trackingFilePath)) {
     // Publish-only mode: release PR was merged
     return shipitPublishOnly(rootPath, trackingFilePath, config, gitOps, logger, options);
+  }
+
+  // 0.5. Check for stale release log (previous failed release)
+  const releaseLogPath = join(rootPath, RELEASE_LOG_PATH);
+  if (!options.force && existsSync(releaseLogPath)) {
+    try {
+      const prevLog = ActionLog.load(releaseLogPath);
+      if (prevLog.status === 'in-progress') {
+        throw new Error(
+          'Previous release may have failed (status: in-progress). Run `bonvoy rollback` first or use `--force` to override.',
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Previous release')) throw error;
+      // Corrupted log file — safe to overwrite
+    }
   }
 
   // 1. Initialize Bonvoy with hooks
@@ -99,6 +124,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     rootPath,
     isDryRun: options.dryRun || false,
     logger,
+    actionLog: noopActionLog,
     commits: commitsWithPackages,
   };
   await bonvoy.hooks.beforeShipIt.promise(initialContext);
@@ -122,6 +148,7 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       rootPath,
       isDryRun: options.dryRun || false,
       logger,
+      actionLog: noopActionLog,
       commits: pkgCommits,
       currentPackage: pkg,
     };
@@ -212,7 +239,23 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   }
   logger.info('');
 
-  // 6. Validate before making any changes
+  // 6. Create action log for rollback tracking
+  const actionLog = options.dryRun
+    ? noopActionLog
+    : new ActionLog(
+        releaseLogPath,
+        {
+          tagFormat: config.tagFormat || '{name}@{version}',
+          rootPath,
+        },
+        changedPackages.map((pkg) => ({
+          name: pkg.name,
+          from: pkg.version,
+          to: versions[pkg.name],
+        })),
+      );
+
+  // 6.5. Validate before making any changes
   const validateContext: Context = {
     config,
     packages,
@@ -220,205 +263,219 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
     rootPath,
     isDryRun: options.dryRun || false,
     logger,
+    actionLog,
     commits: commitsWithPackages,
     versions,
   };
-  await bonvoy.hooks.validateRepo.promise(validateContext);
 
-  // 6.5. Run version hooks (allows plugins to modify versions)
-  const versionContext: VersionContext = {
-    ...validateContext,
-    versions,
-    bumps,
-  };
-  await bonvoy.hooks.version.promise(versionContext);
-  await bonvoy.hooks.afterVersion.promise(versionContext);
+  try {
+    await bonvoy.hooks.validateRepo.promise(validateContext);
 
-  // 7. Generate changelogs per package
-  const changelogs: Record<string, string> = {};
+    // 6.5. Run version hooks (allows plugins to modify versions)
+    const versionContext: VersionContext = {
+      ...validateContext,
+      versions,
+      bumps,
+    };
+    await bonvoy.hooks.version.promise(versionContext);
+    await bonvoy.hooks.afterVersion.promise(versionContext);
 
-  for (const pkg of changedPackages) {
-    const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
-    const changelogContext: ChangelogContext = {
+    // 7. Generate changelogs per package
+    const changelogs: Record<string, string> = {};
+
+    for (const pkg of changedPackages) {
+      const pkgCommits = commitsWithPackages.filter((c) => c.packages.includes(pkg.name));
+      const changelogContext: ChangelogContext = {
+        config,
+        packages,
+        changedPackages,
+        rootPath,
+        isDryRun: options.dryRun || false,
+        logger,
+        actionLog,
+        commits: pkgCommits,
+        currentPackage: pkg,
+        versions,
+        bumps,
+        changelogs,
+      };
+
+      await bonvoy.hooks.beforeChangelog.promise(changelogContext);
+      const generated = await bonvoy.hooks.generateChangelog.promise(changelogContext);
+      if (typeof generated === 'string' && generated) {
+        changelogs[pkg.name] = generated;
+      }
+      await bonvoy.hooks.afterChangelog.promise(changelogContext);
+    }
+
+    if (!options.dryRun) {
+      // Update all package.json versions
+      for (const pkg of changedPackages) {
+        const pkgJsonPath = join(pkg.path, 'package.json');
+        const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+        pkgJson.version = versions[pkg.name];
+        writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
+      }
+
+      // Update internal dependencies to match new versions (including root package.json)
+      const packageNames = new Set(packages.map((p) => p.name));
+      const pkgJsonPaths = packages.map((p) => join(p.path, 'package.json'));
+      const rootPkgJsonPath = join(rootPath, 'package.json');
+      if (existsSync(rootPkgJsonPath)) {
+        pkgJsonPaths.push(rootPkgJsonPath);
+      }
+      for (const pkgJsonPath of pkgJsonPaths) {
+        const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+        let modified = false;
+
+        for (const depType of ['dependencies', 'devDependencies', 'peerDependencies'] as const) {
+          const deps = pkgJson[depType];
+          if (!deps) continue;
+
+          for (const depName of Object.keys(deps)) {
+            if (packageNames.has(depName) && versions[depName]) {
+              deps[depName] = `^${versions[depName]}`;
+              modified = true;
+            }
+          }
+        }
+
+        if (modified) {
+          writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
+        }
+      }
+
+      // Note: changelogs are written by the ChangelogPlugin via afterChangelog hook
+
+      // Sync package-lock.json after version bumps
+      try {
+        await execa('npm', ['install', '--package-lock-only'], { cwd: rootPath });
+        logger.info('🔒 package-lock.json synced');
+      } catch {
+        // No lock file or npm not available - skip
+      }
+
+      // Update root package.json version (monorepo only)
+      /* c8 ignore start -- rootVersionStrategy tested via integration */
+      try {
+        const rootPkgPath = join(rootPath, 'package.json');
+        const rootPkg = JSON.parse(readFileSync(rootPkgPath, 'utf-8'));
+        if (rootPkg.workspaces && config.rootVersionStrategy !== 'none') {
+          const strategy = config.rootVersionStrategy || 'max';
+          const newVersions = Object.values(versions);
+          /* c8 ignore next */
+          let rootVersion: string | null = null;
+
+          if (strategy === 'max') {
+            rootVersion = newVersions.sort((a, b) => (a > b ? -1 : 1))[0] ?? null;
+            /* c8 ignore next */
+          } else if (strategy === 'patch') {
+            rootVersion = inc(rootPkg.version, 'patch');
+          }
+
+          /* c8 ignore next */
+          if (rootVersion && rootVersion !== rootPkg.version) {
+            rootPkg.version = rootVersion;
+            writeFileSync(rootPkgPath, `${JSON.stringify(rootPkg, null, 2)}\n`);
+            logger.info(`📦 Root package bumped to ${rootVersion} (strategy: ${strategy})`);
+          }
+        }
+      } catch {
+        // Root package.json not found or not readable - skip
+      }
+      /* c8 ignore stop */
+    }
+
+    // 8. Update package versions for publishing
+    const packagesWithNewVersions = changedPackages.map((pkg) => ({
+      ...pkg,
+      version: versions[pkg.name],
+    }));
+
+    // 9. Publish packages
+    const publishContext = {
       config,
-      packages,
+      packages: packagesWithNewVersions,
       changedPackages,
       rootPath,
       isDryRun: options.dryRun || false,
       logger,
-      commits: pkgCommits,
-      currentPackage: pkg,
+      actionLog,
+      commits: commitsWithPackages,
       versions,
       bumps,
       changelogs,
+      publishedPackages: [] as string[],
+      preid: options.preid,
     };
 
-    await bonvoy.hooks.beforeChangelog.promise(changelogContext);
-    const generated = await bonvoy.hooks.generateChangelog.promise(changelogContext);
-    if (typeof generated === 'string' && generated) {
-      changelogs[pkg.name] = generated;
+    await bonvoy.hooks.beforePublish.promise(publishContext);
+    await bonvoy.hooks.publish.promise(publishContext);
+    await bonvoy.hooks.afterPublish.promise(publishContext);
+
+    // 10. Create GitHub releases
+    const releaseContext: ReleaseContext = {
+      ...publishContext,
+      releases: {},
+    };
+
+    await bonvoy.hooks.beforeRelease.promise(releaseContext);
+    await bonvoy.hooks.makeRelease.promise(releaseContext);
+    await bonvoy.hooks.afterRelease.promise(releaseContext);
+
+    if (!options.dryRun) {
+      // Mark release as completed in action log
+      /* c8 ignore start -- unreachable: actionLog is always ActionLog when !dryRun */
+      if (actionLog instanceof ActionLog) {
+        actionLog.complete();
+      }
+      /* c8 ignore stop */
+
+      logger.info('\n🎉 Release completed successfully!');
+    } else {
+      logger.info('\n🔍 Dry run completed - no changes made');
     }
-    await bonvoy.hooks.afterChangelog.promise(changelogContext);
-  }
 
-  if (!options.dryRun) {
-    // Update all package.json versions
-    for (const pkg of changedPackages) {
-      const pkgJsonPath = join(pkg.path, 'package.json');
-      const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
-      pkgJson.version = versions[pkg.name];
-      writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
-    }
-
-    // Update internal dependencies to match new versions (including root package.json)
-    const packageNames = new Set(packages.map((p) => p.name));
-    const pkgJsonPaths = packages.map((p) => join(p.path, 'package.json'));
-    const rootPkgJsonPath = join(rootPath, 'package.json');
-    if (existsSync(rootPkgJsonPath)) {
-      pkgJsonPaths.push(rootPkgJsonPath);
-    }
-    for (const pkgJsonPath of pkgJsonPaths) {
-      const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
-      let modified = false;
-
-      for (const depType of ['dependencies', 'devDependencies', 'peerDependencies'] as const) {
-        const deps = pkgJson[depType];
-        if (!deps) continue;
-
-        for (const depName of Object.keys(deps)) {
-          if (packageNames.has(depName) && versions[depName]) {
-            deps[depName] = `^${versions[depName]}`;
-            modified = true;
-          }
+    return {
+      packages,
+      changedPackages,
+      versions,
+      bumps,
+      changelogs,
+      commits: commitsWithPackages,
+    };
+  } catch (error) {
+    // Auto-rollback on failure
+    if (!options.dryRun && actionLog instanceof ActionLog) {
+      const entries = actionLog.entries();
+      if (entries.length > 0) {
+        logger.error('\n❌ Release failed — rolling back...');
+        const rollbackContext: RollbackContext = {
+          config,
+          packages,
+          changedPackages,
+          rootPath,
+          isDryRun: false,
+          logger,
+          actionLog,
+          actions: entries,
+          errors: [error instanceof Error ? error : new Error(String(error))],
+        };
+        try {
+          await bonvoy.hooks.rollback.promise(rollbackContext);
+          actionLog.markRolledBack();
+          logger.info('✅ Rollback completed');
+        } catch (rollbackError) {
+          actionLog.markRollbackFailed();
+          const msg =
+            rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+          logger.error(`⚠️  Rollback partially failed: ${msg}`);
+          logger.error('Check .bonvoy/release-log.json for details and fix manually.');
         }
       }
-
-      if (modified) {
-        writeFileSync(pkgJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`);
-      }
     }
-
-    // Note: changelogs are written by the ChangelogPlugin via afterChangelog hook
-
-    // Sync package-lock.json after version bumps
-    try {
-      await execa('npm', ['install', '--package-lock-only'], { cwd: rootPath });
-      logger.info('🔒 package-lock.json synced');
-    } catch {
-      // No lock file or npm not available - skip
-    }
-
-    // Update root package.json version (monorepo only)
-    /* c8 ignore start -- rootVersionStrategy tested via integration */
-    try {
-      const rootPkgPath = join(rootPath, 'package.json');
-      const rootPkg = JSON.parse(readFileSync(rootPkgPath, 'utf-8'));
-      if (rootPkg.workspaces && config.rootVersionStrategy !== 'none') {
-        const strategy = config.rootVersionStrategy || 'max';
-        const newVersions = Object.values(versions);
-        /* c8 ignore next */
-        let rootVersion: string | null = null;
-
-        if (strategy === 'max') {
-          rootVersion = newVersions.sort((a, b) => (a > b ? -1 : 1))[0] ?? null;
-          /* c8 ignore next */
-        } else if (strategy === 'patch') {
-          rootVersion = inc(rootPkg.version, 'patch');
-        }
-
-        /* c8 ignore next */
-        if (rootVersion && rootVersion !== rootPkg.version) {
-          rootPkg.version = rootVersion;
-          writeFileSync(rootPkgPath, `${JSON.stringify(rootPkg, null, 2)}\n`);
-          logger.info(`📦 Root package bumped to ${rootVersion} (strategy: ${strategy})`);
-        }
-      }
-    } catch {
-      // Root package.json not found or not readable - skip
-    }
-    /* c8 ignore stop */
+    throw error;
   }
-
-  // 8. Update package versions for publishing
-  const packagesWithNewVersions = changedPackages.map((pkg) => ({
-    ...pkg,
-    version: versions[pkg.name],
-  }));
-
-  // 9. Publish packages
-  const publishContext = {
-    config,
-    packages: packagesWithNewVersions,
-    changedPackages,
-    rootPath,
-    isDryRun: options.dryRun || false,
-    logger,
-    commits: commitsWithPackages,
-    versions,
-    bumps,
-    changelogs,
-    publishedPackages: [] as string[],
-    preid: options.preid,
-  };
-
-  await bonvoy.hooks.beforePublish.promise(publishContext);
-  await bonvoy.hooks.publish.promise(publishContext);
-  await bonvoy.hooks.afterPublish.promise(publishContext);
-
-  // 10. Create GitHub releases
-  const releaseContext: ReleaseContext = {
-    ...publishContext,
-    releases: {},
-  };
-
-  await bonvoy.hooks.beforeRelease.promise(releaseContext);
-  await bonvoy.hooks.makeRelease.promise(releaseContext);
-  await bonvoy.hooks.afterRelease.promise(releaseContext);
-
-  if (!options.dryRun) {
-    // Write release log for rollback tracking
-    try {
-      const bonvoyDir = join(rootPath, '.bonvoy');
-      mkdirSync(bonvoyDir, { recursive: true });
-      writeFileSync(
-        join(bonvoyDir, 'release-log.json'),
-        `${JSON.stringify(
-          {
-            timestamp: new Date().toISOString(),
-            packages: changedPackages.map((pkg) => ({
-              name: pkg.name,
-              from: pkg.version,
-              to: versions[pkg.name],
-            })),
-            tags: changedPackages.map((pkg) => {
-              const tagFormat = config.tagFormat || '{name}@{version}';
-              return tagFormat.replace('{name}', pkg.name).replace('{version}', versions[pkg.name]);
-            }),
-            published: publishContext.publishedPackages,
-          },
-          null,
-          2,
-        )}\n`,
-      );
-      logger.info('📋 Release log saved to .bonvoy/release-log.json');
-      /* c8 ignore next 3 -- non-fatal error handling */
-    } catch {
-      // Could not write release log - non-fatal
-    }
-
-    logger.info('\n🎉 Release completed successfully!');
-  } else {
-    logger.info('\n🔍 Dry run completed - no changes made');
-  }
-
-  return {
-    packages,
-    changedPackages,
-    versions,
-    bumps,
-    changelogs,
-    commits: commitsWithPackages,
-  };
 }
 
 async function shipitPublishOnly(
@@ -472,6 +529,7 @@ async function shipitPublishOnly(
     /* c8 ignore next */
     isDryRun: options.dryRun || false,
     logger,
+    actionLog: noopActionLog,
     commits: [],
     versions,
     bumps,
@@ -525,6 +583,7 @@ export async function shipitCommand(
     json?: boolean;
     package?: string[];
     preid?: string;
+    force?: boolean;
     silent?: boolean;
   } = {},
 ): Promise<void> {

@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { BonvoyPlugin, Context, PRContext, ReleaseContext } from '@bonvoy/core';
+import type {
+  BonvoyPlugin,
+  Context,
+  PRContext,
+  ReleaseContext,
+  RollbackContext,
+} from '@bonvoy/core';
 
 import { defaultGitLabOperations, type GitLabOperations } from './operations.js';
 
@@ -57,6 +63,12 @@ export default class GitLabPlugin implements BonvoyPlugin {
             description: changelog,
           });
 
+          context.actionLog.record({
+            plugin: 'gitlab',
+            action: 'release',
+            data: { tag: tagName, projectId: String(projectId), host },
+          });
+
           context.logger.info(`✅ Created GitLab release: ${tagName}`);
         } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : String(error);
@@ -100,6 +112,39 @@ export default class GitLabPlugin implements BonvoyPlugin {
         throw error;
       }
     });
+
+    bonvoy.hooks.rollback.tapPromise(this.name, async (context: RollbackContext) => {
+      await this.rollback(context);
+    });
+  }
+
+  private async rollback(context: RollbackContext): Promise<void> {
+    const { logger } = context;
+    const actions = context.actions.filter((a) => a.plugin === 'gitlab').reverse();
+
+    const token = this.options.token || process.env.GITLAB_TOKEN;
+    if (!token) {
+      if (actions.length > 0) {
+        logger.warn('⚠️  GITLAB_TOKEN not found, cannot rollback GitLab releases');
+      }
+      return;
+    }
+
+    for (const action of actions) {
+      if (action.action !== 'release') continue;
+      const { tag, projectId, host } = action.data as {
+        tag: string;
+        projectId: string;
+        host: string;
+      };
+      try {
+        logger.info(`  ↩️  Deleting GitLab release: ${tag}`);
+        await this.ops.deleteRelease(token, host, projectId, tag);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        logger.warn(`  ⚠️  Failed to delete GitLab release ${tag}: ${msg}`);
+      }
+    }
   }
 
   private async validateReleases(context: Context): Promise<void> {

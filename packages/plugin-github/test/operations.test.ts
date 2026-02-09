@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const mockCreateRelease = vi.fn();
+const mockCreateRelease = vi.fn().mockResolvedValue({ data: { id: 42 } });
 vi.mock('@octokit/rest', () => ({
   Octokit: class {
     repos = { createRelease: mockCreateRelease };

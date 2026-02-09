@@ -8,6 +8,7 @@ import { Command } from '@commander-js/extra-typings';
 
 import { changelogCommand } from './commands/changelog.js';
 import { prepareCommand } from './commands/prepare.js';
+import { rollbackCommand } from './commands/rollback.js';
 import { shipitCommand } from './commands/shipit.js';
 import { statusCommand } from './commands/status.js';
 
@@ -28,6 +29,7 @@ export function createProgram(): Command {
     .option('--json', 'Output results as JSON (for CI)')
     .option('--package <name...>', 'Only release specific package(s)')
     .option('--preid <identifier>', 'Prerelease identifier (alpha, beta, rc)')
+    .option('--force', 'Skip stale release log check')
     .argument('[bump]', 'Version bump (patch/minor/major/prerelease/x.y.z)')
     .action(shipitCommand);
 
@@ -43,11 +45,19 @@ export function createProgram(): Command {
 
   prog.command('changelog').description('Preview changelog').action(changelogCommand);
 
+  prog
+    .command('rollback')
+    .description('Rollback last release')
+    .option('--dry-run', 'Preview rollback without executing')
+    .option('--force', 'Skip confirmation')
+    .action(rollbackCommand);
+
   return prog;
 }
 
 export type { PrepareOptions, PrepareResult } from './commands/prepare.js';
 export { prepare } from './commands/prepare.js';
+export { rollback } from './commands/rollback.js';
 // Re-export shipit for testing
 export { shipit } from './commands/shipit.js';
 export type { ShipitOptions, ShipitResult } from './utils/types.js';

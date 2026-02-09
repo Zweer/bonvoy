@@ -11,6 +11,11 @@ afterChangelog → beforePublish → publish → afterPublish →
 beforeRelease → makeRelease → afterRelease
 ```
 
+On failure at any point:
+```
+... → ✗ failure → rollback (reverse order)
+```
+
 For PR workflow:
 ```
 modifyConfig → beforeShipIt → getVersion → validateRepo →
@@ -183,6 +188,23 @@ Create the pull request or merge request.
 
 Called after the PR is created. `PRContext` includes `prUrl` and `prNumber` at this point.
 
+## Rollback Phase
+
+### `rollback`
+
+- **Type:** `AsyncSeriesHook<[RollbackContext]>`
+
+Called when a release fails or when `bonvoy rollback` is run manually. Each plugin rolls back its own actions in reverse order.
+
+```typescript
+bonvoy.hooks.rollback.tapPromise('MyPlugin', async (context) => {
+  const actions = context.actions.filter((a) => a.plugin === 'my-plugin').reverse();
+  for (const action of actions) {
+    // undo the action
+  }
+});
+```
+
 ## Context Types
 
 ```typescript
@@ -193,6 +215,7 @@ interface Context {
   rootPath: string;
   isDryRun: boolean;
   logger: Logger;
+  actionLog: ActionLogHelper;
   commits?: CommitInfo[];
   currentPackage?: Package;
   versions?: Record<string, string>;
@@ -224,5 +247,18 @@ interface PRContext extends Context {
   body: string;
   prUrl?: string;
   prNumber?: number;
+}
+
+interface RollbackContext extends Context {
+  actions: ActionEntry[];
+  errors: Error[];
+}
+
+interface ActionEntry {
+  plugin: string;
+  action: string;
+  data: Record<string, unknown>;
+  timestamp: string;
+  status: 'completed' | 'failed';
 }
 ```

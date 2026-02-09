@@ -30,6 +30,13 @@ function createMockGitOps(config: {
     async getLastTag() {
       return config.lastTag ?? null;
     },
+    async getHeadSha() {
+      return 'mock-sha';
+    },
+    async resetHard() {},
+    async deleteTag() {},
+    async deleteRemoteTags() {},
+    async forcePush() {},
     async getCommitsSinceTag() {
       return config.commits ?? [];
     },

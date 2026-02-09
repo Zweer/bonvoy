@@ -54,6 +54,7 @@ export default defineConfig({
           { text: 'Single Package', link: '/guides/single-package' },
           { text: 'PR Workflow', link: '/guides/pr-workflow' },
           { text: 'CI/CD', link: '/guides/ci-cd' },
+          { text: 'Rollback & Recovery', link: '/guides/rollback' },
           { text: 'Migration', link: '/guides/migration' },
           { text: 'Writing Plugins', link: '/guides/writing-plugins' },
         ],

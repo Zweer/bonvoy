@@ -19,6 +19,7 @@ function createMockOps(
     calls,
     async createRelease(token: string, params: GitHubReleaseParams) {
       calls.push({ method: 'createRelease', args: [token, params] });
+      return { id: 123 };
     },
     async createPR(token: string, params) {
       calls.push({ method: 'createPR', args: [token, params] });
@@ -27,6 +28,9 @@ function createMockOps(
     async releaseExists(_token, _owner, _repo, tag) {
       calls.push({ method: 'releaseExists', args: [_token, _owner, _repo, tag] });
       return existingReleases.has(tag);
+    },
+    async deleteRelease(_token, _owner, _repo, _releaseId) {
+      calls.push({ method: 'deleteRelease', args: [_token, _owner, _repo, _releaseId] });
     },
   };
 }
@@ -48,6 +52,7 @@ describe('GitHubPlugin', () => {
       validateRepo: { tapPromise: vi.fn() },
       makeRelease: { tapPromise: vi.fn() },
       createPR: { tapPromise: vi.fn() },
+      rollback: { tapPromise: vi.fn() },
     },
   });
 
@@ -76,6 +81,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: true,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [],
       versions: {},
@@ -105,6 +111,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [],
       versions: {},
@@ -130,6 +137,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: '@test/pkg', version: '1.0.0', path: '/test/pkg' }],
       versions: { '@test/pkg': '1.1.0' },
@@ -168,6 +176,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -189,6 +198,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0-beta.1' },
@@ -211,6 +221,7 @@ describe('GitHubPlugin', () => {
       async releaseExists() {
         return false;
       },
+      async deleteRelease() {},
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
     const mockBonvoy = createMockBonvoy();
@@ -221,6 +232,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -243,6 +255,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -264,6 +277,7 @@ describe('GitHubPlugin', () => {
       async releaseExists() {
         return false;
       },
+      async deleteRelease() {},
     };
     const plugin = new GitHubPlugin({ token: 'test-token', owner: 'test', repo: 'repo' }, mockOps);
     const mockBonvoy = createMockBonvoy();
@@ -274,6 +288,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -298,6 +313,7 @@ describe('GitHubPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -325,6 +341,7 @@ describe('GitHubPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -345,6 +362,7 @@ describe('GitHubPlugin', () => {
       const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
       await hookFn({
         isDryRun: true,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         branchName: 'release/123',
         baseBranch: 'main',
@@ -367,6 +385,7 @@ describe('GitHubPlugin', () => {
       const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
       await hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         branchName: 'release/123',
         baseBranch: 'main',
@@ -391,6 +410,7 @@ describe('GitHubPlugin', () => {
       const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
       const context = {
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         branchName: 'release/123',
         baseBranch: 'main',
@@ -410,13 +430,16 @@ describe('GitHubPlugin', () => {
     it('should handle createPR errors', async () => {
       const mockOps = {
         calls: [] as { method: string; args: unknown[] }[],
-        async createRelease() {},
+        async createRelease() {
+          return { id: 0 };
+        },
         async createPR() {
           throw new Error('PR creation failed');
         },
         async releaseExists() {
           return false;
         },
+        async deleteRelease() {},
       };
       const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
       const mockBonvoy = createMockBonvoy();
@@ -427,6 +450,7 @@ describe('GitHubPlugin', () => {
       await expect(
         hookFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           branchName: 'release/123',
           baseBranch: 'main',
@@ -442,13 +466,16 @@ describe('GitHubPlugin', () => {
     it('should handle createPR non-Error throws', async () => {
       const mockOps = {
         calls: [] as { method: string; args: unknown[] }[],
-        async createRelease() {},
+        async createRelease() {
+          return { id: 0 };
+        },
         async createPR() {
           throw 'string error';
         },
         async releaseExists() {
           return false;
         },
+        async deleteRelease() {},
       };
       const plugin = new GitHubPlugin({ token: 'test-token', owner: 'org', repo: 'repo' }, mockOps);
       const mockBonvoy = createMockBonvoy();
@@ -459,6 +486,7 @@ describe('GitHubPlugin', () => {
       await expect(
         hookFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           branchName: 'release/123',
           baseBranch: 'main',
@@ -488,6 +516,7 @@ describe('GitHubPlugin', () => {
           versions: { '@test/package': '1.0.0' },
           rootPath: '/test',
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
         }),
       ).rejects.toThrow('GitHub releases already exist');
@@ -508,6 +537,7 @@ describe('GitHubPlugin', () => {
           versions: { '@test/package': '1.0.0' },
           rootPath: '/test',
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
         }),
       ).resolves.toBeUndefined();
@@ -528,6 +558,7 @@ describe('GitHubPlugin', () => {
           versions: { '@test/package': '1.0.0' },
           rootPath: '/test',
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
         }),
       ).resolves.toBeUndefined();
@@ -547,6 +578,7 @@ describe('GitHubPlugin', () => {
           changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/test' }],
           rootPath: '/test',
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
         }),
       ).resolves.toBeUndefined();
@@ -570,6 +602,7 @@ describe('GitHubPlugin', () => {
           versions: { '@test/package': '1.0.0' },
           rootPath: '/nonexistent',
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
         }),
       ).resolves.toBeUndefined();
@@ -593,6 +626,7 @@ describe('GitHubPlugin', () => {
           versions: { '@test/package-a': '1.0.0' }, // package-b not in versions
           rootPath: '/test',
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
         }),
       ).resolves.toBeUndefined();

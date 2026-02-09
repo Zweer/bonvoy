@@ -34,6 +34,7 @@ Uses [tapable](https://github.com/webpack/tapable) for hooks. Plugins tap into l
 - `beforePublish`, `publish`, `afterPublish`
 - `beforeRelease`, `makeRelease`, `afterRelease`
 - `beforeCreatePR`, `createPR`, `afterCreatePR`
+- `rollback`
 
 ### Monorepo Structure
 ```
@@ -96,6 +97,12 @@ npx bonvoy prepare  # Create PR with version bumps + changelog
 npx bonvoy shipit   # Auto-detects merged PR and publishes
 ```
 
+### 4. Rollback a Failed Release
+```bash
+npx bonvoy rollback            # Roll back using .bonvoy/release-log.json
+npx bonvoy rollback --dry-run  # Preview what would be rolled back
+```
+
 ## 💡 Development Guidelines
 
 ### TypeScript Style
@@ -138,5 +145,6 @@ All phases complete:
 - Phase 3: PR Workflow ✅
 - Phase 4: Optional Plugins (GitLab, exec, changeset) ✅
 - Phase 5: Polish (docs, tests, 100% coverage) ✅
+- Rollback & Recovery ✅
 
 Remember: bonvoy should be **simple to use** but **powerful to extend**. The goal is to make releasing as easy as `npx bonvoy shipit`.

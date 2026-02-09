@@ -24,6 +24,7 @@ function createMockOps(): GitLabOperations & { calls: any[] } {
     async releaseExists(_token, _host, _projectId, _tagName) {
       return false;
     },
+    async deleteRelease() {},
   };
 }
 
@@ -45,6 +46,7 @@ describe('GitLabPlugin', () => {
       validateRepo: { tapPromise: vi.fn() },
       makeRelease: { tapPromise: vi.fn() },
       createPR: { tapPromise: vi.fn() },
+      rollback: { tapPromise: vi.fn() },
     },
   });
 
@@ -57,6 +59,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: true,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [],
       versions: {},
@@ -81,6 +84,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [],
       versions: {},
@@ -103,6 +107,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: '@test/pkg', version: '1.0.0', path: '/test/pkg' }],
       versions: { '@test/pkg': '1.1.0' },
@@ -138,6 +143,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -163,6 +169,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -186,6 +193,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -207,6 +215,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -230,6 +239,7 @@ describe('GitLabPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -251,6 +261,7 @@ describe('GitLabPlugin', () => {
       async releaseExists() {
         return false;
       },
+      async deleteRelease() {},
     };
     const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
     const mockBonvoy = createMockBonvoy();
@@ -261,6 +272,7 @@ describe('GitLabPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -282,6 +294,7 @@ describe('GitLabPlugin', () => {
       async releaseExists() {
         return false;
       },
+      async deleteRelease() {},
     };
     const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
     const mockBonvoy = createMockBonvoy();
@@ -292,6 +305,7 @@ describe('GitLabPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -312,6 +326,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -338,6 +353,7 @@ describe('GitLabPlugin', () => {
     await expect(
       hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
         versions: { 'test-pkg': '1.0.0' },
@@ -366,6 +382,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
       versions: { 'test-pkg': '1.0.0' },
@@ -389,6 +406,7 @@ describe('GitLabPlugin', () => {
     const hookFn = mockBonvoy.hooks.makeRelease.tapPromise.mock.calls[0][1];
     await hookFn({
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       changedPackages: [{ name: '@test/pkg', version: '1.0.0', path: '/test/pkg' }],
       versions: { '@test/pkg': '1.1.0' },
@@ -411,6 +429,7 @@ describe('GitLabPlugin', () => {
       await expect(
         validateFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
           versions: { 'test-pkg': '1.1.0' },
@@ -431,6 +450,7 @@ describe('GitLabPlugin', () => {
       await expect(
         validateFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
           versions: { 'test-pkg': '1.1.0' },
@@ -450,6 +470,7 @@ describe('GitLabPlugin', () => {
       await expect(
         validateFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
           versions: { 'test-pkg': '1.1.0' },
@@ -469,6 +490,7 @@ describe('GitLabPlugin', () => {
       await expect(
         validateFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           changedPackages: [],
           rootPath: '/test',
@@ -489,6 +511,7 @@ describe('GitLabPlugin', () => {
       await expect(
         validateFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           changedPackages: [{ name: 'test-pkg', version: '1.0.0', path: '/test' }],
           versions: { 'test-pkg': '1.1.0' },
@@ -509,6 +532,7 @@ describe('GitLabPlugin', () => {
       const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
       await hookFn({
         isDryRun: true,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         branchName: 'release/123',
         baseBranch: 'main',
@@ -531,6 +555,7 @@ describe('GitLabPlugin', () => {
       const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
       await hookFn({
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         branchName: 'release/123',
         baseBranch: 'main',
@@ -555,6 +580,7 @@ describe('GitLabPlugin', () => {
       const hookFn = mockBonvoy.hooks.createPR.tapPromise.mock.calls[0][1];
       const context = {
         isDryRun: false,
+        actionLog: { record: vi.fn(), entries: () => [] },
         logger: mockLogger,
         branchName: 'release/123',
         baseBranch: 'main',
@@ -580,6 +606,7 @@ describe('GitLabPlugin', () => {
         async releaseExists() {
           return false;
         },
+        async deleteRelease() {},
       };
       const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
       const mockBonvoy = createMockBonvoy();
@@ -590,6 +617,7 @@ describe('GitLabPlugin', () => {
       await expect(
         hookFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           branchName: 'release/123',
           baseBranch: 'main',
@@ -612,6 +640,7 @@ describe('GitLabPlugin', () => {
         async releaseExists() {
           return false;
         },
+        async deleteRelease() {},
       };
       const plugin = new GitLabPlugin({ token: 'test-token', projectId: 'proj' }, mockOps);
       const mockBonvoy = createMockBonvoy();
@@ -622,6 +651,7 @@ describe('GitLabPlugin', () => {
       await expect(
         hookFn({
           isDryRun: false,
+          actionLog: { record: vi.fn(), entries: () => [] },
           logger: mockLogger,
           branchName: 'release/123',
           baseBranch: 'main',

@@ -31,7 +31,7 @@ describe('@bonvoy/cli', () => {
     const commandNames = program.commands
       .map((cmd) => cmd.name())
       .filter((name) => name !== 'help');
-    expect(commandNames).toEqual(['shipit', 'prepare', 'status', 'changelog']);
+    expect(commandNames).toEqual(['shipit', 'prepare', 'status', 'changelog', 'rollback']);
   });
 
   it('shipit command should have --json option', () => {

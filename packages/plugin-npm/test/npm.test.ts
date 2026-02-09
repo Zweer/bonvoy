@@ -35,6 +35,9 @@ function createMockOps(
       calls.push({ method: 'hasToken', args: [] });
       return hasTokenValue;
     },
+    async unpublish(pkg, version) {
+      calls.push({ method: 'unpublish', args: [pkg, version] });
+    },
   };
 }
 
@@ -52,6 +55,7 @@ describe('NpmPlugin', () => {
       hooks: {
         validateRepo: { tapPromise: vi.fn() },
         publish: { tapPromise: vi.fn() },
+        rollback: { tapPromise: vi.fn() },
       },
     };
   });
@@ -71,6 +75,7 @@ describe('NpmPlugin', () => {
     const context = {
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
       isDryRun: true,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -85,6 +90,7 @@ describe('NpmPlugin', () => {
 
     const context = {
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       packages: [
         { name: '@test/package-a', version: '1.0.0', path: '/path/to/a' },
@@ -109,6 +115,7 @@ describe('NpmPlugin', () => {
 
     const context = {
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       packages: [
         { name: '@test/package-a', version: '1.0.0', path: '/path/to/a' },
@@ -131,6 +138,7 @@ describe('NpmPlugin', () => {
 
     const context = {
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
@@ -149,6 +157,7 @@ describe('NpmPlugin', () => {
 
     const context = {
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
@@ -166,6 +175,7 @@ describe('NpmPlugin', () => {
 
     const context = {
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
@@ -189,6 +199,7 @@ describe('NpmPlugin', () => {
 
     const context = {
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       packages: [{ name: '@test/package', version: '1.0.0', path: '/path/to/pkg' }],
     };
@@ -208,6 +219,7 @@ describe('NpmPlugin', () => {
       changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/path/to/pkg' }],
       versions: { '@test/package': '1.0.0' },
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -224,6 +236,7 @@ describe('NpmPlugin', () => {
       changedPackages: [{ name: '@test/new-package', version: '0.0.0', path: '/path/to/pkg' }],
       versions: { '@test/new-package': '1.0.0' },
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -240,6 +253,7 @@ describe('NpmPlugin', () => {
       changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/path/to/pkg' }],
       versions: { '@test/package': '1.0.0' },
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -253,6 +267,7 @@ describe('NpmPlugin', () => {
     const context = {
       changedPackages: [{ name: '@test/package', version: '0.9.0', path: '/path/to/pkg' }],
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -270,6 +285,7 @@ describe('NpmPlugin', () => {
       ],
       versions: { '@test/package-a': '1.0.0' }, // package-b not in versions
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -286,6 +302,7 @@ describe('NpmPlugin', () => {
       changedPackages: [{ name: '@test/new-package', version: '0.0.0', path: '/path/to/pkg' }],
       versions: { '@test/new-package': '1.0.0' },
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
     };
 
@@ -299,6 +316,7 @@ describe('NpmPlugin', () => {
     const context = {
       packages: [{ name: '@test/package', version: '1.0.1-beta.0', path: '/path/to/pkg' }],
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       preid: 'beta',
     };
@@ -317,6 +335,7 @@ describe('NpmPlugin', () => {
     const context = {
       packages: [{ name: '@test/package', version: '1.0.1-alpha.0', path: '/path/to/pkg' }],
       isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
       logger: mockLogger,
       // no preid
     };

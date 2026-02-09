@@ -1,4 +1,11 @@
 
+## [0.8.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
 ## [0.7.0] - 2026-02-08
 
 ### ✨ Features

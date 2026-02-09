@@ -1,4 +1,235 @@
 
+## @bonvoy/core
+
+## [0.6.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-conventional
+
+## [0.1.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-git
+
+## [0.5.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-github
+
+## [0.4.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-gitlab
+
+## [0.2.2] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-npm
+
+## [0.3.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## bonvoy
+
+## [0.8.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
+## @bonvoy/core
+
+## [0.6.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-conventional
+
+## [0.1.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-git
+
+## [0.5.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-github
+
+## [0.4.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-gitlab
+
+## [0.2.2] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-npm
+
+## [0.3.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
+## @bonvoy/core
+
+## [0.6.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-conventional
+
+## [0.1.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-git
+
+## [0.5.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-github
+
+## [0.4.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-gitlab
+
+## [0.2.2] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
+## @bonvoy/core
+
+## [0.6.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-conventional
+
+## [0.1.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-git
+
+## [0.5.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-github
+
+## [0.4.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
+## @bonvoy/core
+
+## [0.6.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-conventional
+
+## [0.1.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-git
+
+## [0.5.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
+## @bonvoy/core
+
+## [0.6.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+## @bonvoy/plugin-conventional
+
+## [0.1.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
+## @bonvoy/core
+
+## [0.6.0] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: add rollback & recovery for failed releases
+
+
 ## bonvoy
 
 ## [0.7.0] - 2026-02-08

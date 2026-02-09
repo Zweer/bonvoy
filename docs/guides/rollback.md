@@ -4,6 +4,10 @@ bonvoy tracks every action during a release. If something fails mid-way, it auto
 
 ## How It Works
 
+API calls to GitHub and GitLab are automatically retried up to 3 times with exponential backoff before giving up. This handles transient errors (rate limiting, server errors) without triggering a rollback.
+
+If an operation still fails after retries, bonvoy rolls back:
+
 During `bonvoy shipit`, every action (git commit, tag, push, npm publish, GitHub/GitLab release) is recorded to `.bonvoy/release-log.json`. If a failure occurs:
 
 1. bonvoy stops the release

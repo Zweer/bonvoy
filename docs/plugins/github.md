@@ -49,6 +49,10 @@ permissions:
 | `createPR` | Creates a pull request (PR workflow) |
 | `rollback` | Deletes GitHub releases by ID |
 
+## Retry
+
+API calls to GitHub (release creation, PR creation) are automatically retried up to 3 times with exponential backoff (1s, 2s, 4s) on transient errors (429 rate limit, 5xx server errors, network timeouts).
+
 ## Release Format
 
 For each published package, a GitHub release is created with:

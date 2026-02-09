@@ -42,6 +42,10 @@ GitLab personal access token or CI job token. Defaults to `GITLAB_TOKEN` environ
 | `createPR` | Creates a merge request (PR workflow) |
 | `rollback` | Deletes GitLab releases by tag |
 
+## Retry
+
+API calls to GitLab (release creation, MR creation) are automatically retried up to 3 times with exponential backoff (1s, 2s, 4s) on transient errors (429 rate limit, 5xx server errors, network timeouts).
+
 ## GitLab CI
 
 ```yaml

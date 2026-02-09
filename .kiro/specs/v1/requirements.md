@@ -94,6 +94,7 @@
 - ✅ **Fast**: Complete release in < 60 seconds
 - ✅ **Clear errors**: Helpful messages with solutions
 - ✅ **Rollback**: Automatic rollback on failure + manual `bonvoy rollback` command
+- ✅ **Retry**: Automatic retry with backoff for transient API errors (429, 5xx)
 
 ## Architecture
 

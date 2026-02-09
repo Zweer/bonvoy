@@ -8,6 +8,7 @@ import type {
   ReleaseContext,
   RollbackContext,
 } from '@bonvoy/core';
+import { withRetry } from '@bonvoy/core';
 
 import { defaultGitLabOperations, type GitLabOperations } from './operations.js';
 
@@ -56,12 +57,16 @@ export default class GitLabPlugin implements BonvoyPlugin {
         const tagName = tagFormat.replace('{name}', pkg.name).replace('{version}', version);
 
         try {
-          await this.ops.createRelease(token, host, {
-            projectId,
-            tagName,
-            name: `${pkg.name} v${version}`,
-            description: changelog,
-          });
+          await withRetry(
+            () =>
+              this.ops.createRelease(token, host, {
+                projectId,
+                tagName,
+                name: `${pkg.name} v${version}`,
+                description: changelog,
+              }),
+            { logger: context.logger },
+          );
 
           context.actionLog.record({
             plugin: 'gitlab',
@@ -95,13 +100,17 @@ export default class GitLabPlugin implements BonvoyPlugin {
       const projectId = this.getProjectId(context.rootPath);
 
       try {
-        const result = await this.ops.createMR(token, host, {
-          projectId,
-          title: context.title,
-          description: context.body,
-          sourceBranch: context.branchName,
-          targetBranch: context.baseBranch,
-        });
+        const result = await withRetry(
+          () =>
+            this.ops.createMR(token, host, {
+              projectId,
+              title: context.title,
+              description: context.body,
+              sourceBranch: context.branchName,
+              targetBranch: context.baseBranch,
+            }),
+          { logger: context.logger },
+        );
 
         context.prUrl = result.url;
         context.prNumber = result.iid;

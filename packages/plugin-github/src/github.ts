@@ -8,6 +8,7 @@ import type {
   ReleaseContext,
   RollbackContext,
 } from '@bonvoy/core';
+import { withRetry } from '@bonvoy/core';
 
 import { defaultGitHubOperations, type GitHubOperations } from './operations.js';
 
@@ -57,15 +58,19 @@ export default class GitHubPlugin implements BonvoyPlugin {
         const tagName = tagFormat.replace('{name}', pkg.name).replace('{version}', version);
 
         try {
-          const { id } = await this.ops.createRelease(token, {
-            owner,
-            repo,
-            tag_name: tagName,
-            name: `${pkg.name} v${version}`,
-            body: changelog,
-            draft: this.options.draft || false,
-            prerelease: this.options.prerelease || version.includes('-'),
-          });
+          const { id } = await withRetry(
+            () =>
+              this.ops.createRelease(token, {
+                owner,
+                repo,
+                tag_name: tagName,
+                name: `${pkg.name} v${version}`,
+                body: changelog,
+                draft: this.options.draft || false,
+                prerelease: this.options.prerelease || version.includes('-'),
+              }),
+            { logger: context.logger },
+          );
 
           context.actionLog.record({
             plugin: 'github',
@@ -98,14 +103,18 @@ export default class GitHubPlugin implements BonvoyPlugin {
       const { owner, repo } = this.getRepoInfo(context.rootPath);
 
       try {
-        const result = await this.ops.createPR(token, {
-          owner,
-          repo,
-          title: context.title,
-          body: context.body,
-          head: context.branchName,
-          base: context.baseBranch,
-        });
+        const result = await withRetry(
+          () =>
+            this.ops.createPR(token, {
+              owner,
+              repo,
+              title: context.title,
+              body: context.body,
+              head: context.branchName,
+              base: context.baseBranch,
+            }),
+          { logger: context.logger },
+        );
 
         context.prUrl = result.url;
         context.prNumber = result.number;

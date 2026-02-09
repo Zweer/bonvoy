@@ -157,7 +157,7 @@ export default class NpmPlugin implements BonvoyPlugin {
     if (needsToken.length > 0) {
       logger.error(`❌ First publish requires NPM_TOKEN: ${needsToken.join(', ')}`);
       throw new Error(
-        `Cannot release with OIDC: packages don't exist on npm yet (${needsToken.join(', ')}). First publish requires NPM_TOKEN. Run: node scripts/publish-dummy-packages.mjs`,
+        `Cannot release with OIDC: packages don't exist on npm yet (${needsToken.join(', ')}). First publish requires NPM_TOKEN environment variable.`,
       );
     }
   }

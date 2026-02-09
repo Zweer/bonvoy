@@ -46,7 +46,9 @@ export async function rollback(
     releaseLog.status !== 'completed' &&
     releaseLog.status !== 'rollback-failed'
   ) {
-    throw new Error(`Unexpected release log status: "${releaseLog.status}".`);
+    throw new Error(
+      `Unexpected release log status: "${releaseLog.status}". Delete .bonvoy/release-log.json and try again.`,
+    );
   }
 
   logger.info('↩️  Rolling back release...');

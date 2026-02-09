@@ -1,10 +1,8 @@
 # bonvoy v2 - Roadmap
 
-> Expanding the bonvoy ecosystem with notifications, new registries, and advanced features.
+> Expanding the bonvoy ecosystem with notifications and advanced features.
 
 ## 📢 Notifications
-
-Plugins to notify the team after a release.
 
 ### ✅ plugin-slack — COMPLETED
 - Slack webhook for release notifications
@@ -29,41 +27,6 @@ Plugins to notify the team after a release.
 - Notifications via SMTP or Amazon SES
 - Customizable HTML templates
 - Configurable recipient list
-
-## 📦 Other Registries
-
-Support for publishing to registries beyond npm.
-
-### plugin-jsr (Priority: High)
-- Publish to [JSR](https://jsr.io) (JavaScript Registry)
-- Native TypeScript support
-- Compatible with Deno and Bun
-- `jsr.json` management
-
-### plugin-docker (Priority: High)
-- Build and push Docker images
-- Automatic version-based tags
-- Multi-registry support (Docker Hub, GHCR, ECR)
-- Dockerfile path configuration
-
-### plugin-pypi (Priority: Medium)
-- Publish to PyPI (Python Package Index)
-- `pyproject.toml` and `setup.py` support
-- OIDC authentication (Trusted Publishers)
-
-### plugin-cargo (Priority: Medium)
-- Publish to crates.io (Rust)
-- `Cargo.toml` management
-- Cargo workspace support
-
-### plugin-maven (Priority: Low)
-- Publish to Maven Central (Java)
-- `pom.xml` management
-- GPG signing
-
-### plugin-nuget (Priority: Low)
-- Publish to NuGet (.NET)
-- `.csproj` and `.nuspec` management
 
 ## 🔧 Integrations
 
@@ -105,27 +68,23 @@ Support for publishing to registries beyond npm.
 
 ## 📋 Implementation Priority
 
-### ~~Phase 1: Basic Notifications~~ ✅ COMPLETED
+### ~~Phase 1: Notifications~~ ✅ COMPLETED
 1. ~~`plugin-slack`~~ ✅
 2. ~~`plugin-discord`~~ ✅
+3. ~~`plugin-telegram`~~ ✅
+4. ~~`plugin-teams`~~ ✅
+5. ~~Pre-release channels~~ ✅ (implemented in v1)
 
-### Phase 2: New Registries
-3. `plugin-jsr`
-4. `plugin-docker`
+### Phase 2: Integrations (on demand)
+6. `plugin-sentry`
+7. `plugin-email`
 
-### ~~Phase 3: Advanced Notifications~~ ✅ COMPLETED
-5. ~~`plugin-telegram`~~ ✅
-6. ~~`plugin-teams`~~ ✅
+### Phase 3: Core (on demand)
+8. `workspace:*` support
+9. AI release notes
 
-### Phase 4: Other Languages
-7. `plugin-pypi`
-8. `plugin-cargo`
-
-### Phase 5: Integrations
-9. `plugin-sentry`
-10. ~~Pre-release channels~~ ✅ (implemented in v1)
+> Registry/language plugins (jsr, docker, pypi, cargo, etc.) moved to `.kiro/specs/community-plugins/` — build on community request.
 
 ---
 
-*Status: Notifications and pre-release channels complete, registries next*
-*Target: bonvoy v2.0.0*
+*Status: Notifications complete, remaining features on demand*

@@ -1,4 +1,13 @@
 
+## bonvoy
+
+## [0.9.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: show commit justification for each package bump
+
+
 ## @bonvoy/plugin-npm
 
 ## [0.4.0] - 2026-02-09

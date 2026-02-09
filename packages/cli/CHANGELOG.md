@@ -1,4 +1,11 @@
 
+## [0.9.1] - 2026-02-09
+
+### ✨ Features
+
+- feat: :sparkles: show commit justification for each package bump
+
+
 ## [0.9.0] - 2026-02-09
 
 ### 🐛 Bug Fixes

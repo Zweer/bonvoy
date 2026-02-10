@@ -61,10 +61,12 @@
 - `workspace:*` → real version support
 - Option to bump dependents
 
-### AI Release Notes (Experimental)
-- Generate release notes with LLM
-- Intelligent change summary
-- Provider configuration (OpenAI, Anthropic, Bedrock)
+### AI Release Notes ✅ COMPLETED
+- ✅ Generate release notes summary with LLM
+- ✅ Prepend as blockquote above conventional changelog
+- ✅ Providers: OpenAI, Anthropic, Gemini (native fetch, zero deps)
+- ✅ Custom prompt template support
+- ✅ Graceful fallback on API failure
 
 ## 📋 Implementation Priority
 
@@ -81,7 +83,7 @@
 
 ### Phase 3: Core (on demand)
 8. `workspace:*` support
-9. AI release notes
+9. ~~AI release notes~~ ✅
 
 > Registry/language plugins (jsr, docker, pypi, cargo, etc.) moved to `.kiro/specs/community-plugins/` — build on community request.
 

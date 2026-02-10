@@ -44,6 +44,7 @@ export default defineConfig({
           { text: 'GitLab', link: '/plugins/gitlab' },
           { text: 'Changeset', link: '/plugins/changeset' },
           { text: 'Exec', link: '/plugins/exec' },
+          { text: 'AI Release Notes', link: '/plugins/ai' },
           { text: 'Notifications', link: '/plugins/notifications' },
         ],
       },

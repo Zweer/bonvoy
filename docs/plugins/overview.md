@@ -47,6 +47,7 @@ Install and configure these when needed:
 | [gitlab](/plugins/gitlab) | GitLab releases and merge requests |
 | [changeset](/plugins/changeset) | Changeset-compatible workflow |
 | [exec](/plugins/exec) | Run custom shell commands at any hook |
+| [ai](/plugins/ai) | AI-generated release notes summary |
 | [notifications](/plugins/notifications) | Slack, Discord, Telegram, Teams |
 
 ## Writing a Plugin

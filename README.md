@@ -94,6 +94,7 @@ jobs:
 | [@bonvoy/plugin-gitlab](./packages/plugin-gitlab) | GitLab releases (optional) |
 | [@bonvoy/plugin-changeset](./packages/plugin-changeset) | Changeset-compatible workflow (optional) |
 | [@bonvoy/plugin-exec](./packages/plugin-exec) | Custom shell commands (optional) |
+| [@bonvoy/plugin-ai](./packages/plugin-ai) | AI-generated release notes summary (optional) |
 | [@bonvoy/plugin-notification](./packages/plugin-notification) | Base notification plugin |
 | [@bonvoy/plugin-slack](./packages/plugin-slack) | Slack notifications (optional) |
 | [@bonvoy/plugin-discord](./packages/plugin-discord) | Discord notifications (optional) |

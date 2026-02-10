@@ -25,6 +25,7 @@ Build a **flexible, plugin-based release tool** in TypeScript that:
 | `docs/requirements.md` | VitePress documentation site structure and deployment |
 | `articles/requirements.md` | Blog articles plan, editorial line, publishing workflow |
 | `community-plugins/requirements.md` | Future registry plugins (jsr, docker, pypi, cargo, etc.) — on demand |
+| `ai-notes/requirements.md` | AI release notes plugin spec (OpenAI, Anthropic, Gemini) |
 
 Additional references: `README.md`, `docs/**` (VitePress site), `drafts/**` (article drafts).
 
@@ -60,6 +61,7 @@ packages/<name>/
 - **plugin-gitlab** (optional) — GitLab MR/releases + rollback
 - **plugin-exec** (optional) — Run custom shell commands at any hook
 - **plugin-changeset** (optional) — Changeset-compatible workflow (`.changeset/` or `.bonvoy/` files)
+- **plugin-ai** (optional) — AI-generated release notes summary (OpenAI, Anthropic, Gemini)
 - **plugin-notification** — Base class for notification plugins
 - **plugin-slack** (optional) — Slack webhook/Bot API
 - **plugin-discord** (optional) — Discord webhook
@@ -180,6 +182,7 @@ All v1 phases complete. v2 notifications complete. Remaining v2 features on dema
 - Documentation site (VitePress, 22 pages) ✅
 - Blog article 1 live, 7 drafts ready ✅
 - Notification plugins (slack, discord, telegram, teams) ✅
+- AI release notes plugin (openai, anthropic, gemini) ✅
 - 100% test coverage ✅
 
-Next (on demand): plugin-sentry, plugin-email, workspace:* support, AI release notes.
+Next (on demand): plugin-sentry, plugin-email, workspace:* support.

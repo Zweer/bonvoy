@@ -10,7 +10,8 @@
     "file://.kiro/specs/e2e/requirements.md",
     "file://.kiro/specs/docs/requirements.md",
     "file://.kiro/specs/articles/requirements.md",
-    "file://.kiro/specs/community-plugins/requirements.md"
+    "file://.kiro/specs/community-plugins/requirements.md",
+    "file://.kiro/specs/ai-notes/requirements.md"
   ],
   "tools": [
     "read",

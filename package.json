@@ -68,6 +68,14 @@
       "@commitlint/config-conventional"
     ]
   },
+  "overrides": {
+    "axios": "^1.13.5",
+    "vitepress": {
+      "vite": {
+        "esbuild": "^0.25.0"
+      }
+    }
+  },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "cosmiconfig": "^9.0.0",

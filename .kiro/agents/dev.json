@@ -2,7 +2,16 @@
   "name": "dev",
   "description": "Agent for bonvoy - Plugin-based release automation tool for npm packages and monorepos",
   "prompt": "file://../prompts/dev.md",
-  "resources": ["file://README.md", "file://.kiro/specs/v1/requirements.md"],
+  "resources": [
+    "file://README.md",
+    "file://.kiro/specs/v1/requirements.md",
+    "file://.kiro/specs/v2/requirements.md",
+    "file://.kiro/specs/rollback/requirements.md",
+    "file://.kiro/specs/e2e/requirements.md",
+    "file://.kiro/specs/docs/requirements.md",
+    "file://.kiro/specs/articles/requirements.md",
+    "file://.kiro/specs/community-plugins/requirements.md"
+  ],
   "tools": [
     "read",
     "write",
@@ -33,16 +42,32 @@
     "write": {
       "allowedPaths": [
         ".kiro/**",
-        "e2e/**",
         "packages/**",
+        "e2e/**",
         "scripts/**",
+        "docs/**",
+        "drafts/**",
+        ".github/**",
+        "__mocks__/**",
         "README.md",
-        "package.json"
+        "CHANGELOG.md",
+        "package.json",
+        "package-lock.json",
+        "bonvoy.config.ts",
+        "vitest.config.ts",
+        "tsdown.config.ts",
+        "tsconfig.json",
+        "biome.json",
+        ".editorconfig",
+        ".gitignore",
+        ".lintstagedrc",
+        ".npmpackagejsonlintrc.json",
+        ".npmpackagejsonlintignore"
       ]
     },
     "shell": {
       "autoAllowReadonly": true,
-      "deniedCommands": ["git commit .*", "git push .*"]
+      "deniedCommands": [".*git commit.*", ".*git push.*", ".*git tag .*", ".*npm publish.*"]
     }
   },
   "mcpServers": {

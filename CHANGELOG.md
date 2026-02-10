@@ -1,4 +1,13 @@
 
+## @bonvoy/plugin-ai
+
+## [0.1.0] - 2026-02-10
+
+### ✨ Features
+
+- feat: :sparkles: add AI release notes plugin
+
+
 ## @bonvoy/core
 
 ## [0.7.0] - 2026-02-09

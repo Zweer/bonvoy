@@ -1,4 +1,4 @@
-# @bonvoy/cli 🚢
+# bonvoy 🚢
 
 > CLI for bonvoy release automation
 
@@ -15,11 +15,11 @@ Command-line interface for bonvoy - the plugin-based release automation tool for
 ## Installation
 
 ```bash
-# Install globally
-npm install -g @bonvoy/cli
+# Install as dev dependency
+npm install -D bonvoy
 
 # Or use with npx
-npx @bonvoy/cli shipit
+npx bonvoy shipit
 ```
 
 ## Commands

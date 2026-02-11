@@ -6,13 +6,13 @@ import { createProgram } from '../src/cli.js';
 vi.mock('node:fs', () => ({
   readFileSync: vi.fn((path: string) => {
     if (path.includes('packages/cli/package.json')) {
-      return JSON.stringify({ name: '@bonvoy/cli', version: '0.0.0' });
+      return JSON.stringify({ name: 'bonvoy', version: '0.0.0' });
     }
     return JSON.stringify({ name: 'test', version: '0.0.0' });
   }),
 }));
 
-describe('@bonvoy/cli', () => {
+describe('bonvoy CLI', () => {
   it('should create program with correct name and version', () => {
     const program = createProgram();
     expect(program.name()).toBe('bonvoy');

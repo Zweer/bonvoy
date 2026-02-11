@@ -53,7 +53,7 @@ Assign commits to packages based on which files were modified.
 ### `shipit`
 
 ```typescript
-import { shipit } from '@bonvoy/cli';
+import { shipit } from 'bonvoy';
 
 const result = await shipit('minor', {
   dryRun: true,
@@ -85,7 +85,7 @@ interface ShipitOptions {
 ### `prepare`
 
 ```typescript
-import { prepare } from '@bonvoy/cli';
+import { prepare } from 'bonvoy';
 
 const result = await prepare({
   dryRun: true,

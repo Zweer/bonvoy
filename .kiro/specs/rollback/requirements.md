@@ -204,7 +204,7 @@ bonvoy rollback --force      # Skip confirmation prompt
 - On error: trigger rollback, update log, re-throw
 
 ### Step 4: `bonvoy rollback` command
-- New command in `@bonvoy/cli`
+- New command in `bonvoy` (CLI package)
 - Read log, initialize plugins, execute rollback
 - `--dry-run` and `--force` flags
 

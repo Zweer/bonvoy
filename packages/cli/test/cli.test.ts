@@ -102,7 +102,7 @@ vi.mock('node:fs', () => ({
   existsSync: vi.fn(() => false),
   readFileSync: vi.fn((path: string) => {
     if (path.includes('packages/cli/package.json')) {
-      return JSON.stringify({ name: '@bonvoy/cli', version: '0.0.0' });
+      return JSON.stringify({ name: 'bonvoy', version: '0.0.0' });
     }
     return JSON.stringify({ name: 'test', version: '0.0.0' });
   }),
@@ -125,7 +125,7 @@ vi.mock('../src/cli.js', async (importOriginal) => {
   };
 });
 
-describe('@bonvoy/cli', () => {
+describe('bonvoy CLI', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
   let exitSpy: ReturnType<typeof vi.spyOn>;
 

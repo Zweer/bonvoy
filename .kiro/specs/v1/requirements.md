@@ -467,7 +467,7 @@ jobs:
 
 ### Phase 1: Core + Essential Plugins (3-4 days) ✅ COMPLETED
 - [x] `@bonvoy/core` - Hook system, CLI, config loading, workspace detection
-- [x] `@bonvoy/cli` - CLI orchestration with shipit command
+- [x] `@bonvoy/cli` → renamed to `bonvoy` - CLI orchestration with shipit command
 - [x] `@bonvoy/plugin-conventional` - Conventional commits parser
 - [x] `@bonvoy/plugin-changelog` - Changelog generation
 - [x] `@bonvoy/plugin-git` - Commit, tag, push

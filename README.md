@@ -85,7 +85,7 @@ jobs:
 | Package | Description |
 |---------|-------------|
 | [@bonvoy/core](./packages/core) | Hook system, config loading, schema validation |
-| [@bonvoy/cli](./packages/cli) | CLI orchestration and commands |
+| [bonvoy](./packages/cli) | CLI orchestration and commands |
 | [@bonvoy/plugin-conventional](./packages/plugin-conventional) | Conventional commits parser (default) |
 | [@bonvoy/plugin-changelog](./packages/plugin-changelog) | Changelog generation (default) |
 | [@bonvoy/plugin-git](./packages/plugin-git) | Git commit, tag, push (default) |

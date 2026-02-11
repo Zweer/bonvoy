@@ -102,4 +102,4 @@ Gitbeaker doesn't log by default — no change needed.
 
 *Feature: Logger*
 *Status: In progress*
-*Affects: @bonvoy/core, @bonvoy/cli, @bonvoy/plugin-npm, @bonvoy/plugin-github*
+*Affects: @bonvoy/core, bonvoy (CLI), @bonvoy/plugin-npm, @bonvoy/plugin-github*

@@ -11,12 +11,22 @@ import { defaultNpmOperations } from '../src/operations.js';
 const mockExeca = vi.mocked(execa);
 
 describe('defaultNpmOperations', () => {
-  it('publish calls npm publish', async () => {
-    await defaultNpmOperations.publish(['--access', 'public'], '/project');
+  it('publish calls npm publish and returns output', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: Mock return type
+    mockExeca.mockResolvedValueOnce({ stdout: '+ @test/pkg@1.0.0', stderr: '' } as any);
+    const output = await defaultNpmOperations.publish(['--access', 'public'], '/project');
+    expect(output).toBe('+ @test/pkg@1.0.0');
     expect(mockExeca).toHaveBeenCalledWith('npm', ['publish', '--access', 'public'], {
       cwd: '/project',
-      stdio: 'inherit',
+      stdio: 'pipe',
     });
+  });
+
+  it('publish includes stderr when present', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: Mock return type
+    mockExeca.mockResolvedValueOnce({ stdout: '+ @test/pkg@1.0.0', stderr: 'npm notice' } as any);
+    const output = await defaultNpmOperations.publish([], '/project');
+    expect(output).toBe('+ @test/pkg@1.0.0\nnpm notice');
   });
 
   it('view returns version', async () => {

@@ -11,7 +11,13 @@ import type {
   PRTrackingFile,
   VersionContext,
 } from '@bonvoy/core';
-import { assignCommitsToPackages, Bonvoy, loadConfig, noopActionLog } from '@bonvoy/core';
+import {
+  assignCommitsToPackages,
+  Bonvoy,
+  createLogger,
+  loadConfig,
+  noopActionLog,
+} from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import { defaultGitOperations, type GitOperations } from '@bonvoy/plugin-git';
@@ -22,16 +28,20 @@ import { inc, valid } from 'semver';
 
 import { detectPackages } from '../utils/detect-packages.js';
 import { getCommitsSinceLastTag } from '../utils/git.js';
+import { resolveLogLevel } from './shipit.js';
 
 export interface PrepareOptions {
   dryRun?: boolean;
   cwd?: string;
   gitOps?: GitOperations;
   silent?: boolean;
+  verbose?: boolean;
+  quiet?: boolean;
   config?: BonvoyConfig;
   packages?: Package[];
   preid?: string; // Prerelease identifier (alpha, beta, rc)
   bump?: string; // Force bump type (patch/minor/major/prerelease/x.y.z)
+  logger?: Logger;
 }
 
 export interface PrepareResult {
@@ -41,22 +51,18 @@ export interface PrepareResult {
   prUrl?: string;
 }
 
-const noop = () => {};
-const silentLogger: Logger = { info: noop, warn: noop, error: noop };
-/* c8 ignore start - simple console wrappers */
-const consoleLogger: Logger = {
-  info: (...args: unknown[]) => console.log(...args),
-  warn: (...args: unknown[]) => console.warn(...args),
-  error: (...args: unknown[]) => console.error(...args),
-};
-/* c8 ignore stop */
-
 /* c8 ignore start - wrapper function with simple branches */
 export async function prepareCommand(
   bump?: string,
-  options: { dryRun?: boolean; preid?: string; silent?: boolean } = {},
+  options: {
+    dryRun?: boolean;
+    preid?: string;
+    silent?: boolean;
+    verbose?: boolean;
+    quiet?: boolean;
+  } = {},
 ): Promise<void> {
-  const log = options.silent ? silentLogger : consoleLogger;
+  const log = createLogger(resolveLogLevel(options));
   try {
     const result = await prepare({ ...options, bump });
     if (result.packages.length === 0) {
@@ -72,7 +78,7 @@ export async function prepareCommand(
 export async function prepare(options: PrepareOptions = {}): Promise<PrepareResult> {
   const rootPath = options.cwd || process.cwd();
   const gitOps = options.gitOps ?? defaultGitOperations;
-  const logger = options.silent ? silentLogger : consoleLogger;
+  const logger = options.logger ?? createLogger(resolveLogLevel(options));
 
   // 1. Load configuration
   let config = options.config ?? (await loadConfig(rootPath));

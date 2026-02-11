@@ -6,7 +6,13 @@ import type { GitLabOperations, GitLabReleaseParams } from '../src/operations.js
 
 vi.mock('node:fs');
 
-const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+const mockLogger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  level: 'silent' as const,
+};
 
 // biome-ignore lint/suspicious/noExplicitAny: Test mock needs flexible args
 function createMockOps(): GitLabOperations & { calls: any[] } {

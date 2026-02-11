@@ -3,7 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import NpmPlugin from '../src/npm.js';
 import type { NpmOperations } from '../src/operations.js';
 
-const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+const mockLogger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  level: 'silent' as const,
+};
 
 function createMockOps(
   config: { existingPackages?: string[]; hasToken?: boolean } = {},
@@ -22,6 +28,7 @@ function createMockOps(
     publishedVersions,
     async publish(args, cwd) {
       calls.push({ method: 'publish', args: [args, cwd] });
+      return '';
     },
     async view(pkg, version) {
       calls.push({ method: 'view', args: [pkg, version] });
@@ -346,5 +353,66 @@ describe('NpmPlugin', () => {
     const publishCall = mockOps.calls.find((c) => c.method === 'publish');
     expect(publishCall?.args[0]).toContain('--tag');
     expect(publishCall?.args[0]).toContain('next');
+  });
+
+  it('should log debug output on successful publish', async () => {
+    const ops = createMockOps();
+    ops.publish = vi.fn().mockResolvedValue('+ @test/pkg@1.0.0');
+    plugin = new NpmPlugin({}, ops);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/pkg', version: '1.0.0', path: '/path' }],
+      isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
+      logger: mockLogger,
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await publishFn(context);
+
+    expect(mockLogger.debug).toHaveBeenCalledWith('+ @test/pkg@1.0.0');
+  });
+
+  it('should log error output and rethrow on publish failure', async () => {
+    const ops = createMockOps();
+    const error = Object.assign(new Error('publish failed'), {
+      stdout: 'npm notice stuff',
+      stderr: 'npm ERR! 403',
+    });
+    ops.publish = vi.fn().mockRejectedValue(error);
+    plugin = new NpmPlugin({}, ops);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/pkg', version: '1.0.0', path: '/path' }],
+      isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
+      logger: mockLogger,
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await expect(publishFn(context)).rejects.toThrow('publish failed');
+
+    expect(mockLogger.error).toHaveBeenCalledWith('npm notice stuff\nnpm ERR! 403');
+  });
+
+  it('should handle publish failure without stdout/stderr', async () => {
+    const ops = createMockOps();
+    ops.publish = vi.fn().mockRejectedValue(new Error('network error'));
+    plugin = new NpmPlugin({}, ops);
+    plugin.apply(mockBonvoy);
+
+    const context = {
+      packages: [{ name: '@test/pkg', version: '1.0.0', path: '/path' }],
+      isDryRun: false,
+      actionLog: { record: vi.fn(), entries: () => [] },
+      logger: mockLogger,
+    };
+
+    const publishFn = mockBonvoy.hooks.publish.tapPromise.mock.calls[0][1];
+    await expect(publishFn(context)).rejects.toThrow('network error');
+
+    expect(mockLogger.error).not.toHaveBeenCalled();
   });
 });

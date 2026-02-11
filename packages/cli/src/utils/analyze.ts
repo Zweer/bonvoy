@@ -42,7 +42,7 @@ export async function analyzeStatus(options: {
       rootPath,
       isDryRun: true,
       actionLog: noopActionLog,
-      logger: { info: noop, warn: noop, error: noop },
+      logger: { debug: noop, info: noop, warn: noop, error: noop, level: 'silent' as const },
       commits: pkgCommits,
       currentPackage: pkg,
     };

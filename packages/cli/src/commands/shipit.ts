@@ -5,6 +5,7 @@ import type {
   ChangelogContext,
   Context,
   Logger,
+  LogLevel,
   Package,
   PRTrackingFile,
   ReleaseContext,
@@ -15,6 +16,7 @@ import {
   ActionLog,
   assignCommitsToPackages,
   Bonvoy,
+  createLogger,
   loadConfig,
   noopActionLog,
 } from '@bonvoy/core';
@@ -32,20 +34,21 @@ import type { ShipitOptions, ShipitResult } from '../utils/types.js';
 
 const RELEASE_LOG_PATH = '.bonvoy/release-log.json';
 
-const noop = () => {};
-const silentLogger: Logger = { info: noop, warn: noop, error: noop };
-/* c8 ignore start - simple console wrappers */
-const consoleLogger: Logger = {
-  info: (...args: unknown[]) => console.log(...args),
-  warn: (...args: unknown[]) => console.warn(...args),
-  error: (...args: unknown[]) => console.error(...args),
-};
-/* c8 ignore stop */
+export function resolveLogLevel(options: {
+  silent?: boolean;
+  verbose?: boolean;
+  quiet?: boolean;
+}): LogLevel {
+  if (options.silent) return 'silent';
+  if (options.verbose) return 'debug';
+  if (options.quiet) return 'warn';
+  return 'info';
+}
 
 export async function shipit(_bump?: string, options: ShipitOptions = {}): Promise<ShipitResult> {
   const rootPath = options.cwd || process.cwd();
   const gitOps = options.gitOps ?? defaultGitOperations;
-  const logger = options.logger ?? (options.silent ? silentLogger : consoleLogger);
+  const logger = options.logger ?? createLogger(resolveLogLevel(options));
 
   // 0. Auto-detect: check if we're on main with a merged release PR
   const trackingFilePath = join(rootPath, '.bonvoy', 'release-pr.json');
@@ -597,16 +600,22 @@ export async function shipitCommand(
     preid?: string;
     force?: boolean;
     silent?: boolean;
+    verbose?: boolean;
+    quiet?: boolean;
   } = {},
 ): Promise<void> {
-  const log = options.silent ? silentLogger : consoleLogger;
+  const log = createLogger(resolveLogLevel({ ...options, silent: options.json || options.silent }));
   try {
     if (!options.json) {
       log.info('🚢 Starting bonvoy release...');
       if (options.dryRun) log.info('🔍 Dry run mode enabled\n');
     }
 
-    const result = await shipit(bump, { ...options, silent: options.json || options.silent });
+    const result = await shipit(bump, {
+      ...options,
+      silent: options.json || options.silent,
+      logger: log,
+    });
 
     if (options.json) {
       /* c8 ignore start - JSON output tested via shipit function */

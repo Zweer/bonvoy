@@ -44,6 +44,14 @@ vi.mock('@bonvoy/core', () => ({
     static load = vi.fn().mockReturnValue({ status: 'completed', actions: [] });
   },
   noopActionLog: { record: vi.fn(), entries: () => [] },
+  createLogger: vi.fn().mockImplementation(() => ({
+    debug: vi.fn(),
+    info: vi.fn((...args: unknown[]) => console.log(...args)),
+    warn: vi.fn((...args: unknown[]) => console.warn(...args)),
+    error: vi.fn((...args: unknown[]) => console.error(...args)),
+    level: 'info',
+  })),
+  silentLogger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), level: 'silent' },
 }));
 
 vi.mock('@bonvoy/plugin-conventional', () => ({

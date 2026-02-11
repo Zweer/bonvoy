@@ -4,6 +4,8 @@ import type { GitOperations } from '@bonvoy/plugin-git';
 export interface ShipitOptions {
   dryRun?: boolean;
   silent?: boolean; // Suppress console output (for JSON mode)
+  verbose?: boolean; // Show debug output
+  quiet?: boolean; // Only show warnings and errors
   package?: string[];
   preid?: string; // Prerelease identifier (alpha, beta, rc)
   force?: boolean; // Skip stale release log check

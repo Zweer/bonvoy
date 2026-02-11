@@ -3,7 +3,13 @@ import { describe, expect, it, vi } from 'vitest';
 import ChangesetPlugin from '../src/changeset.js';
 import type { ChangesetOperations } from '../src/operations.js';
 
-const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+const mockLogger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  level: 'silent' as const,
+};
 
 function createMockOps(
   files: Record<string, string> = {},

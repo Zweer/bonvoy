@@ -1,7 +1,7 @@
 import { execa } from 'execa';
 
 export interface NpmOperations {
-  publish(args: string[], cwd: string): Promise<void>;
+  publish(args: string[], cwd: string): Promise<string>;
   view(pkg: string, version: string): Promise<string | null>;
   packageExists(pkg: string): Promise<boolean>;
   hasToken(): Promise<boolean>;
@@ -10,7 +10,8 @@ export interface NpmOperations {
 
 export const defaultNpmOperations: NpmOperations = {
   async publish(args, cwd) {
-    await execa('npm', ['publish', ...args], { cwd, stdio: 'inherit' });
+    const result = await execa('npm', ['publish', ...args], { cwd, stdio: 'pipe' });
+    return result.stdout + (result.stderr ? `\n${result.stderr}` : '');
   },
 
   async view(pkg, version) {

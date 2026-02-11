@@ -8,7 +8,9 @@ function createMockOps(): NpmOperations & { calls: Array<{ method: string; args:
   const calls: Array<{ method: string; args: unknown[] }> = [];
   return {
     calls,
-    async publish() {},
+    async publish() {
+      return '';
+    },
     async view() {
       return null;
     },
@@ -31,7 +33,13 @@ function createRollbackContext(actions: RollbackContext['actions']): RollbackCon
     changedPackages: [],
     rootPath: '/project',
     isDryRun: false,
-    logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+    logger: {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      level: 'silent' as const,
+    },
     actionLog: { record: vi.fn(), entries: () => [] },
     actions,
     errors: [],

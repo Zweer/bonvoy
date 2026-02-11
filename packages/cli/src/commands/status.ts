@@ -1,20 +1,13 @@
-import type { Logger } from '@bonvoy/core';
+import { createLogger } from '@bonvoy/core';
 import { inc } from 'semver';
 
 import { analyzeStatus } from '../utils/analyze.js';
+import { resolveLogLevel } from './shipit.js';
 
-const noop = () => {};
-const silentLogger: Logger = { info: noop, warn: noop, error: noop };
-/* c8 ignore start - simple console wrappers */
-const consoleLogger: Logger = {
-  info: (...args: unknown[]) => console.log(...args),
-  warn: (...args: unknown[]) => console.warn(...args),
-  error: (...args: unknown[]) => console.error(...args),
-};
-/* c8 ignore stop */
-
-export async function statusCommand(options: { silent?: boolean } = {}): Promise<void> {
-  const log = options.silent ? silentLogger : consoleLogger;
+export async function statusCommand(
+  options: { silent?: boolean; verbose?: boolean; quiet?: boolean } = {},
+): Promise<void> {
+  const log = createLogger(resolveLogLevel(options));
   try {
     const { packages, changedPackages, commits } = await analyzeStatus({});
 

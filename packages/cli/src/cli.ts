@@ -30,6 +30,8 @@ export function createProgram(): Command {
     .option('--package <name...>', 'Only release specific package(s)')
     .option('--preid <identifier>', 'Prerelease identifier (alpha, beta, rc)')
     .option('--force', 'Skip stale release log check')
+    .option('--verbose', 'Show debug output')
+    .option('--quiet', 'Only show warnings and errors')
     .argument('[bump]', 'Version bump (patch/minor/major/prerelease/x.y.z)')
     .action(shipitCommand);
 
@@ -38,18 +40,32 @@ export function createProgram(): Command {
     .description('Create release PR')
     .option('--dry-run', 'Preview changes without creating PR')
     .option('--preid <identifier>', 'Prerelease identifier (alpha, beta, rc)')
+    .option('--verbose', 'Show debug output')
+    .option('--quiet', 'Only show warnings and errors')
     .argument('[bump]', 'Version bump (patch/minor/major/prerelease/x.y.z)')
     .action(prepareCommand);
 
-  prog.command('status').description('Show pending changes').action(statusCommand);
+  prog
+    .command('status')
+    .description('Show pending changes')
+    .option('--verbose', 'Show debug output')
+    .option('--quiet', 'Only show warnings and errors')
+    .action(statusCommand);
 
-  prog.command('changelog').description('Preview changelog').action(changelogCommand);
+  prog
+    .command('changelog')
+    .description('Preview changelog')
+    .option('--verbose', 'Show debug output')
+    .option('--quiet', 'Only show warnings and errors')
+    .action(changelogCommand);
 
   prog
     .command('rollback')
     .description('Rollback last release')
     .option('--dry-run', 'Preview rollback without executing')
     .option('--force', 'Skip confirmation')
+    .option('--verbose', 'Show debug output')
+    .option('--quiet', 'Only show warnings and errors')
     .action(rollbackCommand);
 
   return prog;

@@ -34,19 +34,31 @@ export interface GitHubOperations {
 export const defaultGitHubOperations: GitHubOperations = {
   /* c8 ignore start - real API calls */
   async createRelease(token, params) {
-    const octokit = new Octokit({ auth: token });
+    const noop = () => {};
+    const octokit = new Octokit({
+      auth: token,
+      log: { debug: noop, info: noop, warn: noop, error: noop },
+    });
     const { data } = await octokit.repos.createRelease({ ...params });
     return { id: data.id };
   },
 
   async createPR(token, params) {
-    const octokit = new Octokit({ auth: token });
+    const noop = () => {};
+    const octokit = new Octokit({
+      auth: token,
+      log: { debug: noop, info: noop, warn: noop, error: noop },
+    });
     const { data } = await octokit.pulls.create({ ...params });
     return { url: data.html_url, number: data.number };
   },
 
   async releaseExists(token, owner, repo, tag) {
-    const octokit = new Octokit({ auth: token });
+    const noop = () => {};
+    const octokit = new Octokit({
+      auth: token,
+      log: { debug: noop, info: noop, warn: noop, error: noop },
+    });
     try {
       await octokit.repos.getReleaseByTag({ owner, repo, tag });
       return true;
@@ -56,7 +68,11 @@ export const defaultGitHubOperations: GitHubOperations = {
   },
 
   async deleteRelease(token, owner, repo, releaseId) {
-    const octokit = new Octokit({ auth: token });
+    const noop = () => {};
+    const octokit = new Octokit({
+      auth: token,
+      log: { debug: noop, info: noop, warn: noop, error: noop },
+    });
     await octokit.repos.deleteRelease({ owner, repo, release_id: releaseId });
   },
   /* c8 ignore stop */

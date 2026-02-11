@@ -33,7 +33,13 @@ describe('types', () => {
       rootPath: '/test',
       isDryRun: false,
       actionLog: { record: () => {}, entries: () => [] },
-      logger: { info: () => {}, warn: () => {}, error: () => {} },
+      logger: {
+        debug: () => {},
+        info: () => {},
+        warn: () => {},
+        error: () => {},
+        level: 'silent' as const,
+      },
     };
 
     expect(context.config.versioning).toBe('independent');

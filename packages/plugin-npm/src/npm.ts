@@ -94,7 +94,17 @@ export default class NpmPlugin implements BonvoyPlugin {
 
     logger.info(`Publishing ${pkg.name}@${pkg.version}...`);
 
-    await this.ops.publish(args, pkg.path);
+    try {
+      const output = await this.ops.publish(args, pkg.path);
+      if (output) logger.debug(output);
+    } catch (error: unknown) {
+      // On failure, include captured output in the error
+      const stderr = (error as { stderr?: string }).stderr ?? '';
+      const stdout = (error as { stdout?: string }).stdout ?? '';
+      const output = [stdout, stderr].filter(Boolean).join('\n');
+      if (output) logger.error(output);
+      throw error;
+    }
   }
 
   private async isAlreadyPublished(pkg: { name: string; version: string }): Promise<boolean> {

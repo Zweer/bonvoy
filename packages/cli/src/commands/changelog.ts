@@ -1,22 +1,15 @@
-import type { ChangelogContext, Logger } from '@bonvoy/core';
-import { Bonvoy, loadConfig, noopActionLog } from '@bonvoy/core';
+import type { ChangelogContext } from '@bonvoy/core';
+import { Bonvoy, createLogger, loadConfig, noopActionLog, silentLogger } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 
 import { analyzeStatus } from '../utils/analyze.js';
+import { resolveLogLevel } from './shipit.js';
 
-const noop = () => {};
-const silentLogger: Logger = { info: noop, warn: noop, error: noop };
-/* c8 ignore start - simple console wrappers */
-const consoleLogger: Logger = {
-  info: (...args: unknown[]) => console.log(...args),
-  warn: (...args: unknown[]) => console.warn(...args),
-  error: (...args: unknown[]) => console.error(...args),
-};
-/* c8 ignore stop */
-
-export async function changelogCommand(options: { silent?: boolean } = {}): Promise<void> {
-  const log = options.silent ? silentLogger : consoleLogger;
+export async function changelogCommand(
+  options: { silent?: boolean; verbose?: boolean; quiet?: boolean } = {},
+): Promise<void> {
+  const log = createLogger(resolveLogLevel(options));
   try {
     const { changedPackages, commits } = await analyzeStatus({});
 
@@ -41,9 +34,7 @@ export async function changelogCommand(options: { silent?: boolean } = {}): Prom
         rootPath: process.cwd(),
         isDryRun: true,
         actionLog: noopActionLog,
-        /* c8 ignore start -- noop logger functions */
-        logger: { info() {}, warn() {}, error() {} },
-        /* c8 ignore stop */
+        logger: silentLogger,
         commits: pkgCommits,
         currentPackage: pkg,
         versions: Object.fromEntries(changedPackages.map((c) => [c.pkg.name, c.pkg.version])),

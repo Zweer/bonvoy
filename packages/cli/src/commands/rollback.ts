@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { Logger, RollbackContext } from '@bonvoy/core';
-import { ActionLog, Bonvoy, loadConfig, noopActionLog } from '@bonvoy/core';
+import { ActionLog, Bonvoy, createLogger, loadConfig, noopActionLog } from '@bonvoy/core';
 import ChangelogPlugin from '@bonvoy/plugin-changelog';
 import ConventionalPlugin from '@bonvoy/plugin-conventional';
 import GitPlugin from '@bonvoy/plugin-git';
@@ -10,24 +10,23 @@ import GitHubPlugin from '@bonvoy/plugin-github';
 import NpmPlugin from '@bonvoy/plugin-npm';
 
 import { detectPackages } from '../utils/detect-packages.js';
+import { resolveLogLevel } from './shipit.js';
 
 const RELEASE_LOG_PATH = '.bonvoy/release-log.json';
 
-const noop = () => {};
-const silentLogger: Logger = { info: noop, warn: noop, error: noop };
-/* c8 ignore start - simple console wrappers */
-const consoleLogger: Logger = {
-  info: (...args: unknown[]) => console.log(...args),
-  warn: (...args: unknown[]) => console.warn(...args),
-  error: (...args: unknown[]) => console.error(...args),
-};
-/* c8 ignore stop */
-
 export async function rollback(
-  options: { dryRun?: boolean; force?: boolean; cwd?: string; silent?: boolean } = {},
+  options: {
+    dryRun?: boolean;
+    force?: boolean;
+    cwd?: string;
+    silent?: boolean;
+    verbose?: boolean;
+    quiet?: boolean;
+    logger?: Logger;
+  } = {},
 ): Promise<void> {
   const rootPath = options.cwd || process.cwd();
-  const logger = options.silent ? silentLogger : consoleLogger;
+  const logger = options.logger ?? createLogger(resolveLogLevel(options));
   const logPath = join(rootPath, RELEASE_LOG_PATH);
 
   if (!existsSync(logPath)) {
@@ -127,9 +126,9 @@ export async function rollback(
 }
 
 export async function rollbackCommand(
-  options: { dryRun?: boolean; force?: boolean } = {},
+  options: { dryRun?: boolean; force?: boolean; verbose?: boolean; quiet?: boolean } = {},
 ): Promise<void> {
-  const logger = consoleLogger;
+  const logger = createLogger(resolveLogLevel(options));
   try {
     logger.info('↩️  bonvoy rollback\n');
     await rollback(options);

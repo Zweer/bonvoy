@@ -1659,7 +1659,13 @@ describe('shipit log output', () => {
       '/',
     );
 
-    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+    const logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      level: 'silent' as const,
+    };
 
     await shipit(undefined, {
       dryRun: true,

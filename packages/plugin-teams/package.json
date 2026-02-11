@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-teams",
-  "version": "0.3.0",
+  "version": "0.12.0",
   "description": "🚢 Microsoft Teams notification plugin for bonvoy",
   "keywords": [
     "bonvoy",
@@ -33,7 +33,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/plugin-notification": "^0.3.0"
+    "@bonvoy/plugin-notification": "^0.12.0"
   },
   "engines": {
     "node": ">=20.5"

@@ -1,4 +1,59 @@
 
+## [0.5.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+### ### chore
+
+- chore: :bookmark: release
+
+
+## [0.5.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+### ### chore
+
+- chore: :bookmark: release
+
+
+## [0.5.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+### ### chore
+
+- chore: :bookmark: release
+
+
+## [0.5.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+### ### chore
+
+- chore: :bookmark: release
+
+
+## [0.5.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+### ### chore
+
+- chore: :bookmark: release
+
+
 ## [0.4.1] - 2026-02-11
 
 ### ✨ Features

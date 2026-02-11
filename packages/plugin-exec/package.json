@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-exec",
-  "version": "0.3.0",
+  "version": "0.12.0",
   "description": "🚢 Execute custom shell commands during release lifecycle",
   "keywords": [
     "bonvoy",
@@ -36,7 +36,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bonvoy/core": "^0.9.0",
+    "@bonvoy/core": "^0.12.0",
     "execa": "^9.6.1"
   },
   "engines": {

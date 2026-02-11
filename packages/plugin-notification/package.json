@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-notification",
-  "version": "0.3.0",
+  "version": "0.12.0",
   "description": "🚢 Base notification plugin for bonvoy",
   "keywords": [
     "bonvoy",
@@ -31,7 +31,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/core": "^0.9.0"
+    "@bonvoy/core": "^0.12.0"
   },
   "engines": {
     "node": ">=20.5"

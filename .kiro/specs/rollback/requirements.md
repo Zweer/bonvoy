@@ -45,14 +45,22 @@ interface ReleaseLog {
 
 | Plugin | Action | Rollback | Notes |
 |--------|--------|----------|-------|
-| git | `commit` | `git reset HEAD~1 --hard` | Resets version bumps + changelogs |
-| git | `tag` (local) | `git tag -d <tag>` | One per package |
-| git | `push` (commits) | `git push --force-with-lease` | Resets remote to pre-release state |
-| git | `push` (tags) | `git push --delete origin <tag>` | One per tag pushed |
-| npm | `publish` | `npm unpublish <pkg>@<version>` | Best-effort: 72h limit, may fail |
+| npm | `publish` | `npm unpublish <pkg>@<version>` | **Runs first**. 72h limit. If fails → skip git rollback |
 | github | `release` | `DELETE /repos/{owner}/{repo}/releases/{id}` | Requires release ID in log |
 | gitlab | `release` | `DELETE /projects/{id}/releases/{tag}` | Requires project ID in log |
+| git | `commit` | `git reset HEAD~1 --hard` | **Runs last**. Skipped if npm unpublish failed |
+| git | `tag` (local) | `git tag -d <tag>` | Skipped if npm unpublish failed |
+| git | `push` (commits) | `git push --force-with-lease` | Skipped if npm unpublish failed |
+| git | `push` (tags) | `git push --delete origin <tag>` | Skipped if npm unpublish failed |
 | changelog | `write` | No-op | Covered by git reset |
+
+### Rollback Order
+
+Rollback runs in this order: **npm → github/gitlab → git**.
+
+If npm unpublish fails, git rollback is **skipped** to keep git state consistent with what's published on npm. This prevents the situation where packages are live on npm but git tags/commits are reverted.
+
+Plugin registration order enforces this: npm and github are registered before git, so tapable calls their rollback hooks first. The `RollbackContext.npmFailed` flag signals git to skip.
 
 ### Action Log Data per Action
 

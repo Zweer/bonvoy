@@ -120,11 +120,14 @@ export default class NpmPlugin implements BonvoyPlugin {
       if (action.action !== 'publish') continue;
       const { name, version } = action.data as { name: string; version: string };
       try {
-        logger.info(`  ↩️  Unpublishing ${name}@${version} (best-effort)`);
+        logger.info(`  ↩️  Unpublishing ${name}@${version}...`);
         await this.ops.unpublish(name, version);
       } catch (error: unknown) {
         const msg = error instanceof Error ? error.message : String(error);
-        logger.warn(`  ⚠️  Failed to unpublish ${name}@${version}: ${msg}`);
+        logger.error(`  ❌ Failed to unpublish ${name}@${version}: ${msg}`);
+        logger.error('  Skipping git rollback to keep state consistent with npm.');
+        context.npmFailed = true;
+        return;
       }
     }
   }

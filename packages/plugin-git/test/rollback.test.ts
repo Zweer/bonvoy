@@ -217,6 +217,35 @@ describe('GitPlugin rollback non-Error handling', () => {
     await rollbackFn(ctx);
     expect(ctx.logger.warn).toHaveBeenCalledWith(expect.stringContaining('string error'));
   });
+
+  it('should skip git rollback when npmFailed is set', async () => {
+    const ops = createMockOps();
+    const plugin = new GitPlugin({}, ops);
+    const bonvoy = {
+      hooks: {
+        validateRepo: { tapPromise: vi.fn() },
+        beforePublish: { tapPromise: vi.fn() },
+        rollback: { tapPromise: vi.fn() },
+      },
+    };
+    plugin.apply(bonvoy);
+
+    const rollbackFn = bonvoy.hooks.rollback.tapPromise.mock.calls[0][1];
+    const ctx = createRollbackContext([
+      {
+        plugin: 'git',
+        action: 'commit',
+        data: { previousSha: 'abc123' },
+        timestamp: '',
+        status: 'completed',
+      },
+    ]);
+    ctx.npmFailed = true;
+
+    await rollbackFn(ctx);
+    expect(ops.calls).toHaveLength(0);
+    expect(ctx.logger.warn).toHaveBeenCalledWith(expect.stringContaining('Skipping git rollback'));
+  });
 });
 
 describe('GitPlugin rollback unknown action', () => {

@@ -72,18 +72,20 @@ export async function rollback(
   const config = await loadConfig(rootPath);
   const bonvoy = new Bonvoy(config);
 
+  // Order matters: npm+github before git so that if npm unpublish fails,
+  // git state is kept consistent with what's published on npm.
   const plugins = [
     new ConventionalPlugin(config.conventional),
     new ChangelogPlugin(config.changelog),
-    new GitPlugin({
-      ...config.git,
-      commitMessage: config.git?.commitMessage ?? config.commitMessage,
-      tagFormat: config.git?.tagFormat ?? config.tagFormat,
-    }),
     new NpmPlugin(config.npm),
     new GitHubPlugin({
       ...config.github,
       tagFormat: config.github?.tagFormat ?? config.tagFormat,
+    }),
+    new GitPlugin({
+      ...config.git,
+      commitMessage: config.git?.commitMessage ?? config.commitMessage,
+      tagFormat: config.git?.tagFormat ?? config.tagFormat,
     }),
   ];
 

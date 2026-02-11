@@ -82,15 +82,13 @@ describe('NpmPlugin rollback', () => {
     expect(ops.calls).toHaveLength(2);
     expect(ops.calls[0].args).toEqual(['pkg-b', '2.0.0']);
     expect(ops.calls[1].args).toEqual(['pkg-a', '1.1.0']);
+    expect(ctx.npmFailed).toBeUndefined();
   });
 
-  it('should warn on unpublish failure and continue', async () => {
+  it('should set npmFailed and stop on unpublish failure', async () => {
     const ops = createMockOps();
-    let callCount = 0;
-    ops.unpublish = async (pkg, version) => {
-      callCount++;
-      if (callCount === 1) throw new Error('Cannot unpublish');
-      ops.calls.push({ method: 'unpublish', args: [pkg, version] });
+    ops.unpublish = async () => {
+      throw new Error('Cannot unpublish');
     };
 
     const plugin = new NpmPlugin({}, ops);
@@ -123,9 +121,9 @@ describe('NpmPlugin rollback', () => {
 
     await rollbackFn(ctx);
 
-    expect(ctx.logger.warn).toHaveBeenCalledWith(expect.stringContaining('Cannot unpublish'));
-    // Second one should still succeed
-    expect(ops.calls).toHaveLength(1);
+    expect(ctx.npmFailed).toBe(true);
+    expect(ctx.logger.error).toHaveBeenCalledWith(expect.stringContaining('Cannot unpublish'));
+    expect(ctx.logger.error).toHaveBeenCalledWith(expect.stringContaining('Skipping git rollback'));
   });
 
   it('should skip non-npm actions', async () => {
@@ -180,6 +178,7 @@ describe('NpmPlugin rollback edge cases', () => {
     ]);
 
     await rollbackFn(ctx);
-    expect(ctx.logger.warn).toHaveBeenCalledWith(expect.stringContaining('string error'));
+    expect(ctx.npmFailed).toBe(true);
+    expect(ctx.logger.error).toHaveBeenCalledWith(expect.stringContaining('string error'));
   });
 });

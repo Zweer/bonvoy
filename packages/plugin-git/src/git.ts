@@ -112,6 +112,14 @@ export default class GitPlugin implements BonvoyPlugin {
 
   private async rollback(context: RollbackContext): Promise<void> {
     const { rootPath, logger } = context;
+
+    if (context.npmFailed) {
+      logger.warn(
+        '  ⚠️  Skipping git rollback — npm unpublish failed, keeping git state consistent.',
+      );
+      return;
+    }
+
     const actions = context.actions.filter((a) => a.plugin === 'git').reverse();
 
     for (const action of actions) {

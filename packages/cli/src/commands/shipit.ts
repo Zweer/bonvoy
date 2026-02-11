@@ -81,9 +81,16 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
   const bonvoy = new Bonvoy(config);
 
   // 2. Load plugins (custom or default)
+  // Order matters for rollback: npm+github run before git so that
+  // if npm unpublish fails, git state is kept consistent with npm.
   const plugins = options.plugins ?? [
     new ConventionalPlugin(config.conventional),
     new ChangelogPlugin(config.changelog),
+    new NpmPlugin(config.npm),
+    new GitHubPlugin({
+      ...config.github,
+      tagFormat: config.github?.tagFormat ?? config.tagFormat,
+    }),
     new GitPlugin(
       {
         ...config.git,
@@ -92,11 +99,6 @@ export async function shipit(_bump?: string, options: ShipitOptions = {}): Promi
       },
       gitOps,
     ),
-    new NpmPlugin(config.npm),
-    new GitHubPlugin({
-      ...config.github,
-      tagFormat: config.github?.tagFormat ?? config.tagFormat,
-    }),
   ];
 
   for (const plugin of plugins) {
@@ -507,10 +509,11 @@ async function shipitPublishOnly(
   logger.info(`📦 Publishing packages from PR #${tracking.prNumber}\n`);
 
   // Initialize Bonvoy with publish plugins only
+  // Order: npm+github before git for correct rollback order
   const bonvoy = new Bonvoy(config);
-  bonvoy.use(new GitPlugin(config.git, gitOps));
   bonvoy.use(new NpmPlugin(config.npm));
   bonvoy.use(new GitHubPlugin(config.github));
+  bonvoy.use(new GitPlugin(config.git, gitOps));
 
   // Detect packages and filter to those in the release
   const allPackages = options.packages ?? (await detectPackages(rootPath));

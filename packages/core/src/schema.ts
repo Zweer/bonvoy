@@ -170,6 +170,7 @@ export interface ReleaseContext extends PublishContext {
 export interface RollbackContext extends Context {
   actions: ActionEntry[];
   errors: Error[];
+  npmFailed?: boolean; // Set by npm plugin if unpublish fails — git plugin should skip rollback
 }
 
 export interface PRContext extends Context {

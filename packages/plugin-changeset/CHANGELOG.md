@@ -1,4 +1,95 @@
 
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
 ## [0.2.1] - 2026-02-06
 
 ### 🐛 Bug Fixes

@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-conventional",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "🚢 Conventional commits plugin for bonvoy",
   "keywords": [
     "release",
@@ -32,7 +32,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/core": "^0.8.0",
+    "@bonvoy/core": "^0.9.0",
     "conventional-commits-parser": "^6.2.1"
   },
   "engines": {

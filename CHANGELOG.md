@@ -1,4 +1,979 @@
 
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-gitlab
+
+## [0.4.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-notification
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-npm
+
+## [0.4.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-slack
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-teams
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-telegram
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## bonvoy
+
+## [0.10.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-gitlab
+
+## [0.4.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-notification
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-npm
+
+## [0.4.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-slack
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-teams
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-telegram
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-gitlab
+
+## [0.4.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-notification
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-npm
+
+## [0.4.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-slack
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-teams
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-gitlab
+
+## [0.4.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-notification
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-npm
+
+## [0.4.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-slack
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-gitlab
+
+## [0.4.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-notification
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-npm
+
+## [0.4.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-gitlab
+
+## [0.4.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-notification
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-gitlab
+
+## [0.4.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-github
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-git
+
+## [0.6.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-exec
+
+## [0.2.1] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-discord
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-conventional
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-changeset
+
+## [0.2.2] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+## @bonvoy/plugin-ai
+
+## [0.2.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
+## @bonvoy/core
+
+## [0.8.0] - 2026-02-11
+
+### ✨ Features
+
+- feat(core): :sparkles: add structured logger with log levels
+
+
 ## @bonvoy/plugin-ai
 
 ## [0.1.0] - 2026-02-10

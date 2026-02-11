@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-npm",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "🚢 npm publishing plugin for bonvoy",
   "keywords": [
     "bonvoy",

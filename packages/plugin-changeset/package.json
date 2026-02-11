@@ -36,7 +36,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bonvoy/core": "^0.12.0",
+    "@bonvoy/core": "^0.12.1",
     "gray-matter": "^4.0.3"
   },
   "engines": {

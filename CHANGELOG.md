@@ -1,6 +1,90 @@
 
 ## @bonvoy/core
 
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+## @bonvoy/plugin-git
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+## @bonvoy/plugin-npm
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+## bonvoy
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+
+## @bonvoy/core
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+## @bonvoy/plugin-git
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+## @bonvoy/plugin-npm
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+
+## @bonvoy/core
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+## @bonvoy/plugin-git
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+
+## @bonvoy/core
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+
+## @bonvoy/core
+
 ## [0.9.0] - 2026-02-11
 
 ### ✨ Features

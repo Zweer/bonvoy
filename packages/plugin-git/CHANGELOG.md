@@ -1,4 +1,25 @@
 
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+
+## [0.12.0] - 2026-02-11
+
+### 🐛 Bug Fixes
+
+- fix(rollback): :bug: npm unpublish first, skip git rollback on failure
+
+
 ## [0.7.0] - 2026-02-11
 
 ### ✨ Features

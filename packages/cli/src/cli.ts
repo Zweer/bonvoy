@@ -48,6 +48,7 @@ export function createProgram(): Command {
   prog
     .command('status')
     .description('Show pending changes')
+    .option('--all', 'Show all packages, not just changed ones')
     .option('--verbose', 'Show debug output')
     .option('--quiet', 'Only show warnings and errors')
     .action(statusCommand);

@@ -1,4 +1,15 @@
 
+## [0.12.1] - 2026-02-12
+
+### ✨ Features
+
+- feat(cli): :sparkles: add --all flag to status command
+
+### 📚 Documentation
+
+- docs: :speech_balloon: replace stale @bonvoy/cli references with bonvoy
+
+
 ## [0.12.0] - 2026-02-11
 
 ### 🐛 Bug Fixes

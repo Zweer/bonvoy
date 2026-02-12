@@ -1,0 +1,40 @@
+# bonvoy
+
+> Plugin-based release automation tool for npm packages and monorepos.
+
+## Guide
+
+- [Getting Started](https://zweer.github.io/bonvoy/getting-started): Install and first release in 2 minutes
+- [Configuration](https://zweer.github.io/bonvoy/configuration): All config options with examples
+- [CLI](https://zweer.github.io/bonvoy/cli): Commands: shipit, prepare, rollback, status, changelog
+- [Comparison](https://zweer.github.io/bonvoy/comparison): Feature matrix vs changesets, semantic-release, release-it, release-please
+- [FAQ](https://zweer.github.io/bonvoy/faq): Common questions and troubleshooting
+
+## Plugins
+
+- [Overview](https://zweer.github.io/bonvoy/plugins/overview): Plugin system architecture, hooks, and lifecycle
+- [Conventional Commits](https://zweer.github.io/bonvoy/plugins/conventional): Parse conventional commits for automatic version bumps
+- [Changelog](https://zweer.github.io/bonvoy/plugins/changelog): Generate CHANGELOG.md per package
+- [Git](https://zweer.github.io/bonvoy/plugins/git): Commit, tag, push with rollback support
+- [npm](https://zweer.github.io/bonvoy/plugins/npm): Publish to npm with OIDC authentication
+- [GitHub](https://zweer.github.io/bonvoy/plugins/github): Create GitHub releases and PRs
+- [GitLab](https://zweer.github.io/bonvoy/plugins/gitlab): Create GitLab releases and merge requests
+- [Changeset](https://zweer.github.io/bonvoy/plugins/changeset): Changeset-compatible workflow with .changeset/ files
+- [Exec](https://zweer.github.io/bonvoy/plugins/exec): Run custom shell commands at any lifecycle hook
+- [AI Release Notes](https://zweer.github.io/bonvoy/plugins/ai): AI-generated release summary via OpenAI, Anthropic, or Gemini
+- [Notifications](https://zweer.github.io/bonvoy/plugins/notifications): Slack, Discord, Telegram, Teams notifications
+
+## Guides
+
+- [Monorepo](https://zweer.github.io/bonvoy/guides/monorepo): npm workspaces setup with independent versioning
+- [Single Package](https://zweer.github.io/bonvoy/guides/single-package): Setup for single-package repositories
+- [PR Workflow](https://zweer.github.io/bonvoy/guides/pr-workflow): Release-please style PR-based releases
+- [CI/CD](https://zweer.github.io/bonvoy/guides/ci-cd): GitHub Actions and GitLab CI setup
+- [Rollback & Recovery](https://zweer.github.io/bonvoy/guides/rollback): Automatic and manual rollback of failed releases
+- [Migration](https://zweer.github.io/bonvoy/guides/migration): Migrate from changesets, semantic-release, release-it
+- [Writing Plugins](https://zweer.github.io/bonvoy/guides/writing-plugins): How to create custom bonvoy plugins
+
+## Reference
+
+- [Hooks](https://zweer.github.io/bonvoy/reference/hooks): All lifecycle hooks with TypeScript signatures
+- [API](https://zweer.github.io/bonvoy/reference/api): Programmatic API for @bonvoy/core

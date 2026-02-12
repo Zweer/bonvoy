@@ -62,3 +62,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HUSKY: 0
+
+  docs:
+    needs: release
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      pages: write
+      id-token: write

@@ -1,0 +1,3157 @@
+# bonvoy
+
+> Plugin-based release automation tool for npm packages and monorepos.
+
+
+---
+
+# Getting Started
+
+Get from zero to your first release in under 2 minutes.
+
+## Installation
+
+```bash
+npm install -D bonvoy
+```
+
+This installs the core package, which includes all default plugins:
+- **conventional** — parse conventional commits for version bumps
+- **changelog** — generate CHANGELOG.md
+- **git** — commit, tag, push
+- **npm** — publish to npm registry
+- **github** — create GitHub releases
+
+## Your First Release
+
+### 1. Make sure you have conventional commits
+
+bonvoy reads your git history to determine what changed:
+
+```bash
+git commit -m "feat: add user authentication"   # → minor bump
+git commit -m "fix: resolve login bug"           # → patch bump
+git commit -m "feat!: remove legacy API"         # → major bump
+```
+
+### 2. Preview the release
+
+```bash
+npx bonvoy shipit --dry-run
+```
+
+This shows you exactly what would happen without making any changes:
+- Which packages changed
+- What version each gets bumped to
+- What the changelog looks like
+
+### 3. Release
+
+```bash
+npx bonvoy shipit
+```
+
+That's it. bonvoy will:
+
+1. **Analyze commits** since the last release
+2. **Calculate version bumps** per package (based on conventional commits)
+3. **Generate changelogs** for each changed package
+4. **Update package.json** versions (including internal dependencies)
+5. **Commit and tag** the changes
+6. **Publish to npm** with provenance
+7. **Create GitHub releases** with changelog bodies
+
+## Force a Specific Version
+
+Don't want automatic bumps? Force it:
+
+```bash
+npx bonvoy shipit patch          # Force patch bump
+npx bonvoy shipit minor          # Force minor bump
+npx bonvoy shipit major          # Force major bump
+npx bonvoy shipit 2.0.0          # Force exact version
+```
+
+## Prereleases
+
+```bash
+npx bonvoy shipit prerelease --preid beta    # 1.0.0 → 1.0.1-beta.0
+npx bonvoy shipit prerelease --preid beta    # 1.0.1-beta.0 → 1.0.1-beta.1
+npx bonvoy shipit patch                      # 1.0.1-beta.1 → 1.0.1 (graduate)
+```
+
+## Monorepo
+
+If your project uses npm workspaces, bonvoy detects it automatically. Each package gets its own version based on which files changed in each commit.
+
+```
+my-monorepo/
+├── packages/
+│   ├── core/        # Only bumped if files in packages/core/ changed
+│   ├── utils/       # Only bumped if files in packages/utils/ changed
+│   └── cli/         # Only bumped if files in packages/cli/ changed
+└── package.json     # workspaces: ["packages/*"]
+```
+
+No extra config needed.
+
+## CI/CD
+
+Add to your GitHub Actions workflow:
+
+```yaml
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump (patch/minor/major/x.y.z)'
+        required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npx bonvoy shipit ${{ github.event.inputs.bump }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+::: tip
+`fetch-depth: 0` is required so bonvoy can read the full git history.
+:::
+
+## What's Next?
+
+- [Configuration](/configuration) — customize bonvoy's behavior
+- [CLI Reference](/cli) — all available commands and options
+- [Plugins](/plugins/overview) — understand the plugin system
+- [Monorepo Guide](/guides/monorepo) — advanced monorepo setup
+- [PR Workflow](/guides/pr-workflow) — release-please style workflow
+- [CI/CD Guide](/guides/ci-cd) — complete CI/CD setup
+
+
+---
+
+# Configuration
+
+bonvoy works with zero configuration. When you need to customize, create a config file.
+
+## Config File
+
+Supported formats (searched in this order):
+
+- `bonvoy.config.js`
+- `bonvoy.config.mjs`
+- `bonvoy.config.ts`
+- `bonvoy.config.json`
+- `bonvoy.config.yaml` / `bonvoy.config.yml`
+- `bonvoy.config.toml`
+- `.bonvoyrc` / `.bonvoyrc.json` / `.bonvoyrc.yaml` / `.bonvoyrc.yml`
+- `"bonvoy"` key in `package.json`
+
+Config is loaded via [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) and validated at runtime with [Zod](https://zod.dev).
+
+## Full Example
+
+```javascript
+// bonvoy.config.js
+export default {
+  // Versioning
+  versioning: 'independent',     // 'independent' | 'fixed'
+  rootVersionStrategy: 'max',    // 'max' | 'patch' | 'none'
+
+  // Git
+  commitMessage: 'chore: :bookmark: release',
+  tagFormat: '{name}@{version}',
+
+  // Changelog
+  changelog: {
+    global: false,
+    sections: {
+      feat: '✨ Features',
+      fix: '🐛 Bug Fixes',
+      perf: '⚡ Performance',
+      docs: '📚 Documentation',
+      breaking: '💥 Breaking Changes',
+    },
+  },
+
+  // Conventional commits
+  conventional: {
+    preset: 'angular',
+  },
+
+  // Git plugin
+  git: {
+    push: true,
+  },
+
+  // npm plugin
+  npm: {
+    registry: 'https://registry.npmjs.org',
+    access: 'public',
+    skipExisting: true,
+    provenance: true,
+  },
+
+  // GitHub plugin
+  github: {
+    draft: false,
+  },
+
+  // Workflow
+  workflow: 'direct',
+  baseBranch: 'main',
+
+  // Additional plugins
+  plugins: [],
+};
+```
+
+## Options Reference
+
+### `versioning`
+
+- **Type:** `'independent' | 'fixed'`
+- **Default:** `'independent'`
+
+How packages are versioned in a monorepo.
+
+- `independent` — each package has its own version based on its changes
+- `fixed` — all packages share the same version (highest bump wins)
+
+### `rootVersionStrategy`
+
+- **Type:** `'max' | 'patch' | 'none'`
+- **Default:** `'max'`
+
+How the root `package.json` version is updated in a monorepo.
+
+- `max` — set to the highest version among released packages
+- `patch` — bump root version by patch on any release
+- `none` — don't update root version
+
+### `commitMessage`
+
+- **Type:** `string`
+- **Default:** `'chore: :bookmark: release'`
+
+Git commit message for the release commit. Supports placeholders:
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{packages}` | Comma-separated package names |
+| `{details}` | Package list with versions (one per line) |
+
+If `{details}` is not used, package details are appended as the commit body automatically.
+
+### `tagFormat`
+
+- **Type:** `string`
+- **Default:** `'{name}@{version}'`
+
+Format for git tags. Supports placeholders:
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{name}` | Package name |
+| `{version}` | Package version |
+
+### `changelog`
+
+#### `changelog.global`
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+Generate a global changelog at the repo root (in addition to per-package changelogs).
+
+#### `changelog.sections`
+
+- **Type:** `Record<string, string>`
+- **Default:** see example above
+
+Map of commit types to changelog section headers.
+
+### `conventional`
+
+#### `conventional.preset`
+
+- **Type:** `'angular' | 'conventional' | 'atom' | 'custom'`
+- **Default:** `'angular'`
+
+Which commit convention to use.
+
+| Preset | `feat` | `fix` | `perf` |
+|--------|--------|-------|--------|
+| `angular` | minor | patch | patch |
+| `conventional` | minor | patch | patch |
+| `atom` | `:sparkles:` → minor | `:bug:` → patch | `:racehorse:` → patch |
+| `custom` | defined by `types` | defined by `types` | defined by `types` |
+
+#### `conventional.types`
+
+- **Type:** `Record<string, 'major' | 'minor' | 'patch' | 'none'>`
+- **Default:** `undefined`
+
+Custom type-to-bump mapping. Only used when `preset: 'custom'`.
+
+```javascript
+export default {
+  conventional: {
+    preset: 'custom',
+    types: {
+      feat: 'minor',
+      fix: 'patch',
+      perf: 'patch',
+      refactor: 'patch',  // custom: refactor triggers a patch
+    },
+  },
+};
+```
+
+### `git`
+
+#### `git.push`
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+Push commits and tags to the remote after release.
+
+#### `git.commitMessage`
+
+- **Type:** `string`
+- **Default:** inherits from top-level `commitMessage`
+
+Override commit message for the git plugin specifically.
+
+#### `git.tagFormat`
+
+- **Type:** `string`
+- **Default:** inherits from top-level `tagFormat`
+
+Override tag format for the git plugin specifically.
+
+### `npm`
+
+#### `npm.registry`
+
+- **Type:** `string`
+- **Default:** `'https://registry.npmjs.org'`
+
+npm registry URL.
+
+#### `npm.access`
+
+- **Type:** `'public' | 'restricted'`
+- **Default:** `'public'`
+
+Access level for published packages. Scoped packages default to `restricted` on npm, so set `'public'` to publish them publicly.
+
+#### `npm.skipExisting`
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+Skip publishing if the version already exists on the registry.
+
+#### `npm.provenance`
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+Enable [npm provenance](https://docs.npmjs.com/generating-provenance-statements) for supply chain security. Requires `id-token: write` permission in GitHub Actions.
+
+### `github`
+
+#### `github.draft`
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+Create GitHub releases as drafts.
+
+#### `github.prerelease`
+
+- **Type:** `boolean`
+- **Default:** auto-detected
+
+Force the prerelease flag on GitHub releases. By default, bonvoy detects prerelease versions automatically (e.g., `1.0.0-beta.1`).
+
+#### `github.owner` / `github.repo`
+
+- **Type:** `string`
+- **Default:** auto-detected from `git remote`
+
+Override the GitHub owner and repository. Usually not needed — bonvoy parses `git remote get-url origin` automatically.
+
+#### `github.token`
+
+- **Type:** `string`
+- **Default:** `process.env.GITHUB_TOKEN`
+
+GitHub token. Defaults to the `GITHUB_TOKEN` environment variable.
+
+### `gitlab`
+
+#### `gitlab.host`
+
+- **Type:** `string`
+- **Default:** `'https://gitlab.com'`
+
+GitLab instance URL.
+
+#### `gitlab.projectId`
+
+- **Type:** `string | number`
+- **Default:** `undefined`
+
+GitLab project ID. Required for GitLab operations.
+
+#### `gitlab.token`
+
+- **Type:** `string`
+- **Default:** `process.env.GITLAB_TOKEN`
+
+GitLab token.
+
+### `workflow`
+
+- **Type:** `'direct' | 'pr'`
+- **Default:** `'direct'`
+
+Release workflow mode.
+
+- `direct` — release immediately with `bonvoy shipit`
+- `pr` — create a release PR with `bonvoy prepare`, publish after merge
+
+### `baseBranch`
+
+- **Type:** `string`
+- **Default:** `'main'`
+
+The base branch for releases and PR targets.
+
+### `plugins`
+
+- **Type:** `(string | [string, object])[]`
+- **Default:** `[]`
+
+Additional plugins to load. Default plugins are always loaded unless explicitly disabled.
+
+```javascript
+export default {
+  plugins: [
+    '@bonvoy/plugin-exec',                              // no config
+    ['@bonvoy/plugin-slack', { webhookUrl: '...' }],    // with config
+  ],
+};
+```
+
+### `hooks`
+
+- **Type:** `Record<string, Function>`
+- **Default:** `undefined`
+
+Inline hook functions. Useful for simple customizations without writing a full plugin.
+
+```javascript
+export default {
+  hooks: {
+    afterRelease: (context) => {
+      console.log(`Released ${context.changedPackages.length} packages!`);
+    },
+  },
+};
+```
+
+## Validation
+
+Config is validated at runtime using Zod. If you pass an invalid option, you'll get a clear error:
+
+```
+Invalid configuration: Expected 'independent' | 'fixed', received 'auto'
+```
+
+## TypeScript
+
+For type-safe config files, use `bonvoy.config.ts`:
+
+```typescript
+import type { BonvoyConfig } from '@bonvoy/core';
+
+export default {
+  versioning: 'independent',
+  npm: { access: 'public' },
+} satisfies BonvoyConfig;
+```
+
+
+---
+
+# CLI Reference
+
+## `bonvoy shipit`
+
+Release all changed packages.
+
+```bash
+bonvoy shipit [bump] [options]
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `bump` | Optional. Force a version bump: `patch`, `minor`, `major`, `prerelease`, or an exact version like `2.0.0` |
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview changes without executing anything |
+| `--json` | Output results as JSON (for CI pipelines) |
+| `--package <name>` | Only release specific package(s). Repeatable |
+| `--preid <id>` | Prerelease identifier: `alpha`, `beta`, `rc`, etc. Default: `next` |
+| `--force` | Ignore stale release log and proceed (see [Rollback](/guides/rollback)) |
+
+### Examples
+
+```bash
+# Automatic bump from conventional commits
+bonvoy shipit
+
+# Preview what would happen
+bonvoy shipit --dry-run
+
+# Force bumps
+bonvoy shipit patch
+bonvoy shipit minor
+bonvoy shipit major
+bonvoy shipit 2.0.0
+
+# Prereleases
+bonvoy shipit prerelease --preid beta     # 1.0.0 → 1.0.1-beta.0
+bonvoy shipit prerelease --preid beta     # 1.0.1-beta.0 → 1.0.1-beta.1
+bonvoy shipit patch                       # 1.0.1-beta.1 → 1.0.1
+
+# Release specific packages only
+bonvoy shipit --package @scope/core
+bonvoy shipit --package @scope/core --package @scope/utils
+
+# JSON output for CI
+bonvoy shipit --json
+```
+
+### JSON Output
+
+When using `--json`, the output looks like:
+
+```json
+{
+  "success": true,
+  "dryRun": false,
+  "released": [
+    { "name": "@scope/core", "version": "1.2.0", "bump": "minor" },
+    { "name": "@scope/utils", "version": "1.1.1", "bump": "patch" }
+  ],
+  "changelogs": {
+    "@scope/core": "## 1.2.0\n\n### ✨ Features\n...",
+    "@scope/utils": "## 1.1.1\n\n### 🐛 Bug Fixes\n..."
+  }
+}
+```
+
+### Auto-Detection
+
+`shipit` is context-aware:
+
+- **On main with `.bonvoy/release-pr.json`**: enters publish-only mode (the release PR was merged, so it only publishes and creates GitHub releases — no version bumps)
+- **Otherwise**: runs the full release lifecycle
+
+## `bonvoy prepare`
+
+Create a release PR with version bumps and changelogs (PR-based workflow).
+
+```bash
+bonvoy prepare [bump] [options]
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `bump` | Optional. Force a version bump type or exact version |
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview without creating the PR |
+| `--preid <id>` | Prerelease identifier |
+
+### What It Does
+
+1. Analyzes commits since last release
+2. Calculates version bumps
+3. Creates a release branch (`release/<timestamp>`)
+4. Updates `package.json` versions
+5. Generates changelogs
+6. Commits and pushes the branch
+7. Creates a PR targeting the base branch
+8. Saves tracking info to `.bonvoy/release-pr.json`
+
+After the PR is merged, running `bonvoy shipit` on the base branch will detect the tracking file and enter publish-only mode.
+
+## `bonvoy status`
+
+Show pending changes since the last release.
+
+```bash
+bonvoy status
+```
+
+Displays which packages have changes and what commits affect them.
+
+## `bonvoy changelog`
+
+Preview the changelog that would be generated.
+
+```bash
+bonvoy changelog
+```
+
+Shows the changelog content without making any changes.
+
+## `bonvoy rollback`
+
+Roll back the last release using the action log.
+
+```bash
+bonvoy rollback [options]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview what would be rolled back without executing |
+| `--force` | Skip stale release log check |
+
+### Examples
+
+```bash
+# Roll back the last release
+bonvoy rollback
+
+# Preview rollback actions
+bonvoy rollback --dry-run
+```
+
+See the [Rollback Guide](/guides/rollback) for details on how rollback works.
+
+
+---
+
+# Comparison
+
+How bonvoy compares to other release tools.
+
+## Feature Matrix
+
+| Feature | bonvoy | changesets | semantic-release | release-it | release-please |
+|---------|--------|-----------|-----------------|-----------|---------------|
+| Zero config | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Monorepo | ✅ | ✅ | ⚠️ plugin | ❌ | ✅ |
+| Independent versioning | ✅ | ✅ | ⚠️ | ❌ | ✅ |
+| Fixed versioning | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Conventional commits | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Change files | ✅ optional | ✅ required | ❌ | ❌ | ❌ |
+| Direct release | ✅ | ❌ | ✅ | ✅ | ❌ |
+| PR workflow | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Plugin system | ✅ tapable | ❌ | ✅ | ✅ | ❌ |
+| GitHub releases | ✅ | ❌ | ✅ | ✅ | ✅ |
+| GitLab support | ✅ | ❌ | ✅ | ✅ | ❌ |
+| npm provenance | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Dry run | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Prerelease | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Force version | ✅ | ❌ | ❌ | ✅ | ❌ |
+| JSON output | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Notifications | ✅ | ❌ | ✅ | ❌ | ❌ |
+
+## When to Use bonvoy
+
+✅ **Use bonvoy when:**
+- You want a tool that works out of the box
+- You have a monorepo with npm workspaces
+- You want flexibility (direct release OR PR workflow)
+- You use conventional commits
+- You want to extend behavior with plugins
+- You want both GitHub and GitLab support
+
+## When NOT to Use bonvoy
+
+❌ **Consider alternatives when:**
+- You need non-npm package managers (pnpm workspaces, yarn workspaces with PnP)
+- You need a mature, battle-tested tool for enterprise (semantic-release)
+- Your team is already happy with changesets
+- You need interactive prompts (release-it)
+
+## Detailed Comparisons
+
+### vs Changesets
+
+**Changesets** requires creating change files for every PR. This is great for large teams but adds friction for small teams or solo developers.
+
+**bonvoy** uses conventional commits by default (no extra files), but optionally supports changeset files via `@bonvoy/plugin-changeset` for teams that prefer that workflow.
+
+### vs semantic-release
+
+**semantic-release** is fully automatic — every push to main triggers a release. This can be surprising and hard to control.
+
+**bonvoy** gives you control: release when you want with `bonvoy shipit`, or automate it in CI. You decide.
+
+### vs release-it
+
+**release-it** is great for single packages with interactive prompts. But it explicitly won't support monorepos.
+
+**bonvoy** is monorepo-native and non-interactive (CI-friendly), while still supporting single packages.
+
+### vs release-please
+
+**release-please** only supports PR-based workflows and requires complex configuration for monorepos.
+
+**bonvoy** supports both direct and PR workflows, and works with zero config for standard setups.
+
+
+---
+
+# FAQ
+
+## General
+
+### Do I need a config file?
+
+No. bonvoy works with zero configuration for standard npm + GitHub projects.
+
+### Does bonvoy work with single packages?
+
+Yes. If there's no `workspaces` field in your `package.json`, bonvoy treats it as a single package.
+
+### Does bonvoy work with pnpm/yarn workspaces?
+
+Currently bonvoy supports npm workspaces. pnpm and yarn workspace support is planned.
+
+### What Node.js version is required?
+
+Node.js >= 20.5.
+
+## Versioning
+
+### How does bonvoy decide the version bump?
+
+By default, it parses conventional commit messages:
+- `feat:` → minor
+- `fix:` / `perf:` → patch
+- `feat!:` or `BREAKING CHANGE:` → major
+- Everything else → no bump
+
+### Can I force a specific version?
+
+Yes:
+```bash
+bonvoy shipit 2.0.0    # exact version
+bonvoy shipit major     # force major bump
+bonvoy shipit minor     # force minor bump
+```
+
+### How are commits assigned to packages in a monorepo?
+
+By the files they modified. If a commit changes `packages/core/src/index.ts`, it's assigned to the `core` package. A commit can be assigned to multiple packages.
+
+### What if there are no changes?
+
+bonvoy exits cleanly with "No changes detected — nothing to release".
+
+## Git
+
+### Does bonvoy push to the remote?
+
+Yes, by default. Disable with:
+```javascript
+export default { git: { push: false } };
+```
+
+### What tags does bonvoy create?
+
+One per released package: `@scope/core@1.2.0`. Customize with `tagFormat`.
+
+### Does bonvoy need the full git history?
+
+Yes. In CI, use `fetch-depth: 0` with `actions/checkout`.
+
+## npm
+
+### Does bonvoy need an NPM_TOKEN?
+
+Not if you use OIDC provenance in GitHub Actions (default). The token is provided automatically.
+
+For other CI systems or manual releases, set `NODE_AUTH_TOKEN`.
+
+### Are private packages published?
+
+No. Packages with `"private": true` are automatically skipped.
+
+### What happens if a version already exists on npm?
+
+By default (`skipExisting: true`), it's skipped. No error.
+
+## Troubleshooting
+
+### "No changes detected" but I have commits
+
+Make sure your commits use conventional format (`feat:`, `fix:`, etc.). Commits like `chore:` or `docs:` don't trigger releases by default.
+
+### Tags already exist
+
+bonvoy validates that tags don't exist before releasing. If a tag exists from a previous partial release, delete it:
+```bash
+git tag -d @scope/core@1.2.0
+git push origin :refs/tags/@scope/core@1.2.0
+```
+
+### Release failed halfway
+
+Check `.bonvoy/release-log.json` for what was completed. It logs which packages were published and which tags were created, so you can manually clean up if needed.
+
+
+---
+
+# Plugin System
+
+bonvoy's core is intentionally minimal: a hook system + workspace detection + config loading. All real functionality is implemented via plugins.
+
+## How It Works
+
+Plugins tap into **lifecycle hooks** using [tapable](https://github.com/webpack/tapable) (the same library webpack uses). When you run `bonvoy shipit`, the hooks fire in order and each plugin does its part.
+
+```
+shipit
+  │
+  ├─ modifyConfig        ← plugins can modify config
+  ├─ beforeShipIt        ← pre-flight checks
+  ├─ getVersion          ← determine version bump (conventional plugin)
+  ├─ validateRepo        ← verify tags/versions don't exist
+  ├─ version             ← apply version bumps
+  ├─ afterVersion
+  ├─ beforeChangelog
+  ├─ generateChangelog   ← create changelog content (changelog plugin)
+  ├─ afterChangelog
+  ├─ beforePublish       ← git commit/tag/push (git plugin)
+  ├─ publish             ← npm publish (npm plugin)
+  ├─ afterPublish
+  ├─ beforeRelease
+  ├─ makeRelease         ← GitHub/GitLab release (github/gitlab plugin)
+  └─ afterRelease
+```
+
+## Default Plugins
+
+These are loaded automatically — you don't need to install or configure them:
+
+| Plugin | What it does |
+|--------|-------------|
+| [conventional](/plugins/conventional) | Parses conventional commits → version bumps |
+| [changelog](/plugins/changelog) | Generates CHANGELOG.md per package |
+| [git](/plugins/git) | Commits, tags, pushes |
+| [npm](/plugins/npm) | Publishes to npm with OIDC provenance |
+| [github](/plugins/github) | Creates GitHub releases |
+
+## Optional Plugins
+
+Install and configure these when needed:
+
+| Plugin | What it does |
+|--------|-------------|
+| [gitlab](/plugins/gitlab) | GitLab releases and merge requests |
+| [changeset](/plugins/changeset) | Changeset-compatible workflow |
+| [exec](/plugins/exec) | Run custom shell commands at any hook |
+| [ai](/plugins/ai) | AI-generated release notes summary |
+| [notifications](/plugins/notifications) | Slack, Discord, Telegram, Teams |
+
+## Writing a Plugin
+
+A plugin is a class with a `name` and an `apply` method:
+
+```typescript
+import type { BonvoyPlugin } from '@bonvoy/core';
+import type { Bonvoy } from '@bonvoy/core';
+
+export default class MyPlugin implements BonvoyPlugin {
+  name = 'my-plugin';
+
+  apply(bonvoy: Bonvoy): void {
+    bonvoy.hooks.afterRelease.tap(this.name, (context) => {
+      console.log(`Released ${context.changedPackages.length} packages!`);
+    });
+  }
+}
+```
+
+### Using Config
+
+Plugins can accept configuration via the constructor:
+
+```typescript
+interface MyPluginConfig {
+  webhookUrl: string;
+  silent?: boolean;
+}
+
+export default class MyPlugin implements BonvoyPlugin {
+  name = 'my-plugin';
+  private config: MyPluginConfig;
+
+  constructor(config: MyPluginConfig) {
+    this.config = config;
+  }
+
+  apply(bonvoy: Bonvoy): void {
+    bonvoy.hooks.afterRelease.tap(this.name, (context) => {
+      if (!context.isDryRun) {
+        // send webhook notification
+      }
+    });
+  }
+}
+```
+
+Users configure it in `bonvoy.config.js`:
+
+```javascript
+export default {
+  plugins: [
+    ['my-plugin', { webhookUrl: 'https://...' }],
+  ],
+};
+```
+
+### Async Hooks
+
+Use `tapPromise` for async operations:
+
+```typescript
+apply(bonvoy: Bonvoy): void {
+  bonvoy.hooks.afterRelease.tapPromise(this.name, async (context) => {
+    await fetch(this.config.webhookUrl, {
+      method: 'POST',
+      body: JSON.stringify({ packages: context.changedPackages }),
+    });
+  });
+}
+```
+
+### Available Hooks
+
+See the [Hooks Reference](/reference/hooks) for the complete list with type signatures.
+
+
+---
+
+# plugin-conventional
+
+> `@bonvoy/plugin-conventional` — Default plugin
+
+Parses [conventional commit](https://www.conventionalcommits.org/) messages to determine semantic version bumps automatically.
+
+## Commit Format
+
+```
+<type>[optional scope][!]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+## Supported Commit Types
+
+| Commit | Bump | Example |
+|--------|------|---------|
+| `feat:` | minor | `feat: add user authentication` |
+| `fix:` | patch | `fix: resolve memory leak` |
+| `perf:` | patch | `perf: optimize database queries` |
+| `feat!:` | major | `feat!: remove deprecated API` |
+| `fix!:` | major | `fix!: change return type` |
+| `BREAKING CHANGE:` in footer | major | Any commit with `BREAKING CHANGE:` in body |
+
+Commits with other types (`docs:`, `chore:`, `style:`, `refactor:`, `test:`, `ci:`) do **not** trigger a release.
+
+## Configuration
+
+```javascript
+export default {
+  conventional: {
+    preset: 'angular',  // default
+  },
+};
+```
+
+### Presets
+
+| Preset | Description |
+|--------|-------------|
+| `angular` | Standard Angular convention (default) |
+| `conventional` | Same as angular |
+| `atom` | Atom editor convention (emoji-based) |
+| `custom` | Define your own type-to-bump mapping |
+
+### Custom Types
+
+```javascript
+export default {
+  conventional: {
+    preset: 'custom',
+    types: {
+      feat: 'minor',
+      fix: 'patch',
+      perf: 'patch',
+      refactor: 'patch',   // refactor triggers a patch
+      breaking: 'major',
+    },
+  },
+};
+```
+
+## How It Works
+
+1. Reads all commits since the last git tag
+2. Parses each commit message with [conventional-commits-parser](https://github.com/conventional-changelog/conventional-changelog)
+3. Maps the commit type to a bump level
+4. Returns the highest bump across all commits
+
+In a monorepo, commits are filtered per package based on which files were modified.
+
+## Hook
+
+| Hook | Action |
+|------|--------|
+| `getVersion` | Returns the calculated `SemverBump` for the current package |
+
+
+---
+
+# plugin-changelog
+
+> `@bonvoy/plugin-changelog` — Default plugin
+
+Generates CHANGELOG.md files for each released package.
+
+## Output Format
+
+```markdown
+## 1.2.0 (2026-02-08)
+
+### ✨ Features
+
+- add user authentication (abc1234)
+- add API rate limiting (def5678)
+
+### 🐛 Bug Fixes
+
+- resolve memory leak in cache (ghi9012)
+```
+
+## Configuration
+
+```javascript
+export default {
+  changelog: {
+    global: false,   // Generate a root CHANGELOG.md too
+    sections: {
+      feat: '✨ Features',
+      fix: '🐛 Bug Fixes',
+      perf: '⚡ Performance',
+      docs: '📚 Documentation',
+      breaking: '💥 Breaking Changes',
+    },
+  },
+};
+```
+
+### `global`
+
+When `true`, generates an aggregated changelog at the repo root in addition to per-package changelogs.
+
+### `sections`
+
+Map of commit types to section headers. Only commits matching these types appear in the changelog. Customize the headers or add new types:
+
+```javascript
+export default {
+  changelog: {
+    sections: {
+      feat: '🚀 New Features',
+      fix: '🐛 Fixes',
+      perf: '⚡ Performance',
+      refactor: '♻️ Refactoring',  // add refactor to changelog
+    },
+  },
+};
+```
+
+## Hooks
+
+| Hook | Action |
+|------|--------|
+| `generateChangelog` | Returns the changelog string for the current package |
+| `afterChangelog` | Writes the changelog to `CHANGELOG.md` |
+
+## Behavior
+
+- New changelog content is **prepended** to the existing CHANGELOG.md
+- If no CHANGELOG.md exists, one is created
+- Each package gets its own CHANGELOG.md in its directory
+- Commits are assigned to packages based on which files they modified
+- A single commit can appear in multiple package changelogs
+
+
+---
+
+# plugin-git
+
+> `@bonvoy/plugin-git` — Default plugin
+
+Handles git commit, tag, push, and branch operations during the release process.
+
+## Configuration
+
+```javascript
+export default {
+  git: {
+    commitMessage: 'chore: :bookmark: release',  // default
+    tagFormat: '{name}@{version}',                // default
+    push: true,                                   // default
+  },
+};
+```
+
+### `commitMessage`
+
+Release commit message. Supports placeholders:
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{packages}` | Comma-separated package names |
+| `{details}` | Package list with versions, one per line |
+
+If `{details}` is not in the message, package details are appended as the commit body automatically.
+
+### `tagFormat`
+
+Git tag format per package:
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{name}` | Package name (e.g., `@bonvoy/core`) |
+| `{version}` | Package version (e.g., `1.2.0`) |
+
+Default produces tags like `@bonvoy/core@1.2.0`.
+
+### `push`
+
+Set to `false` to commit and tag locally without pushing. Useful for testing.
+
+## Hook
+
+| Hook | Action |
+|------|--------|
+| `beforePublish` | Stages all changes, commits, creates tags, pushes |
+| `rollback` | Resets HEAD, deletes local/remote tags, force-pushes |
+
+## What It Does
+
+During `beforePublish`:
+
+1. `git add .` — stage all changes (version bumps, changelogs)
+2. `git commit -m "..."` — commit with configured message
+3. `git tag <tag>` — create a tag for each released package
+4. `git push` — push commits to remote
+5. `git push --tags` — push tags to remote
+
+
+---
+
+# plugin-npm
+
+> `@bonvoy/plugin-npm` — Default plugin
+
+Publishes packages to the npm registry with OIDC provenance support.
+
+## Configuration
+
+```javascript
+export default {
+  npm: {
+    registry: 'https://registry.npmjs.org',  // default
+    access: 'public',                         // default
+    skipExisting: true,                       // default
+    provenance: true,                         // default
+  },
+};
+```
+
+### `registry`
+
+npm registry URL. Change for GitHub Packages or private registries:
+
+```javascript
+export default {
+  npm: {
+    registry: 'https://npm.pkg.github.com',
+  },
+};
+```
+
+### `access`
+
+- `'public'` — anyone can install (default)
+- `'restricted'` — only authorized users
+
+::: warning
+Scoped packages (e.g., `@bonvoy/core`) default to `restricted` on npm. Set `'public'` explicitly to publish them publicly.
+:::
+
+### `skipExisting`
+
+When `true`, skips publishing if the version already exists on the registry instead of failing.
+
+### `provenance`
+
+Enable [npm provenance statements](https://docs.npmjs.com/generating-provenance-statements) for supply chain security. Links published packages to their source code and build.
+
+Requires in GitHub Actions:
+
+```yaml
+permissions:
+  id-token: write
+```
+
+## Hook
+
+| Hook | Action |
+|------|--------|
+| `publish` | Publishes each changed package to npm |
+| `rollback` | Unpublishes packages (best-effort) |
+
+## Behavior
+
+For each changed package:
+
+1. Skip if `"private": true` in package.json
+2. Skip if version already exists on registry (when `skipExisting: true`)
+3. Run `npm publish --access <access> --provenance`
+
+## Prerelease Tags
+
+When publishing a prerelease version (e.g., `1.0.0-beta.0`), the npm dist-tag is set automatically:
+
+| Version | npm tag |
+|---------|---------|
+| `1.0.0` | `latest` |
+| `1.0.0-beta.0` | `beta` |
+| `1.0.0-alpha.1` | `alpha` |
+| `1.0.0-rc.0` | `rc` |
+| `1.0.0-next.0` | `next` |
+
+This prevents prereleases from becoming the default `latest` tag.
+
+
+---
+
+# plugin-github
+
+> `@bonvoy/plugin-github` — Default plugin
+
+Creates GitHub releases after publishing packages. Also handles PR creation for the PR-based workflow.
+
+## Configuration
+
+```javascript
+export default {
+  github: {
+    draft: false,        // default
+    prerelease: false,   // default: auto-detected
+    // owner: 'my-org',  // auto-detected from git remote
+    // repo: 'my-repo',  // auto-detected from git remote
+  },
+};
+```
+
+### `draft`
+
+Create releases as drafts for manual review before publishing.
+
+### `prerelease`
+
+Force the prerelease flag. By default, bonvoy detects prerelease versions automatically (e.g., `1.0.0-beta.1` → prerelease).
+
+### `owner` / `repo`
+
+Usually not needed. bonvoy parses `git remote get-url origin` to detect the GitHub owner and repository.
+
+## Requirements
+
+- `GITHUB_TOKEN` environment variable with `contents: write` permission
+- For PR workflow: also needs `pull-requests: write`
+
+```yaml
+permissions:
+  contents: write
+  pull-requests: write  # only for PR workflow
+  id-token: write       # only for npm provenance
+```
+
+## Hooks
+
+| Hook | Action |
+|------|--------|
+| `makeRelease` | Creates a GitHub release for each published package |
+| `createPR` | Creates a pull request (PR workflow) |
+| `rollback` | Deletes GitHub releases by ID |
+
+## Retry
+
+API calls to GitHub (release creation, PR creation) are automatically retried up to 3 times with exponential backoff (1s, 2s, 4s) on transient errors (429 rate limit, 5xx server errors, network timeouts).
+
+## Release Format
+
+For each published package, a GitHub release is created with:
+
+- **Tag**: `@bonvoy/core@1.2.0` (configurable via `tagFormat`)
+- **Title**: `@bonvoy/core v1.2.0`
+- **Body**: the package's changelog for this version
+- **Prerelease**: auto-detected from version string
+
+
+---
+
+# plugin-gitlab
+
+> `@bonvoy/plugin-gitlab` — Optional plugin
+
+Creates GitLab releases and merge requests. Use this instead of (or alongside) the GitHub plugin.
+
+## Installation
+
+```bash
+npm install -D @bonvoy/plugin-gitlab
+```
+
+## Configuration
+
+```javascript
+export default {
+  gitlab: {
+    host: 'https://gitlab.com',   // default
+    projectId: 12345,             // required
+    // token: process.env.GITLAB_TOKEN,  // default
+  },
+};
+```
+
+### `host`
+
+GitLab instance URL. Change for self-hosted GitLab.
+
+### `projectId`
+
+Your GitLab project ID. Find it on the project's main page under the project name.
+
+### `token`
+
+GitLab personal access token or CI job token. Defaults to `GITLAB_TOKEN` environment variable.
+
+## Hooks
+
+| Hook | Action |
+|------|--------|
+| `makeRelease` | Creates a GitLab release for each published package |
+| `createPR` | Creates a merge request (PR workflow) |
+| `rollback` | Deletes GitLab releases by tag |
+
+## Retry
+
+API calls to GitLab (release creation, MR creation) are automatically retried up to 3 times with exponential backoff (1s, 2s, 4s) on transient errors (429 rate limit, 5xx server errors, network timeouts).
+
+## GitLab CI
+
+```yaml
+release:
+  stage: deploy
+  script:
+    - npm ci
+    - npx bonvoy shipit
+  variables:
+    GITLAB_TOKEN: $CI_JOB_TOKEN
+  only:
+    - main
+```
+
+
+---
+
+# plugin-changeset
+
+> `@bonvoy/plugin-changeset` — Optional plugin
+
+Provides a [changesets](https://github.com/changesets/changesets)-compatible workflow. Track changes via markdown files instead of (or in addition to) conventional commits.
+
+## Installation
+
+```bash
+npm install -D @bonvoy/plugin-changeset
+```
+
+## Usage
+
+### 1. Create a changeset file
+
+```bash
+mkdir -p .changeset  # or .bonvoy
+```
+
+```markdown
+<!-- .changeset/add-auth.md -->
+---
+"@scope/core": minor
+"@scope/utils": patch
+---
+
+Added user authentication to the core package.
+Fixed utility helpers for token validation.
+```
+
+### 2. Release
+
+```bash
+npx bonvoy shipit
+```
+
+The plugin reads the changeset files, applies the bumps, uses the markdown body as changelog notes, and deletes the files after release.
+
+## File Format
+
+YAML frontmatter with package-to-bump mapping, followed by markdown description:
+
+```markdown
+---
+"@scope/core": minor
+"@scope/utils": patch
+---
+
+Description that goes into the changelog.
+Can be multi-line.
+```
+
+### Explicit Versions
+
+Unlike standard changesets, bonvoy supports explicit versions:
+
+```markdown
+---
+"@scope/core": "2.0.0"
+"@scope/utils": minor
+---
+
+Breaking release with explicit version for core.
+```
+
+## File Locations
+
+The plugin reads from both directories (for migration compatibility):
+
+- `.changeset/*.md`
+- `.bonvoy/*.md`
+
+## Multiple Files
+
+When multiple files reference the same package:
+
+- **Bump**: the highest wins (`major` > `minor` > `patch`)
+- **Notes**: all descriptions are concatenated
+
+```markdown
+<!-- .changeset/feature-a.md -->
+---
+"@scope/core": minor
+---
+Added feature A
+
+<!-- .changeset/feature-b.md -->
+---
+"@scope/core": patch
+---
+Fixed bug in feature B
+```
+
+Result: `@scope/core` gets a `minor` bump with both notes in the changelog.
+
+## Fallback
+
+If a changeset file has no markdown body, the plugin falls back to conventional commits for that package's changelog notes.
+
+## Hook
+
+| Hook | Action |
+|------|--------|
+| `beforeShipIt` | Reads and parses changeset files |
+| `getVersion` | Returns bump from changeset data |
+
+
+---
+
+# plugin-exec
+
+> `@bonvoy/plugin-exec` — Optional plugin
+
+Run custom shell commands at any point in the release lifecycle.
+
+## Installation
+
+```bash
+npm install -D @bonvoy/plugin-exec
+```
+
+## Usage
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-exec', {
+      beforePublish: 'npm run build',
+      afterRelease: 'echo "Released!"',
+    }]
+  ],
+};
+```
+
+## Available Hooks
+
+| Hook | When |
+|------|------|
+| `beforeShipIt` | Before release starts |
+| `afterVersion` | After versions are bumped |
+| `beforeChangelog` | Before changelog generation |
+| `afterChangelog` | After changelog is written |
+| `beforePublish` | Before npm publish |
+| `afterPublish` | After npm publish |
+| `beforeRelease` | Before GitHub/GitLab release |
+| `afterRelease` | After release completes |
+
+## Examples
+
+### Build before publish
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-exec', {
+      beforePublish: 'npm run build',
+    }]
+  ],
+};
+```
+
+### Run tests and build
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-exec', {
+      beforePublish: 'npm run lint && npm run build && npm run test',
+    }]
+  ],
+};
+```
+
+### Send a webhook
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-exec', {
+      afterRelease: 'curl -X POST https://hooks.example.com/release -d "done"',
+    }]
+  ],
+};
+```
+
+## Behavior
+
+- Commands run with full shell support (pipes, redirects, `&&`, etc.)
+- Commands are **skipped** in dry-run mode
+- Commands are logged before execution
+- If a command fails, the release process stops
+
+
+---
+
+# AI Release Notes
+
+Prepend an AI-generated summary to your conventional changelog. The summary appears as a blockquote above the commit list, giving readers a quick overview of what changed.
+
+## Installation
+
+```bash
+npm install -D @bonvoy/plugin-ai
+```
+
+## Usage
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-ai', { provider: 'openai' }]
+  ],
+};
+```
+
+Set the API key:
+
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+## Output Example
+
+```markdown
+## [0.9.0] - 2026-02-10
+
+> Adds automatic rollback for failed releases and improves error
+> messages. If a publish fails mid-way, bonvoy now undoes all
+> completed steps automatically.
+
+### ✨ Features
+- add rollback & recovery for failed releases
+
+### 🐛 Bug Fixes
+- improve error messages for rollback status
+```
+
+## Providers
+
+| Provider | Default Model | Env Var |
+|----------|---------------|---------|
+| `openai` | `gpt-4o-mini` | `OPENAI_API_KEY` |
+| `anthropic` | `claude-sonnet-4-20250514` | `ANTHROPIC_API_KEY` |
+| `gemini` | `gemini-2.0-flash` | `GEMINI_API_KEY` |
+
+```javascript
+// Anthropic
+['@bonvoy/plugin-ai', { provider: 'anthropic' }]
+
+// Gemini
+['@bonvoy/plugin-ai', { provider: 'gemini' }]
+
+// Custom model
+['@bonvoy/plugin-ai', { provider: 'openai', model: 'gpt-4o' }]
+```
+
+## Configuration
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `provider` | `'openai' \| 'anthropic' \| 'gemini'` | Yes | LLM provider |
+| `model` | `string` | No | Model name (uses provider default) |
+| `apiKey` | `string` | No | API key (defaults to env var) |
+| `promptTemplate` | `string` | No | Custom prompt template |
+| `maxTokens` | `number` | No | Max response tokens (default: `200`) |
+
+## Custom Prompt
+
+Override the default prompt with `{packageName}`, `{version}`, and `{commitList}` placeholders:
+
+```javascript
+['@bonvoy/plugin-ai', {
+  provider: 'openai',
+  promptTemplate: `Summarize the changes for {packageName} v{version} in 2 sentences.
+Focus on user-facing changes.
+
+Commits:
+{commitList}`,
+}]
+```
+
+## Behavior
+
+- Runs after the conventional changelog is generated (`afterChangelog` hook)
+- One LLM call per changed package
+- Skipped in `--dry-run` mode (no API cost)
+- On API failure: logs a warning, keeps the conventional changelog as-is
+- Long commit lists are truncated to 50 commits
+
+## GitHub Actions
+
+```yaml
+- run: npx bonvoy shipit
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+```
+
+
+---
+
+# Notification Plugins
+
+Send release notifications to your team via Slack, Discord, Telegram, or Microsoft Teams.
+
+## Slack
+
+```bash
+npm install -D @bonvoy/plugin-slack
+```
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-slack', {
+      // Option 1: Incoming Webhook
+      webhookUrl: process.env.SLACK_WEBHOOK_URL,
+
+      // Option 2: Bot API
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: '#releases',
+    }]
+  ],
+};
+```
+
+## Discord
+
+```bash
+npm install -D @bonvoy/plugin-discord
+```
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-discord', {
+      webhookUrl: process.env.DISCORD_WEBHOOK_URL,
+    }]
+  ],
+};
+```
+
+## Telegram
+
+```bash
+npm install -D @bonvoy/plugin-telegram
+```
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-telegram', {
+      botToken: process.env.TELEGRAM_BOT_TOKEN,
+      chatId: process.env.TELEGRAM_CHAT_ID,
+    }]
+  ],
+};
+```
+
+## Microsoft Teams
+
+```bash
+npm install -D @bonvoy/plugin-teams
+```
+
+```javascript
+export default {
+  plugins: [
+    ['@bonvoy/plugin-teams', {
+      webhookUrl: process.env.TEAMS_WEBHOOK_URL,
+    }]
+  ],
+};
+```
+
+## Common Options
+
+All notification plugins support:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `onSuccess` | `boolean` | `true` | Send notification on successful release |
+| `onFailure` | `boolean` | `false` | Send notification on failed release |
+| `includeChangelog` | `boolean` | `true` | Include changelog in the message |
+
+## Writing a Custom Notification Plugin
+
+All notification plugins extend `@bonvoy/plugin-notification`:
+
+```typescript
+import { NotificationPlugin } from '@bonvoy/plugin-notification';
+
+export default class MyNotificationPlugin extends NotificationPlugin {
+  name = 'my-notification';
+
+  async send(message: string): Promise<void> {
+    await fetch('https://my-service.com/notify', {
+      method: 'POST',
+      body: JSON.stringify({ text: message }),
+    });
+  }
+}
+```
+
+
+---
+
+# Monorepo Guide
+
+bonvoy is built for monorepos. If your project uses npm workspaces, everything works automatically.
+
+## Setup
+
+Your `package.json` should have a `workspaces` field:
+
+```json
+{
+  "name": "my-monorepo",
+  "workspaces": ["packages/*"]
+}
+```
+
+That's it. No extra config needed.
+
+## How It Works
+
+### Commit Assignment
+
+When you run `bonvoy shipit`, each commit is assigned to packages based on which files it modified:
+
+```
+commit: "feat: add validation"
+  modified: packages/core/src/validate.ts
+  → assigned to: @scope/core
+
+commit: "fix: resolve parsing bug"
+  modified: packages/parser/src/index.ts
+  modified: packages/core/src/types.ts
+  → assigned to: @scope/parser, @scope/core
+```
+
+### Independent Versioning (default)
+
+Each package gets its own version based on its commits:
+
+```
+@scope/core:   1.2.0 → 1.3.0  (had a feat commit)
+@scope/parser: 0.5.1 → 0.5.2  (had a fix commit)
+@scope/utils:  no changes       (not released)
+```
+
+### Fixed Versioning
+
+All packages share the same version. The highest bump wins:
+
+```javascript
+// bonvoy.config.js
+export default {
+  versioning: 'fixed',
+};
+```
+
+```
+@scope/core:   1.2.0 → 1.3.0  (feat → minor)
+@scope/parser: 1.2.0 → 1.3.0  (fix → patch, but minor wins)
+@scope/utils:  1.2.0 → 1.3.0  (no changes, but fixed versioning)
+```
+
+## Root Package Version
+
+In a monorepo, the root `package.json` version is updated automatically:
+
+| Strategy | Behavior |
+|----------|----------|
+| `max` (default) | Set to the highest version among released packages |
+| `patch` | Bump by patch on any release |
+| `none` | Don't update root version |
+
+```javascript
+export default {
+  rootVersionStrategy: 'max',  // default
+};
+```
+
+## Internal Dependencies
+
+bonvoy automatically updates cross-package references. If `@scope/cli` depends on `@scope/core`:
+
+```json
+// Before release
+{ "dependencies": { "@scope/core": "^1.2.0" } }
+
+// After @scope/core is bumped to 1.3.0
+{ "dependencies": { "@scope/core": "^1.3.0" } }
+```
+
+This applies to `dependencies`, `devDependencies`, and `peerDependencies`.
+
+## Selective Release
+
+Release only specific packages:
+
+```bash
+bonvoy shipit --package @scope/core
+bonvoy shipit --package @scope/core --package @scope/utils
+```
+
+## Per-Package Changelogs
+
+Each package gets its own `CHANGELOG.md` in its directory:
+
+```
+packages/
+├── core/
+│   ├── CHANGELOG.md    ← only core's changes
+│   └── package.json
+├── parser/
+│   ├── CHANGELOG.md    ← only parser's changes
+│   └── package.json
+```
+
+## Per-Package Tags
+
+Each package gets its own git tag:
+
+```
+@scope/core@1.3.0
+@scope/parser@0.5.2
+```
+
+## Per-Package GitHub Releases
+
+Each package gets its own GitHub release with its changelog as the body.
+
+## Example: Full Monorepo Config
+
+```javascript
+// bonvoy.config.js
+export default {
+  versioning: 'independent',
+  rootVersionStrategy: 'max',
+  tagFormat: '{name}@{version}',
+  changelog: {
+    global: true,  // also generate root CHANGELOG.md
+  },
+};
+```
+
+
+---
+
+# Single Package Guide
+
+bonvoy works great for single-package repos too.
+
+## Setup
+
+```bash
+npm install -D bonvoy
+```
+
+No config file needed.
+
+## Release
+
+```bash
+# Automatic bump from commits
+npx bonvoy shipit
+
+# Or force a bump
+npx bonvoy shipit patch
+npx bonvoy shipit minor
+npx bonvoy shipit 1.0.0
+```
+
+## What Happens
+
+1. Reads commits since the last git tag
+2. Determines the bump from conventional commits
+3. Updates `package.json` version
+4. Generates/updates `CHANGELOG.md`
+5. Commits, tags, pushes
+6. Publishes to npm
+7. Creates a GitHub release
+
+## Tag Format
+
+For single packages, you might prefer simpler tags:
+
+```javascript
+// bonvoy.config.js
+export default {
+  tagFormat: 'v{version}',  // v1.2.0 instead of my-package@1.2.0
+};
+```
+
+## GitHub Actions
+
+```yaml
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump'
+        required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npx bonvoy shipit ${{ github.event.inputs.bump }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+
+---
+
+# PR Workflow
+
+For teams that prefer a review step before releasing, bonvoy supports a PR-based workflow similar to release-please or changesets.
+
+## How It Works
+
+```
+push to main → bonvoy prepare → Release PR created
+                                      │
+                                 review & merge
+                                      │
+push to main → bonvoy shipit → detects merged PR → publish only
+```
+
+### Step 1: `bonvoy prepare`
+
+When code is pushed to main, `bonvoy prepare`:
+
+1. Analyzes commits since last release
+2. Calculates version bumps
+3. Creates a `release/<timestamp>` branch
+4. Updates package.json versions and changelogs
+5. Pushes the branch and creates a PR
+6. Saves tracking info to `.bonvoy/release-pr.json`
+
+### Step 2: Review
+
+The PR shows:
+- Which packages are being released
+- What versions they're bumped to
+- The full changelog for each package
+
+### Step 3: Merge & Publish
+
+After the PR is merged, `bonvoy shipit` on main detects `.bonvoy/release-pr.json` and enters **publish-only mode**:
+
+- Skips version calculation (already done in the PR)
+- Publishes to npm
+- Creates GitHub releases
+- Cleans up the tracking file
+
+## GitHub Actions Setup
+
+A single workflow handles both steps:
+
+```yaml
+name: Release
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npx bonvoy shipit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+`bonvoy shipit` auto-detects the context:
+- If `.bonvoy/release-pr.json` exists → publish-only mode
+- Otherwise → creates a release PR (same as `bonvoy prepare`)
+
+## Configuration
+
+```javascript
+export default {
+  workflow: 'pr',
+  baseBranch: 'main',
+};
+```
+
+## Tracking File
+
+`.bonvoy/release-pr.json` contains:
+
+```json
+{
+  "prNumber": 42,
+  "prUrl": "https://github.com/owner/repo/pull/42",
+  "branch": "release/1707321600000",
+  "baseBranch": "main",
+  "createdAt": "2026-02-08T12:00:00.000Z",
+  "packages": ["@scope/core", "@scope/utils"]
+}
+```
+
+::: tip
+Add `.bonvoy/release-pr.json` to `.gitignore` if you don't want it tracked. The file is cleaned up automatically after publishing.
+:::
+
+## GitLab
+
+The PR workflow also works with GitLab. Install `@bonvoy/plugin-gitlab` and it creates merge requests instead of pull requests.
+
+
+---
+
+# CI/CD Guide
+
+## GitHub Actions
+
+### Direct Release (manual trigger)
+
+```yaml
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump (patch/minor/major/x.y.z)'
+        required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm test
+      - run: npx bonvoy shipit ${{ github.event.inputs.bump }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Direct Release (on push to main)
+
+```yaml
+name: Release
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npx bonvoy shipit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### PR Workflow
+
+```yaml
+name: Release
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npx bonvoy shipit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### JSON Output for Downstream Jobs
+
+```yaml
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.result }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - id: release
+        run: |
+          RESULT=$(npx bonvoy shipit --json)
+          echo "result=$RESULT" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: release
+    if: fromJSON(needs.release.outputs.released).success
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploy triggered by release"
+```
+
+## GitLab CI
+
+```yaml
+stages:
+  - test
+  - release
+
+test:
+  stage: test
+  script:
+    - npm ci
+    - npm test
+
+release:
+  stage: release
+  script:
+    - npm ci
+    - npx bonvoy shipit
+  variables:
+    GITLAB_TOKEN: $CI_JOB_TOKEN
+  only:
+    - main
+```
+
+## Required Permissions
+
+### GitHub
+
+| Permission | Required for |
+|------------|-------------|
+| `contents: write` | Git push, create releases |
+| `id-token: write` | npm provenance (OIDC) |
+| `pull-requests: write` | PR workflow only |
+
+### npm
+
+For OIDC provenance (recommended), no `NPM_TOKEN` is needed — GitHub Actions provides the token automatically via OIDC.
+
+For traditional token auth, set `NODE_AUTH_TOKEN`:
+
+```yaml
+- run: npx bonvoy shipit
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+## Important Notes
+
+::: warning fetch-depth: 0
+Always use `fetch-depth: 0` with `actions/checkout`. bonvoy needs the full git history to find commits since the last tag.
+:::
+
+::: warning registry-url
+Always set `registry-url` in `actions/setup-node`. This configures the `.npmrc` file needed for publishing.
+:::
+
+
+---
+
+# Rollback & Recovery
+
+bonvoy tracks every action during a release. If something fails mid-way, it automatically rolls back completed actions. You can also trigger a manual rollback.
+
+## How It Works
+
+API calls to GitHub and GitLab are automatically retried up to 3 times with exponential backoff before giving up. This handles transient errors (rate limiting, server errors) without triggering a rollback.
+
+If an operation still fails after retries, bonvoy rolls back:
+
+During `bonvoy shipit`, every action (git commit, tag, push, npm publish, GitHub/GitLab release) is recorded to `.bonvoy/release-log.json`. If a failure occurs:
+
+1. bonvoy stops the release
+2. reads the action log to see what was completed
+3. rolls back each action in reverse order
+4. marks the log as `failed`
+
+```
+commit → tag → push → npm publish → GitHub release ✗
+                                          ↓
+                              auto-rollback starts
+                                          ↓
+         unpublish ← force-push ← delete tags ← reset HEAD
+```
+
+## Action Log
+
+The release log is written to `.bonvoy/release-log.json` and updated incrementally as each action completes:
+
+```json
+{
+  "status": "in-progress",
+  "startedAt": "2026-02-09T15:30:00.000Z",
+  "entries": [
+    { "plugin": "git", "action": "commit", "data": { "sha": "abc123", "previousSha": "def456" }, "timestamp": "...", "status": "completed" },
+    { "plugin": "git", "action": "tag", "data": { "tag": "@bonvoy/core@1.2.0" }, "timestamp": "...", "status": "completed" },
+    { "plugin": "npm", "action": "publish", "data": { "name": "@bonvoy/core", "version": "1.2.0" }, "timestamp": "...", "status": "completed" }
+  ]
+}
+```
+
+### Stale Log Detection
+
+If a previous release log has `"status": "in-progress"`, bonvoy aborts with a warning — a previous release may have crashed without cleanup. Use `--force` to override:
+
+```bash
+bonvoy shipit --force    # ignore stale log and proceed
+```
+
+## Manual Rollback
+
+Roll back the last release using the action log:
+
+```bash
+bonvoy rollback              # roll back from .bonvoy/release-log.json
+bonvoy rollback --dry-run    # preview what would be rolled back
+bonvoy rollback --force      # skip stale log check
+```
+
+## What Gets Rolled Back
+
+Each plugin handles its own rollback:
+
+| Plugin | Action | Rollback |
+|--------|--------|----------|
+| **git** | `commit` | `git reset --hard <previousSha>` |
+| **git** | `tag` | `git tag -d <tag>` |
+| **git** | `push` | `git push --force` |
+| **git** | `pushTags` | `git push origin --delete <tags>` |
+| **npm** | `publish` | `npm unpublish <pkg>@<version>` (best-effort) |
+| **github** | `release` | Delete GitHub release via API |
+| **gitlab** | `release` | Delete GitLab release via API |
+
+::: warning
+npm unpublish is best-effort. npm has strict unpublish policies (72-hour window, no dependents). If unpublish fails, bonvoy warns and continues rolling back other actions.
+:::
+
+## Plugin Authors
+
+To support rollback in a custom plugin, tap into the `rollback` hook:
+
+```typescript
+class MyPlugin {
+  apply(bonvoy) {
+    bonvoy.hooks.makeRelease.tapPromise('MyPlugin', async (context) => {
+      // Record the action before doing it
+      context.actionLog.record('my-plugin', 'create-thing', { id: 123 });
+      await createThing(123);
+    });
+
+    bonvoy.hooks.rollback.tapPromise('MyPlugin', async (rollbackContext) => {
+      const actions = rollbackContext.actions
+        .filter((a) => a.plugin === 'my-plugin')
+        .reverse();
+
+      for (const action of actions) {
+        if (action.action === 'create-thing') {
+          await deleteThing(action.data.id);
+        }
+      }
+    });
+  }
+}
+```
+
+The `rollbackContext.actions` array contains only completed actions, already filtered by status.
+
+
+---
+
+# Migration Guide
+
+Moving to bonvoy from another release tool? Here's how.
+
+## From Changesets
+
+### What Changes
+
+| Changesets | bonvoy |
+|-----------|--------|
+| `npx changeset` to create change file | Conventional commits (no files needed) |
+| `npx changeset version` to bump | `npx bonvoy shipit` does everything |
+| `npx changeset publish` to publish | Included in `shipit` |
+| `.changeset/` directory required | No change files by default |
+| PR workflow mandatory | Direct release or PR — your choice |
+
+### Steps
+
+1. Install bonvoy:
+   ```bash
+   npm install -D bonvoy
+   npm uninstall @changesets/cli @changesets/changelog-github
+   ```
+
+2. Remove changeset config:
+   ```bash
+   rm -rf .changeset
+   ```
+
+3. Update CI workflow — replace changeset commands with:
+   ```bash
+   npx bonvoy shipit
+   ```
+
+4. Start using conventional commits:
+   ```bash
+   git commit -m "feat: add new feature"   # instead of creating a changeset file
+   ```
+
+### Want to Keep Change Files?
+
+Install `@bonvoy/plugin-changeset` — it reads `.changeset/*.md` files in the same format:
+
+```bash
+npm install -D @bonvoy/plugin-changeset
+```
+
+bonvoy reads both `.changeset/` and `.bonvoy/` directories.
+
+## From semantic-release
+
+### What Changes
+
+| semantic-release | bonvoy |
+|-----------------|--------|
+| Fully automatic on every push | You decide when to release |
+| Complex plugin config | Sensible defaults, minimal config |
+| `.releaserc` with plugin chains | `bonvoy.config.js` (optional) |
+| No monorepo support | Monorepo-native |
+
+### Steps
+
+1. Install bonvoy:
+   ```bash
+   npm install -D bonvoy
+   npm uninstall semantic-release @semantic-release/*
+   ```
+
+2. Remove semantic-release config:
+   ```bash
+   rm .releaserc .releaserc.json .releaserc.yml
+   ```
+
+3. Update CI — replace `npx semantic-release` with:
+   ```bash
+   npx bonvoy shipit
+   ```
+
+Your conventional commits work the same way. No changes to your commit workflow.
+
+## From release-it
+
+### What Changes
+
+| release-it | bonvoy |
+|-----------|--------|
+| Interactive prompts | Non-interactive (CI-friendly) |
+| No monorepo support | Monorepo-native |
+| `.release-it.json` config | `bonvoy.config.js` (optional) |
+| Manual version selection | Automatic from commits or forced |
+
+### Steps
+
+1. Install bonvoy:
+   ```bash
+   npm install -D bonvoy
+   npm uninstall release-it @release-it/*
+   ```
+
+2. Remove release-it config:
+   ```bash
+   rm .release-it.json .release-it.js
+   ```
+
+3. Update CI and scripts:
+   ```bash
+   npx bonvoy shipit          # automatic bump
+   npx bonvoy shipit minor    # force minor (like release-it prompt)
+   ```
+
+## From release-please
+
+### What Changes
+
+| release-please | bonvoy |
+|---------------|--------|
+| PR-only workflow | Direct or PR — your choice |
+| GitHub App or Action | Simple CLI |
+| `release-please-config.json` | `bonvoy.config.js` (optional) |
+| Complex manifest config | Zero config for common cases |
+
+### Steps
+
+1. Install bonvoy:
+   ```bash
+   npm install -D bonvoy
+   ```
+
+2. Remove release-please config:
+   ```bash
+   rm release-please-config.json .release-please-manifest.json
+   ```
+
+3. Remove the release-please GitHub Action and replace with:
+   ```yaml
+   - run: npx bonvoy shipit
+     env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+   ```
+
+If you want to keep the PR workflow:
+```javascript
+// bonvoy.config.js
+export default {
+  workflow: 'pr',
+};
+```
+
+
+---
+
+# Writing Plugins
+
+bonvoy's plugin system is built on [tapable](https://github.com/webpack/tapable). A plugin is a class that taps into lifecycle hooks.
+
+## Minimal Plugin
+
+```typescript
+import type { BonvoyPlugin } from '@bonvoy/core';
+import type { Bonvoy } from '@bonvoy/core';
+
+export default class MyPlugin implements BonvoyPlugin {
+  name = 'my-plugin';
+
+  apply(bonvoy: Bonvoy): void {
+    bonvoy.hooks.afterRelease.tap(this.name, (context) => {
+      console.log(`Released ${context.changedPackages.length} packages!`);
+    });
+  }
+}
+```
+
+## With Configuration
+
+```typescript
+import type { BonvoyPlugin, ReleaseContext } from '@bonvoy/core';
+import type { Bonvoy } from '@bonvoy/core';
+
+interface SlackConfig {
+  webhookUrl: string;
+  channel?: string;
+}
+
+export default class SlackPlugin implements BonvoyPlugin {
+  name = 'slack';
+  private config: SlackConfig;
+
+  constructor(config: SlackConfig) {
+    this.config = config;
+  }
+
+  apply(bonvoy: Bonvoy): void {
+    bonvoy.hooks.afterRelease.tapPromise(this.name, async (context: ReleaseContext) => {
+      if (context.isDryRun) return;
+
+      const packages = context.changedPackages
+        .map(p => `${p.name}@${context.versions[p.name]}`)
+        .join(', ');
+
+      await fetch(this.config.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: `🚢 Released: ${packages}`,
+        }),
+      });
+    });
+  }
+}
+```
+
+Users configure it:
+
+```javascript
+// bonvoy.config.js
+export default {
+  plugins: [
+    ['./my-slack-plugin.js', { webhookUrl: 'https://...' }],
+  ],
+};
+```
+
+## Hook Types
+
+### Sync Hooks
+
+Use `tap` for synchronous operations:
+
+```typescript
+bonvoy.hooks.validateRepo.tap(this.name, (context) => {
+  if (!context.config.baseBranch) {
+    throw new Error('baseBranch is required');
+  }
+});
+```
+
+### Async Hooks
+
+Use `tapPromise` for async operations:
+
+```typescript
+bonvoy.hooks.publish.tapPromise(this.name, async (context) => {
+  await publishToRegistry(context.packages);
+});
+```
+
+### Waterfall Hooks
+
+Some hooks pass a value through the chain. Return the modified value:
+
+```typescript
+bonvoy.hooks.modifyConfig.tap(this.name, (config) => {
+  return { ...config, tagFormat: 'v{version}' };
+});
+
+bonvoy.hooks.getVersion.tap(this.name, (context) => {
+  return 'minor';  // force minor bump
+});
+```
+
+## Available Hooks
+
+See the [Hooks Reference](/reference/hooks) for the complete list.
+
+## Context Objects
+
+Each hook receives a context object. The context grows as the release progresses:
+
+| Phase | Context | Extra fields |
+|-------|---------|-------------|
+| Validation | `Context` | `config`, `packages`, `commits`, `isDryRun` |
+| Version | `VersionContext` | + `versions`, `bumps` |
+| Changelog | `ChangelogContext` | + `changelogs` |
+| Publish | `PublishContext` | + `publishedPackages`, `preid` |
+| Release | `ReleaseContext` | + `releases` |
+| PR | `PRContext` | `branchName`, `baseBranch`, `title`, `body` |
+
+## Testing Plugins
+
+```typescript
+import { Bonvoy } from '@bonvoy/core';
+import { describe, expect, it } from 'vitest';
+import MyPlugin from './my-plugin.js';
+
+describe('MyPlugin', () => {
+  it('should tap into afterRelease', () => {
+    const bonvoy = new Bonvoy();
+    const plugin = new MyPlugin();
+    plugin.apply(bonvoy);
+
+    // Verify the hook was tapped
+    expect(bonvoy.hooks.afterRelease.taps).toHaveLength(1);
+  });
+});
+```
+
+## Publishing Your Plugin
+
+Name your package `bonvoy-plugin-<name>` or `@scope/bonvoy-plugin-<name>` so it's discoverable on npm.
+
+
+---
+
+# Hooks Reference
+
+Complete list of lifecycle hooks with their type signatures.
+
+## Lifecycle Order
+
+```
+modifyConfig → beforeShipIt → getVersion → validateRepo →
+version → afterVersion → beforeChangelog → generateChangelog →
+afterChangelog → beforePublish → publish → afterPublish →
+beforeRelease → makeRelease → afterRelease
+```
+
+On failure at any point:
+```
+... → ✗ failure → rollback (reverse order)
+```
+
+For PR workflow:
+```
+modifyConfig → beforeShipIt → getVersion → validateRepo →
+version → afterVersion → beforeChangelog → generateChangelog →
+afterChangelog → beforeCreatePR → createPR → afterCreatePR
+```
+
+## Configuration Phase
+
+### `modifyConfig`
+
+- **Type:** `AsyncSeriesWaterfallHook<[BonvoyConfig]>`
+- **Returns:** modified config
+
+Allows plugins to modify the configuration before the release starts.
+
+```typescript
+bonvoy.hooks.modifyConfig.tap('my-plugin', (config) => {
+  return { ...config, tagFormat: 'v{version}' };
+});
+```
+
+## Validation Phase
+
+### `beforeShipIt`
+
+- **Type:** `AsyncSeriesHook<[Context]>`
+
+Runs before the release process starts. Use for pre-flight checks or setup.
+
+```typescript
+bonvoy.hooks.beforeShipIt.tap('my-plugin', (context) => {
+  console.log(`Starting release for ${context.packages.length} packages`);
+});
+```
+
+### `validateRepo`
+
+- **Type:** `AsyncSeriesHook<[Context]>`
+
+Validate the repository state before making changes. The context includes calculated `versions` at this point. Throw an error to abort.
+
+```typescript
+bonvoy.hooks.validateRepo.tapPromise('my-plugin', async (context) => {
+  // context.versions is available here
+  for (const [name, version] of Object.entries(context.versions)) {
+    if (await tagExists(`${name}@${version}`)) {
+      throw new Error(`Tag ${name}@${version} already exists`);
+    }
+  }
+});
+```
+
+## Version Phase
+
+### `getVersion`
+
+- **Type:** `AsyncSeriesWaterfallHook<[Context]>`
+- **Returns:** `SemverBump` (`'major' | 'minor' | 'patch' | 'prerelease' | 'none'`)
+
+Determine the version bump for the current package. Called once per package.
+
+```typescript
+bonvoy.hooks.getVersion.tap('my-plugin', (context) => {
+  // context.currentPackage - the package being evaluated
+  // context.commits - commits filtered for this package
+  return 'minor';
+});
+```
+
+### `version`
+
+- **Type:** `AsyncSeriesHook<[VersionContext]>`
+
+Called after all version bumps are calculated. `VersionContext` includes `versions` and `bumps` maps.
+
+### `afterVersion`
+
+- **Type:** `AsyncSeriesHook<[VersionContext]>`
+
+Called after version hooks complete.
+
+## Changelog Phase
+
+### `beforeChangelog`
+
+- **Type:** `AsyncSeriesHook<[ChangelogContext]>`
+
+Called before changelog generation for each package.
+
+### `generateChangelog`
+
+- **Type:** `AsyncSeriesWaterfallHook<[ChangelogContext]>`
+- **Returns:** `string` (changelog content)
+
+Generate the changelog content for the current package.
+
+```typescript
+bonvoy.hooks.generateChangelog.tap('my-plugin', (context) => {
+  // context.currentPackage - the package
+  // context.commits - commits for this package
+  // context.versions - all calculated versions
+  return `## ${context.versions[context.currentPackage.name]}\n\n...`;
+});
+```
+
+### `afterChangelog`
+
+- **Type:** `AsyncSeriesHook<[ChangelogContext]>`
+
+Called after changelog generation. The changelog plugin writes the file here.
+
+## Publish Phase
+
+### `beforePublish`
+
+- **Type:** `AsyncSeriesHook<[PublishContext]>`
+
+Called before publishing. The git plugin commits, tags, and pushes here.
+
+### `publish`
+
+- **Type:** `AsyncSeriesHook<[PublishContext]>`
+
+Publish packages. The npm plugin publishes to the registry here.
+
+### `afterPublish`
+
+- **Type:** `AsyncSeriesHook<[PublishContext]>`
+
+Called after publishing.
+
+## Release Phase
+
+### `beforeRelease`
+
+- **Type:** `AsyncSeriesHook<[ReleaseContext]>`
+
+Called before creating releases.
+
+### `makeRelease`
+
+- **Type:** `AsyncSeriesHook<[ReleaseContext]>`
+
+Create releases. The GitHub/GitLab plugin creates releases here.
+
+### `afterRelease`
+
+- **Type:** `AsyncSeriesHook<[ReleaseContext]>`
+
+Called after all releases are created. Notification plugins typically hook here.
+
+## PR Workflow Phase
+
+### `beforeCreatePR`
+
+- **Type:** `AsyncSeriesHook<[PRContext]>`
+
+Called before creating the release PR/MR.
+
+### `createPR`
+
+- **Type:** `AsyncSeriesHook<[PRContext]>`
+
+Create the pull request or merge request.
+
+### `afterCreatePR`
+
+- **Type:** `AsyncSeriesHook<[PRContext]>`
+
+Called after the PR is created. `PRContext` includes `prUrl` and `prNumber` at this point.
+
+## Rollback Phase
+
+### `rollback`
+
+- **Type:** `AsyncSeriesHook<[RollbackContext]>`
+
+Called when a release fails or when `bonvoy rollback` is run manually. Each plugin rolls back its own actions in reverse order.
+
+```typescript
+bonvoy.hooks.rollback.tapPromise('MyPlugin', async (context) => {
+  const actions = context.actions.filter((a) => a.plugin === 'my-plugin').reverse();
+  for (const action of actions) {
+    // undo the action
+  }
+});
+```
+
+## Context Types
+
+```typescript
+interface Context {
+  config: BonvoyConfig;
+  packages: Package[];
+  changedPackages: Package[];
+  rootPath: string;
+  isDryRun: boolean;
+  logger: Logger;
+  actionLog: ActionLogHelper;
+  commits?: CommitInfo[];
+  currentPackage?: Package;
+  versions?: Record<string, string>;
+}
+
+interface VersionContext extends Context {
+  versions: Record<string, string>;
+  bumps: Record<string, string>;
+}
+
+interface ChangelogContext extends VersionContext {
+  commits: CommitInfo[];
+  changelogs: Record<string, string>;
+}
+
+interface PublishContext extends ChangelogContext {
+  publishedPackages: string[];
+  preid?: string;
+}
+
+interface ReleaseContext extends PublishContext {
+  releases: Record<string, ReleaseInfo>;
+}
+
+interface PRContext extends Context {
+  branchName: string;
+  baseBranch: string;
+  title: string;
+  body: string;
+  prUrl?: string;
+  prNumber?: number;
+}
+
+interface RollbackContext extends Context {
+  actions: ActionEntry[];
+  errors: Error[];
+}
+
+interface ActionEntry {
+  plugin: string;
+  action: string;
+  data: Record<string, unknown>;
+  timestamp: string;
+  status: 'completed' | 'failed';
+}
+```
+
+
+---
+
+# API Reference
+
+Use bonvoy programmatically in your own tools.
+
+## Core
+
+### `Bonvoy`
+
+The main class that holds hooks and plugins.
+
+```typescript
+import { Bonvoy } from '@bonvoy/core';
+
+const bonvoy = new Bonvoy(config);
+bonvoy.use(myPlugin);
+```
+
+#### `constructor(config?: BonvoyConfig)`
+
+Create a new Bonvoy instance with optional config.
+
+#### `hooks: ReleaseHooks`
+
+Access all lifecycle hooks. See [Hooks Reference](/reference/hooks).
+
+#### `use(plugin: BonvoyPlugin): void`
+
+Register a plugin.
+
+### `loadConfig`
+
+```typescript
+import { loadConfig } from '@bonvoy/core';
+
+const config = await loadConfig('/path/to/project');
+const config = await loadConfig('/path/to/project', '/path/to/config.js');
+```
+
+Load and validate configuration from the project root.
+
+### `assignCommitsToPackages`
+
+```typescript
+import { assignCommitsToPackages } from '@bonvoy/core';
+
+const commitsWithPackages = assignCommitsToPackages(commits, packages, rootPath);
+```
+
+Assign commits to packages based on which files were modified.
+
+## CLI
+
+### `shipit`
+
+```typescript
+import { shipit } from 'bonvoy';
+
+const result = await shipit('minor', {
+  dryRun: true,
+  cwd: '/path/to/project',
+  silent: true,
+});
+
+// result.versions    → { '@scope/core': '1.3.0' }
+// result.bumps       → { '@scope/core': 'minor' }
+// result.changelogs  → { '@scope/core': '## 1.3.0\n...' }
+// result.changedPackages → [{ name: '@scope/core', ... }]
+```
+
+#### Options
+
+```typescript
+interface ShipitOptions {
+  dryRun?: boolean;
+  cwd?: string;
+  silent?: boolean;
+  json?: boolean;
+  package?: string[];
+  preid?: string;
+  config?: BonvoyConfig;
+  plugins?: BonvoyPlugin[];
+}
+```
+
+### `prepare`
+
+```typescript
+import { prepare } from 'bonvoy';
+
+const result = await prepare({
+  dryRun: true,
+  cwd: '/path/to/project',
+  bump: 'minor',
+});
+
+// result.branchName → 'release/1707321600000'
+// result.versions   → { '@scope/core': '1.3.0' }
+// result.prUrl      → 'https://github.com/owner/repo/pull/42'
+```
+
+#### Options
+
+```typescript
+interface PrepareOptions {
+  dryRun?: boolean;
+  cwd?: string;
+  silent?: boolean;
+  config?: BonvoyConfig;
+  preid?: string;
+  bump?: string;
+}
+```
+
+## Types
+
+All types are exported from `@bonvoy/core`:
+
+```typescript
+import type {
+  BonvoyConfig,
+  BonvoyPlugin,
+  CommitInfo,
+  Context,
+  VersionContext,
+  ChangelogContext,
+  PublishContext,
+  ReleaseContext,
+  PRContext,
+  Package,
+  SemverBump,
+  ReleaseHooks,
+  Logger,
+} from '@bonvoy/core';
+```

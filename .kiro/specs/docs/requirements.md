@@ -60,15 +60,16 @@ docs/
 
 ## Deployment
 
-- GitHub Pages via GitHub Actions (`.github/workflows/docs.yml`)
+- GitHub Pages via GitHub Actions
 - URL: `zweer.github.io/bonvoy`
-- Auto-deploy on push to main (when `docs/` changes)
-- Manual trigger via `workflow_dispatch`
+- `docs.yml` supports `workflow_call` (called by `ci.yml` after release) + `workflow_dispatch` (manual)
+- Checkout uses `ref: main` to include release commit
+- `predocs:build` generates `llms.txt` and `llms-full.txt` (LLM-optimized docs)
 
 ## Scripts
 
 - `npm run docs:dev` — local dev server
-- `npm run docs:build` — production build
+- `npm run docs:build` — production build (includes `predocs:build` for llms.txt)
 - `npm run docs:preview` — preview production build
 
 ## Completed
@@ -83,6 +84,9 @@ docs/
 - [x] Blog section added (`docs/blog/`)
 - [x] Install commands updated: `npm install -D bonvoy` (unscoped package)
 - [x] `@bonvoy/cli` renamed to `bonvoy`, root renamed to `bonvoy-monorepo`
+- [x] `llms.txt` and `llms-full.txt` generation (`scripts/generate-llms-txt.ts`)
+- [x] LLM docs served at `/bonvoy/llms.txt` and `/bonvoy/llms-full.txt`
+- [x] Docs deploy after release via `workflow_call` in CI
 
 ## Blog Section
 

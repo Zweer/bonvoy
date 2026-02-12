@@ -39,6 +39,7 @@ npx bonvoy shipit              # Release all changed packages
 npx bonvoy shipit --dry-run    # Preview changes
 npx bonvoy shipit minor        # Force minor bump
 npx bonvoy shipit 2.0.0        # Force specific version
+npx bonvoy status --all        # Show all packages with versions
 npx bonvoy rollback            # Roll back a failed release
 ```
 

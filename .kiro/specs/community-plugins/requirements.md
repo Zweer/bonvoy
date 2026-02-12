@@ -1,8 +1,34 @@
-# Community Plugins — Registries & Languages
+# Community Plugins — Integrations, Registries & Languages
 
 > Low priority. Build only when requested by the community.
 
-These plugins extend bonvoy to publish to registries beyond npm. None are planned for active development — they'll be built when users ask for them.
+These plugins extend bonvoy with integrations and publishing to registries beyond npm. None are planned for active development — they'll be built when users ask for them.
+
+## Integrations
+
+### plugin-sentry
+- Create releases on Sentry
+- Associate commits with release
+- Sourcemap upload
+
+### plugin-email
+- Notifications via SMTP or Amazon SES
+- Customizable HTML templates
+- Configurable recipient list
+
+### plugin-jira
+- Update Jira tickets mentioned in commits
+- Automatic status transition
+- Comment with release link
+
+### plugin-linear
+- Update Linear issues
+- Automatic issue closing
+
+### plugin-s3
+- Upload assets to S3
+- Bucket and path configuration
+- CloudFront invalidation support
 
 ## JavaScript / TypeScript
 

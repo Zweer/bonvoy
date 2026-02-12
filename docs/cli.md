@@ -117,10 +117,52 @@ After the PR is merged, running `bonvoy shipit` on the base branch will detect t
 Show pending changes since the last release.
 
 ```bash
-bonvoy status
+bonvoy status [options]
 ```
 
-Displays which packages have changes and what commits affect them.
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--all` | Show all packages with versions, not just changed ones |
+
+### Examples
+
+```bash
+# Show only packages with pending changes
+bonvoy status
+
+# Show all packages with their current versions
+bonvoy status --all
+```
+
+### Output
+
+Without `--all`, only changed packages are shown:
+
+```
+📦 2 package(s) with pending changes:
+
+  @scope/core: 1.0.0 → 1.1.0 (minor, 3 commits)
+  @scope/utils: 0.5.0 → 0.5.1 (patch, 1 commit)
+
+📝 4 commit(s) since last release
+📊 5 total package(s) in workspace
+```
+
+With `--all`, all packages are listed:
+
+```
+📊 5 package(s) in workspace:
+
+  @scope/core: 1.0.0 → 1.1.0 (minor)
+  @scope/utils: 0.5.0 → 0.5.1 (patch)
+  @scope/cli: 0.3.0
+  @scope/config: 0.2.0
+  @scope/types: 0.1.0
+
+📝 4 commit(s) since last release
+```
 
 ## `bonvoy changelog`
 

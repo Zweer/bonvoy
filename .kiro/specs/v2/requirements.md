@@ -23,32 +23,6 @@
 - Microsoft Teams webhook (Adaptive Cards)
 - Teams channel integration
 
-### plugin-email (Priority: Low)
-- Notifications via SMTP or Amazon SES
-- Customizable HTML templates
-- Configurable recipient list
-
-## 🔧 Integrations
-
-### plugin-sentry (Priority: Medium)
-- Create releases on Sentry
-- Associate commits with release
-- Sourcemap upload
-
-### plugin-jira (Priority: Low)
-- Update Jira tickets mentioned in commits
-- Automatic status transition
-- Comment with release link
-
-### plugin-linear (Priority: Low)
-- Update Linear issues
-- Automatic issue closing
-
-### plugin-s3 (Priority: Low)
-- Upload assets to S3
-- Bucket and path configuration
-- CloudFront invalidation support
-
 ## 🚀 Core Features
 
 ### ✅ Pre-release Channels — COMPLETED
@@ -56,17 +30,31 @@
 - ✅ Automatic publish to npm dist-tag
 - Branch → channel configuration
 
-### Monorepo Dependency Linking
+### ✅ Monorepo Dependency Linking — COMPLETED
 - ✅ Automatically update versions between internal packages (implemented in shipit)
-- `workspace:*` → real version support
-- Option to bump dependents
 
-### AI Release Notes ✅ COMPLETED
+### ✅ AI Release Notes — COMPLETED
 - ✅ Generate release notes summary with LLM
 - ✅ Prepend as blockquote above conventional changelog
 - ✅ Providers: OpenAI, Anthropic, Gemini (native fetch, zero deps)
 - ✅ Custom prompt template support
 - ✅ Graceful fallback on API failure
+
+### ✅ LLM-Optimized Documentation — COMPLETED
+- ✅ `llms.txt` and `llms-full.txt` generation script
+- ✅ Served at `/bonvoy/llms.txt` and `/bonvoy/llms-full.txt`
+- ✅ Auto-generated via `predocs:build` hook
+- ✅ Build artifacts, gitignored
+
+### ✅ CLI: `bonvoy status --all` — COMPLETED
+- ✅ Shows all packages with current versions
+- ✅ Changed packages show pending bump
+- ✅ Unchanged packages show version only
+
+### ✅ CI: Docs Deploy After Release — COMPLETED
+- ✅ `docs.yml` uses `workflow_call` + `workflow_dispatch`
+- ✅ `ci.yml` calls docs after release job
+- ✅ Checkout with `ref: main` to include release commit
 
 ## 📋 Implementation Priority
 
@@ -77,16 +65,14 @@
 4. ~~`plugin-teams`~~ ✅
 5. ~~Pre-release channels~~ ✅ (implemented in v1)
 
-### Phase 2: Integrations (on demand)
-6. `plugin-sentry`
-7. `plugin-email`
+### ~~Phase 2: Core~~ ✅ COMPLETED
+6. ~~AI release notes~~ ✅
+7. ~~LLM-optimized docs~~ ✅
+8. ~~`bonvoy status --all`~~ ✅
+9. ~~CI: docs deploy after release~~ ✅
 
-### Phase 3: Core (on demand)
-8. `workspace:*` support
-9. ~~AI release notes~~ ✅
-
-> Registry/language plugins (jsr, docker, pypi, cargo, etc.) moved to `.kiro/specs/community-plugins/` — build on community request.
+> Integration plugins (sentry, email, jira, linear, s3) and registry/language plugins moved to `.kiro/specs/community-plugins/` — build on community request.
 
 ---
 
-*Status: Notifications complete, remaining features on demand*
+*Status: ✅ v2 COMPLETED*

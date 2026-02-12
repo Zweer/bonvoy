@@ -19,12 +19,12 @@ Build a **flexible, plugin-based release tool** in TypeScript that:
 | Spec | Content |
 |------|---------|
 | `v1/requirements.md` | Core requirements, architecture, plugin system, hooks, config schema, CLI |
-| `v2/requirements.md` | Roadmap: notifications (done), integrations (sentry, jira), AI release notes |
+| `v2/requirements.md` | Roadmap: notifications, AI release notes, LLM docs, status --all, CI docs deploy |
 | `rollback/requirements.md` | Action log, automatic/manual rollback, reversible actions per plugin |
 | `e2e/requirements.md` | 24 E2E test scenarios with expected inputs/outputs |
 | `docs/requirements.md` | VitePress documentation site structure and deployment |
 | `articles/requirements.md` | Blog articles plan, editorial line, publishing workflow |
-| `community-plugins/requirements.md` | Future registry plugins (jsr, docker, pypi, cargo, etc.) — on demand |
+| `community-plugins/requirements.md` | Future plugins: integrations (sentry, email, jira, linear, s3) + registries (jsr, docker, pypi, cargo, etc.) — on demand |
 | `ai-notes/requirements.md` | AI release notes plugin spec (OpenAI, Anthropic, Gemini) |
 
 Additional references: `README.md`, `docs/**` (VitePress site), `drafts/**` (article drafts).
@@ -174,7 +174,7 @@ feat(git): :sparkles: improve release commit message format
 
 ## ✅ Project Status
 
-All v1 phases complete. v2 notifications complete. Remaining v2 features on demand.
+All v1 phases complete. v2 complete.
 
 - v1: Core + all default/optional plugins ✅
 - Rollback & recovery ✅
@@ -183,6 +183,9 @@ All v1 phases complete. v2 notifications complete. Remaining v2 features on dema
 - Blog article 1 live, 7 drafts ready ✅
 - Notification plugins (slack, discord, telegram, teams) ✅
 - AI release notes plugin (openai, anthropic, gemini) ✅
+- LLM-optimized docs (`llms.txt` + `llms-full.txt`) ✅
+- `bonvoy status --all` ✅
+- CI: docs deploy after release via `workflow_call` ✅
 - 100% test coverage ✅
 
-Next (on demand): plugin-sentry, plugin-email, workspace:* support.
+Next (on demand): community plugins (sentry, email, jira, jsr, docker, etc.).

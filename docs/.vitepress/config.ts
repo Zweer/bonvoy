@@ -4,7 +4,11 @@ export default defineConfig({
   title: 'bonvoy',
   description: 'A plugin-based release automation tool for npm packages and monorepos',
   base: '/bonvoy/',
-  head: [['link', { rel: 'icon', href: '/bonvoy/favicon.ico' }]],
+  head: [
+    ['link', { rel: 'icon', href: '/bonvoy/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/bonvoy/favicon-32x32.png' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/bonvoy/apple-touch-icon.png' }],
+  ],
 
   themeConfig: {
     logo: '/logo.svg',

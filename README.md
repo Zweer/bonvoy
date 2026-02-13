@@ -1,10 +1,16 @@
-# bonvoy 🚢
+<div align="center">
+  <img src="assets/bonvoy-logo.png" alt="bonvoy logo" width="200"/>
+  <h1>bonvoy</h1>
+  <p><em>"Bon voyage to your releases!"</em></p>
+</div>
+
+<div align="center">
 
 [![CI](https://github.com/Zweer/bonvoy/actions/workflows/ci.yml/badge.svg)](https://github.com/Zweer/bonvoy/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Coverage Badge](https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat)
 
-> "Bon voyage to your releases!"
+</div>
 
 A plugin-based release automation tool for npm packages and monorepos.
 

@@ -83,24 +83,24 @@ jobs:
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| [@bonvoy/core](./packages/core) | Hook system, config loading, schema validation |
-| [bonvoy](./packages/cli) | CLI orchestration and commands |
-| [@bonvoy/plugin-conventional](./packages/plugin-conventional) | Conventional commits parser (default) |
-| [@bonvoy/plugin-changelog](./packages/plugin-changelog) | Changelog generation (default) |
-| [@bonvoy/plugin-git](./packages/plugin-git) | Git commit, tag, push (default) |
-| [@bonvoy/plugin-npm](./packages/plugin-npm) | npm publish with OIDC (default) |
-| [@bonvoy/plugin-github](./packages/plugin-github) | GitHub releases (default) |
-| [@bonvoy/plugin-gitlab](./packages/plugin-gitlab) | GitLab releases (optional) |
-| [@bonvoy/plugin-changeset](./packages/plugin-changeset) | Changeset-compatible workflow (optional) |
-| [@bonvoy/plugin-exec](./packages/plugin-exec) | Custom shell commands (optional) |
-| [@bonvoy/plugin-ai](./packages/plugin-ai) | AI-generated release notes summary (optional) |
-| [@bonvoy/plugin-notification](./packages/plugin-notification) | Base notification plugin |
-| [@bonvoy/plugin-slack](./packages/plugin-slack) | Slack notifications (optional) |
-| [@bonvoy/plugin-discord](./packages/plugin-discord) | Discord notifications (optional) |
-| [@bonvoy/plugin-telegram](./packages/plugin-telegram) | Telegram notifications (optional) |
-| [@bonvoy/plugin-teams](./packages/plugin-teams) | Microsoft Teams notifications (optional) |
+| Package | npm | Description |
+|---------|-----|-------------|
+| [@bonvoy/core](./packages/core) | [![npm](https://img.shields.io/npm/v/@bonvoy/core)](https://www.npmjs.com/package/@bonvoy/core) | Hook system, config loading, schema validation |
+| [bonvoy](./packages/cli) | [![npm](https://img.shields.io/npm/v/bonvoy)](https://www.npmjs.com/package/bonvoy) | CLI orchestration and commands |
+| [@bonvoy/plugin-conventional](./packages/plugin-conventional) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-conventional)](https://www.npmjs.com/package/@bonvoy/plugin-conventional) | Conventional commits parser (default) |
+| [@bonvoy/plugin-changelog](./packages/plugin-changelog) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changelog)](https://www.npmjs.com/package/@bonvoy/plugin-changelog) | Changelog generation (default) |
+| [@bonvoy/plugin-git](./packages/plugin-git) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-git)](https://www.npmjs.com/package/@bonvoy/plugin-git) | Git commit, tag, push (default) |
+| [@bonvoy/plugin-npm](./packages/plugin-npm) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-npm)](https://www.npmjs.com/package/@bonvoy/plugin-npm) | npm publish with OIDC (default) |
+| [@bonvoy/plugin-github](./packages/plugin-github) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-github)](https://www.npmjs.com/package/@bonvoy/plugin-github) | GitHub releases (default) |
+| [@bonvoy/plugin-gitlab](./packages/plugin-gitlab) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-gitlab)](https://www.npmjs.com/package/@bonvoy/plugin-gitlab) | GitLab releases (optional) |
+| [@bonvoy/plugin-changeset](./packages/plugin-changeset) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-changeset)](https://www.npmjs.com/package/@bonvoy/plugin-changeset) | Changeset-compatible workflow (optional) |
+| [@bonvoy/plugin-exec](./packages/plugin-exec) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-exec)](https://www.npmjs.com/package/@bonvoy/plugin-exec) | Custom shell commands (optional) |
+| [@bonvoy/plugin-ai](./packages/plugin-ai) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-ai)](https://www.npmjs.com/package/@bonvoy/plugin-ai) | AI-generated release notes summary (optional) |
+| [@bonvoy/plugin-notification](./packages/plugin-notification) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-notification)](https://www.npmjs.com/package/@bonvoy/plugin-notification) | Base notification plugin |
+| [@bonvoy/plugin-slack](./packages/plugin-slack) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-slack)](https://www.npmjs.com/package/@bonvoy/plugin-slack) | Slack notifications (optional) |
+| [@bonvoy/plugin-discord](./packages/plugin-discord) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-discord)](https://www.npmjs.com/package/@bonvoy/plugin-discord) | Discord notifications (optional) |
+| [@bonvoy/plugin-telegram](./packages/plugin-telegram) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-telegram)](https://www.npmjs.com/package/@bonvoy/plugin-telegram) | Telegram notifications (optional) |
+| [@bonvoy/plugin-teams](./packages/plugin-teams) | [![npm](https://img.shields.io/npm/v/@bonvoy/plugin-teams)](https://www.npmjs.com/package/@bonvoy/plugin-teams) | Microsoft Teams notifications (optional) |
 
 ## Documentation
 

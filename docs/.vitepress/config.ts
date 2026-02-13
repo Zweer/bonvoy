@@ -16,6 +16,7 @@ export default defineConfig({
       { text: 'Guide', link: '/getting-started' },
       { text: 'Plugins', link: '/plugins/overview' },
       { text: 'Reference', link: '/reference/hooks' },
+      { text: 'Blog', link: '/blog/why-i-built-bonvoy' },
       {
         text: 'Links',
         items: [

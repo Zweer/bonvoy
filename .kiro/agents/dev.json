@@ -4,14 +4,9 @@
   "prompt": "file://../prompts/dev.md",
   "resources": [
     "file://README.md",
-    "file://.kiro/specs/v1/requirements.md",
-    "file://.kiro/specs/v2/requirements.md",
-    "file://.kiro/specs/rollback/requirements.md",
-    "file://.kiro/specs/e2e/requirements.md",
-    "file://.kiro/specs/docs/requirements.md",
-    "file://.kiro/specs/articles/requirements.md",
-    "file://.kiro/specs/community-plugins/requirements.md",
-    "file://.kiro/specs/ai-notes/requirements.md"
+    "file://.kiro/specs/**/*.md",
+    "file://.kiro/steering/**/*.md",
+    "file://docs/**/*.md"
   ],
   "tools": [
     "read",

@@ -1,3 +1,7 @@
+---
+sidebar: false
+---
+
 # Why I Built Yet Another Release Tool for npm
 
 It was a Tuesday night. I was staring at a CI pipeline that had just published three packages to npm — packages that hadn't changed. Not a single line of code was different, but lerna decided they needed a new version anyway. Again.

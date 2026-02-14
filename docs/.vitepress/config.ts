@@ -72,10 +72,6 @@ export default defineConfig({
           { text: 'API', link: '/reference/api' },
         ],
       },
-      {
-        text: 'Blog',
-        items: [{ text: 'Why I Built bonvoy', link: '/blog/why-i-built-bonvoy' }],
-      },
     ],
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/Zweer/bonvoy' }],

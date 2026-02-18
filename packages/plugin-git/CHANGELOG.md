@@ -1,4 +1,18 @@
 
+## [0.12.1] - 2026-02-18
+
+### 🐛 Bug Fixes
+
+- fix(plugin-git): :bug: prevent release-log.json from being committed
+
+
+## [0.12.1] - 2026-02-18
+
+### 🐛 Bug Fixes
+
+- fix(plugin-git): :bug: prevent release-log.json from being committed
+
+
 ## [0.12.0] - 2026-02-11
 
 ### 🐛 Bug Fixes

@@ -16,6 +16,20 @@ describe('defaultGitOperations', () => {
     expect(mockExeca).toHaveBeenCalledWith('git', ['add', '.'], { cwd: '/project' });
   });
 
+  it('resetFile calls git reset HEAD', async () => {
+    await defaultGitOperations.resetFile('.bonvoy/release-log.json', '/project');
+    expect(mockExeca).toHaveBeenCalledWith('git', ['reset', 'HEAD', '.bonvoy/release-log.json'], {
+      cwd: '/project',
+    });
+  });
+
+  it('resetFile ignores errors (file not staged)', async () => {
+    mockExeca.mockRejectedValueOnce(new Error('pathspec did not match'));
+    await expect(
+      defaultGitOperations.resetFile('.bonvoy/release-log.json', '/project'),
+    ).resolves.toBeUndefined();
+  });
+
   it('commit calls git commit', async () => {
     await defaultGitOperations.commit('test message', '/project');
     expect(mockExeca).toHaveBeenCalledWith('git', ['commit', '-m', 'test message'], {

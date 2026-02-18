@@ -39,6 +39,10 @@ export function createMockGitOperations(
       calls.push({ method: 'add', args: [files, cwd] });
     },
 
+    async resetFile(file, cwd) {
+      calls.push({ method: 'resetFile', args: [file, cwd] });
+    },
+
     async commit(message, cwd) {
       calls.push({ method: 'commit', args: [message, cwd] });
     },

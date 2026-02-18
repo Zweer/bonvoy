@@ -18,6 +18,7 @@ function createMockGitOps(config: {
 }): GitOperations {
   return {
     async add() {},
+    async resetFile() {},
     async commit() {},
     async tag() {},
     async push() {},
@@ -149,6 +150,7 @@ describe('prepare command', () => {
       async add(files) {
         calls.push(`add:${files}`);
       },
+      async resetFile() {},
       async commit(msg) {
         calls.push(`commit:${msg}`);
       },
@@ -219,6 +221,7 @@ describe('prepare command', () => {
       async add(files) {
         calls.push(`add:${files}`);
       },
+      async resetFile() {},
       async commit(msg) {
         calls.push(`commit:${msg}`);
       },
@@ -410,6 +413,7 @@ describe('prepare command', () => {
 
     const gitOps: GitOperations = {
       async add() {},
+      async resetFile() {},
       async commit() {},
       async tag() {},
       async push() {},

@@ -9,6 +9,7 @@ function createMockOps(config: {
 }): GitOperations {
   return {
     async add() {},
+    async resetFile() {},
     async commit() {},
     async tag() {},
     async push() {},

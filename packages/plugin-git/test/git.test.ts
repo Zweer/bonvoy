@@ -23,6 +23,9 @@ function createMockOps(
     async add(files, cwd) {
       calls.push({ method: 'add', args: [files, cwd] });
     },
+    async resetFile(file, cwd) {
+      calls.push({ method: 'resetFile', args: [file, cwd] });
+    },
     async commit(message, cwd) {
       calls.push({ method: 'commit', args: [message, cwd] });
     },
@@ -116,6 +119,10 @@ describe('GitPlugin', () => {
 
     expect(mockOps.calls).toContainEqual({ method: 'add', args: ['.', '/project'] });
     expect(mockOps.calls).toContainEqual({
+      method: 'resetFile',
+      args: ['.bonvoy/release-log.json', '/project'],
+    });
+    expect(mockOps.calls).toContainEqual({
       method: 'commit',
       args: [
         'chore: :bookmark: release\n\n- @test/package-a@1.0.0\n- @test/package-b@2.0.0',
@@ -135,6 +142,14 @@ describe('GitPlugin', () => {
       method: 'pushTags',
       args: [['@test/package-a@1.0.0', '@test/package-b@2.0.0'], '/project'],
     });
+
+    // Verify order: add → resetFile → commit
+    const methods = mockOps.calls.map((c) => c.method);
+    const addIdx = methods.indexOf('add');
+    const resetIdx = methods.indexOf('resetFile');
+    const commitIdx = methods.indexOf('commit');
+    expect(addIdx).toBeLessThan(resetIdx);
+    expect(resetIdx).toBeLessThan(commitIdx);
   });
 
   it('should use custom commit message', async () => {

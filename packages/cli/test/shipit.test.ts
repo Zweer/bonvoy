@@ -22,6 +22,7 @@ function createMockGitOps(config: {
   const existingTags = new Set(config.existingTags ?? []);
   return {
     async add() {},
+    async resetFile() {},
     async commit() {},
     async tag() {},
     async push() {},

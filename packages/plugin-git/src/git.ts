@@ -65,6 +65,7 @@ export default class GitPlugin implements BonvoyPlugin {
     if (!isDryRun) {
       const previousSha = await this.ops.getHeadSha(rootPath);
       await this.ops.add('.', rootPath);
+      await this.ops.resetFile('.bonvoy/release-log.json', rootPath);
       await this.ops.commit(fullMessage, rootPath);
       actionLog.record({ plugin: 'git', action: 'commit', data: { previousSha } });
     }

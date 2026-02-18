@@ -2,6 +2,7 @@ import { execa } from 'execa';
 
 export interface GitOperations {
   add(files: string, cwd: string): Promise<void>;
+  resetFile(file: string, cwd: string): Promise<void>;
   commit(message: string, cwd: string): Promise<void>;
   tag(name: string, cwd: string): Promise<void>;
   push(cwd: string, branch?: string): Promise<void>;
@@ -27,6 +28,14 @@ export interface GitOperations {
 export const defaultGitOperations: GitOperations = {
   async add(files, cwd) {
     await execa('git', ['add', files], { cwd });
+  },
+
+  async resetFile(file, cwd) {
+    try {
+      await execa('git', ['reset', 'HEAD', file], { cwd });
+    } catch {
+      // File not staged (already gitignored or doesn't exist) — ignore
+    }
   },
 
   async commit(message, cwd) {

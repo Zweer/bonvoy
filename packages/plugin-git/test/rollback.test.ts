@@ -9,6 +9,7 @@ function createMockOps(): GitOperations & { calls: Array<{ method: string; args:
   return {
     calls,
     async add() {},
+    async resetFile() {},
     async commit() {},
     async tag() {},
     async push() {},

@@ -365,6 +365,23 @@ describe('ConventionalPlugin', () => {
     expect(result).toBe('none');
   });
 
+  it('should handle multi-scope commits', async () => {
+    plugin.apply(bonvoy);
+    const context = {
+      commits: [createMockCommit('fix(pipeline,storage-sqlite): prevent FK constraint failure')],
+      config: {},
+      packages: [],
+      changedPackages: [],
+      rootPath: '/test',
+      isDryRun: false,
+      actionLog: { record: () => {}, entries: () => [] },
+      logger: mockLogger,
+    };
+
+    const result = await bonvoy.hooks.getVersion.promise(context);
+    expect(result).toBe('patch');
+  });
+
   it('should handle commits with missing parsed fields', async () => {
     // Test a commit that conventional-commits-parser might return with null fields
     plugin.apply(bonvoy);

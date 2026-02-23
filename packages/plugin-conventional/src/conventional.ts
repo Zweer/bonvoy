@@ -93,17 +93,24 @@ export default class ConventionalPlugin implements BonvoyPlugin {
 
       // Use conventional-commits-parser for normal commits
       const parsed = commitParser.parse(message);
-      if (!parsed.type) return null;
+      if (parsed.type) {
+        return {
+          type: parsed.type,
+          scope: parsed.scope || undefined,
+          subject: parsed.subject || '',
+          // v8 ignore next -- @preserve
+          header: parsed.header || message,
+          // v8 ignore next -- @preserve
+          notes: parsed.notes || [],
+        };
+      }
 
-      return {
-        type: parsed.type,
-        scope: parsed.scope || undefined,
-        subject: parsed.subject || '',
-        // v8 ignore next -- @preserve
-        header: parsed.header || message,
-        // v8 ignore next -- @preserve
-        notes: parsed.notes || [],
-      };
+      // Fallback for multi-scope commits (e.g. "fix(a,b): msg") that the parser doesn't handle
+      const fallback = message.match(/^(\w+)\(([^)]+)\):\s*(.+)$/);
+      if (!fallback) return null;
+
+      const [, fbType, fbScope, fbSubject] = fallback;
+      return { type: fbType, scope: fbScope, subject: fbSubject, header: message };
     } catch {
       return null;
     }

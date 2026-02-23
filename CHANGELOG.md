@@ -1,4 +1,13 @@
 
+## @bonvoy/plugin-conventional
+
+## [0.12.0] - 2026-02-23
+
+### 🐛 Bug Fixes
+
+- fix(conventional): :bug: parse multi-scope conventional commits
+
+
 ## @bonvoy/plugin-git
 
 ## [0.12.1] - 2026-02-18

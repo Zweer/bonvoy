@@ -36,7 +36,7 @@
   "dependencies": {
     "@bonvoy/core": "^0.12.1",
     "@bonvoy/plugin-changelog": "^0.12.0",
-    "@bonvoy/plugin-conventional": "^0.12.0",
+    "@bonvoy/plugin-conventional": "^0.12.1",
     "@bonvoy/plugin-git": "^0.12.2",
     "@bonvoy/plugin-github": "^0.12.0",
     "@bonvoy/plugin-gitlab": "^0.12.0",

@@ -1,6 +1,6 @@
 {
   "name": "bonvoy-monorepo",
-  "version": "0.13.1",
+  "version": "0.12.1",
   "private": true,
   "description": "🚢 Plugin-based release automation tool for npm packages and monorepos",
   "keywords": [

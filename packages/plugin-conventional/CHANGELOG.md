@@ -1,4 +1,11 @@
 
+## [0.12.0] - 2026-02-23
+
+### 🐛 Bug Fixes
+
+- fix(conventional): :bug: parse multi-scope conventional commits
+
+
 ## [0.3.0] - 2026-02-11
 
 ### ✨ Features

@@ -1,6 +1,6 @@
 {
   "name": "@bonvoy/plugin-conventional",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "🚢 Conventional commits plugin for bonvoy",
   "keywords": [
     "release",

@@ -1,20 +1,44 @@
 version: 2
+
 updates:
+  # Enable version updates for npm
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
       day: monday
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - Zweer
+    commit-message:
+      prefix: "fix"
+      prefix-development: "chore"
+    labels:
+      - dependencies
+      - automated
     groups:
-      minor-and-patch:
+      # Group all patch and minor updates together
+      development-dependencies:
+        dependency-type: development
         update-types:
           - minor
           - patch
-    open-pull-requests-limit: 10
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
 
+  # Enable version updates for GitHub Actions
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+      time: "09:00"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - github-actions
+      - automated

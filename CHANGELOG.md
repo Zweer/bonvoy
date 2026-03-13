@@ -1,4 +1,30 @@
 
+## @bonvoy/core
+
+## [0.12.1] - 2026-03-13
+
+### 🐛 Bug Fixes
+
+- fix: bump the production-dependencies group with 2 updates (#16)
+
+## @bonvoy/plugin-slack
+
+## [0.12.0] - 2026-03-13
+
+### 🐛 Bug Fixes
+
+- fix: bump the production-dependencies group with 2 updates (#16)
+
+
+## @bonvoy/core
+
+## [0.12.1] - 2026-03-13
+
+### 🐛 Bug Fixes
+
+- fix: bump the production-dependencies group with 2 updates (#16)
+
+
 ## @bonvoy/plugin-conventional
 
 ## [0.12.0] - 2026-02-23

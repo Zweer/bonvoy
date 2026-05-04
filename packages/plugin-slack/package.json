@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "@bonvoy/plugin-notification": "^0.12.0",
-    "@slack/web-api": "^7.15.0"
+    "@slack/web-api": "^7.15.1"
   },
   "engines": {
     "node": ">=20.5"

@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "@bonvoy/core": "^0.12.2",
-    "conventional-commits-parser": "^6.3.0"
+    "conventional-commits-parser": "^6.4.0"
   },
   "engines": {
     "node": ">=20.5"

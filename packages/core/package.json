@@ -33,11 +33,11 @@
     "schema.json"
   ],
   "dependencies": {
-    "cosmiconfig": "^9.0.1",
+    "cosmiconfig": "^9.0.2",
     "deepmerge": "^4.3.1",
-    "smol-toml": "^1.6.0",
-    "tapable": "^2.3.0",
-    "zod": "^4.3.6"
+    "smol-toml": "^1.6.1",
+    "tapable": "^2.3.3",
+    "zod": "^4.4.3"
   },
   "engines": {
     "node": ">=20.5"

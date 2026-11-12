@@ -82,7 +82,7 @@
     "cosmiconfig": "^9.0.1",
     "deepmerge": "^4.3.1",
     "execa": "^9.6.1",
-    "jiti": "^2.6.1",
+    "jiti": "^2.7.0",
     "js-yaml": "^4.3.2"
   },
   "devDependencies": {
@@ -94,7 +94,7 @@
     "@tsconfig/node24": "^24.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^25.5.0",
-    "@types/semver": "^7.7.1",
+    "@types/semver": "^7.8.0",
     "@vitest/coverage-v8": "^4.1.12",
     "@zweer/coverage-badge-readme": "^1.2.2",
     "bonvoy": "^0.13.1",

@@ -39,7 +39,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bonvoy/core": "^0.12.4"
+    "@bonvoy/core": "^0.12.5"
   },
   "engines": {
     "node": ">= 20.5"

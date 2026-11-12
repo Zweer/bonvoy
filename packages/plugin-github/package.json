@@ -31,7 +31,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/core": "^0.12.4",
+    "@bonvoy/core": "^0.12.5",
     "@octokit/rest": "^22.0.1",
     "execa": "^9.6.1"
   },

@@ -1,6 +1,15 @@
 
 ## @bonvoy/core
 
+## [0.12.4] - 2026-11-12
+
+### 🐛 Bug Fixes
+
+- fix: bump zod from 4.3.6 to 4.6.7 (#50)
+
+
+## @bonvoy/core
+
 ## [0.12.3] - 2026-11-12
 
 ### 🐛 Bug Fixes

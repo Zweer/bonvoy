@@ -224,13 +224,9 @@
           "type": "string"
         },
         "projectId": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "number"
-            }
+          "type": [
+            "string",
+            "number"
           ]
         },
         "tagFormat": {
@@ -260,7 +256,10 @@
                 },
                 "additionalProperties": {}
               }
-            ]
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
           }
         ]
       }

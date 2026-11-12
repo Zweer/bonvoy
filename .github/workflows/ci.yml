@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump (patch/minor/major/x.y.z)'
+        description: "Version bump (patch/minor/major/x.y.z)"
         required: false
         type: string
 
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20, 22, 24]
+        node-version: [22, 24, 26]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - run: npm ci
       - run: npm run build

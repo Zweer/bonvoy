@@ -28,7 +28,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "bonvoy": "dist/index.mjs"
+    "bonvoy": "./dist/index.mjs"
   },
   "files": [
     "dist"

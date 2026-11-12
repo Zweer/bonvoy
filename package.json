@@ -93,14 +93,14 @@
     "@commitlint/config-conventional": "^20.4.4",
     "@tsconfig/node24": "^24.0.6",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^25.5.0",
+    "@types/node": "^26.6.6",
     "@types/semver": "^7.8.0",
-    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/coverage-v8": "^5.1.0",
     "@zweer/coverage-badge-readme": "^1.4.0",
     "bonvoy": "^0.13.2",
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.7",
     "husky": "^9.1.7",
-    "lint-staged": "^16.3.3",
+    "lint-staged": "^17.6.0",
     "lockfile-lint": "^5.1.0",
     "ls-engines": "^0.10.1",
     "memfs": "^4.80.0",
@@ -108,15 +108,16 @@
     "npm-package-json-lint-config-default": "^8.0.1",
     "publint": "^0.3.25",
     "rimraf": "^6.1.4",
-    "sort-package-json": "^3.6.1",
-    "tsdown": "^0.21.2",
+    "sort-package-json": "^4.1.0",
+    "tsdown": "^0.23.7",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
+    "unrun": "^0.3.1",
     "vitepress": "^1.6.4",
-    "vitest": "^4.1.12"
+    "vitest": "^5.1.0"
   },
   "engines": {
-    "node": ">= 20.5"
+    "node": ">= 22.18"
   },
   "lockfile-lint": {
     "path": "package-lock.json",

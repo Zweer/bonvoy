@@ -42,9 +42,9 @@
     "postbuild": "npm run scripts:schema",
     "clean": "rimraf --glob packages/**/dist",
     "predocs:build": "tsx scripts/generate-llms-txt.ts",
-    "docs:build": "vitepress build docs",
-    "docs:dev": "vitepress dev docs",
-    "docs:preview": "vitepress preview docs",
+    "docs:build": "astro build --root docs",
+    "docs:dev": "astro dev --root docs",
+    "docs:preview": "astro preview --root docs",
     "prelint": "npm run build",
     "lint": "concurrently npm:lint:* --prefixColors auto",
     "postlint": "npm run clean",
@@ -70,12 +70,7 @@
     ]
   },
   "overrides": {
-    "axios": "^1.21.1",
-    "vitepress": {
-      "vite": {
-        "esbuild": "^0.25.0"
-      }
-    }
+    "axios": "^1.21.1"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -87,6 +82,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.5",
+    "@astrojs/starlight": "^0.42.11",
     "@biomejs/biome": "^2.6.7",
     "@bonvoy/core": "^0.12.6",
     "@commitlint/cli": "^20.4.4",
@@ -97,6 +93,7 @@
     "@types/semver": "^7.8.0",
     "@vitest/coverage-v8": "^5.1.0",
     "@zweer/coverage-badge-readme": "^1.4.0",
+    "astro": "^7.4.11",
     "bonvoy": "^0.13.2",
     "concurrently": "^10.0.7",
     "husky": "^9.1.7",
@@ -113,7 +110,6 @@
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "unrun": "^0.3.1",
-    "vitepress": "^1.6.4",
     "vitest": "^5.1.0"
   },
   "engines": {

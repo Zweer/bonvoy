@@ -1,0 +1,59 @@
+---
+title: bonvoy
+description: A plugin-based release automation tool for npm packages and monorepos.
+template: splash
+hero:
+  tagline: Bon voyage to your releases! A plugin-based release automation tool for npm packages and monorepos.
+  image:
+    file: ../../../public/logo.svg
+    alt: bonvoy
+  actions:
+    - text: Get Started
+      link: /bonvoy/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/Zweer/bonvoy
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Plugin Architecture" icon="puzzle">
+    Core is an event bus — everything else is a plugin. Extend or replace any functionality.
+  </Card>
+  <Card title="Monorepo-Native" icon="seti:npm">
+    npm workspaces out of the box. Independent or fixed versioning per package.
+  </Card>
+  <Card title="Zero Config" icon="rocket">
+    Works immediately for npm + GitHub projects. No config file needed.
+  </Card>
+  <Card title="Conventional Commits" icon="pencil">
+    Automatic version bumps and changelogs from your commit messages.
+  </Card>
+  <Card title="Flexible Workflows" icon="random">
+    Direct release with one command, or PR-based workflow like release-please.
+  </Card>
+  <Card title="Pre-release Validation" icon="approve-check">
+    Checks tags, npm versions, and GitHub releases before making any changes.
+  </Card>
+</CardGrid>
+
+## Why bonvoy?
+
+| Tool             | Problem                                     |
+| ---------------- | ------------------------------------------- |
+| semantic-release | Too automatic, complex plugin config        |
+| release-it       | No monorepo support (wontfix)               |
+| changesets       | Mandatory PR workflow, unpredictable bumps  |
+| release-please   | Complex config, PR-only workflow            |
+| auto             | Label-based, PR-dependent                   |
+
+bonvoy gives you the best of all worlds: **simple by default, powerful when you need it**.
+
+```bash
+npm install -D bonvoy
+npx bonvoy shipit
+```

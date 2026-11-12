@@ -3,9 +3,10 @@ import { resolve } from 'node:path';
 
 const SITE_URL = 'https://zweer.github.io/bonvoy';
 const DOCS_DIR = resolve(import.meta.dirname, '../docs');
+const CONTENT_DIR = resolve(DOCS_DIR, 'src/content/docs');
 const OUT_DIR = resolve(DOCS_DIR, 'public');
 
-// Sidebar structure — mirrors docs/.vitepress/config.ts
+// Sidebar structure — mirrors docs/astro.config.mjs
 // Each page has a description for llms.txt (human-readable summary)
 const sidebar: Array<{
   section: string;
@@ -146,9 +147,9 @@ const fullParts: string[] = [
 ];
 
 for (const page of allPages) {
-  const filePath = resolve(DOCS_DIR, `${page.link.slice(1)}.md`);
+  const filePath = resolve(CONTENT_DIR, `${page.link.slice(1)}.md`);
   const content = readFileSync(filePath, 'utf-8')
-    // Strip VitePress frontmatter
+    // Strip Starlight frontmatter
     .replace(/^---\n[\s\S]*?\n---\n/, '');
   fullParts.push(`\n---\n\n${content.trim()}\n`);
 }

@@ -101,11 +101,9 @@ dist
 # Sveltekit cache directory
 .svelte-kit/
 
-# vitepress build output
-**/.vitepress/dist
-
-# vitepress cache directory
-**/.vitepress/cache
+# Astro build output and generated types
+docs/dist/
+.astro/
 
 # Generated LLM docs (build artifact)
 docs/public/llms.txt

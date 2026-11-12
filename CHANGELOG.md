@@ -1,6 +1,15 @@
 
 ## @bonvoy/core
 
+## [0.12.2] - 2026-11-12
+
+### 🐛 Bug Fixes
+
+- fix: bump smol-toml from 1.6.0 to 1.6.1 (#19)
+
+
+## @bonvoy/core
+
 ## [0.12.1] - 2026-03-13
 
 ### 🐛 Bug Fixes

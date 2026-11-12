@@ -1,4 +1,11 @@
 
+## [0.13.1] - 2026-11-12
+
+### 🐛 Bug Fixes
+
+- fix: bump the production-dependencies group across 1 directory with 3 updates (#66)
+
+
 ## [0.13.0] - 2026-02-18
 
 ### 🐛 Bug Fixes

@@ -1,6 +1,32 @@
 
 ## @bonvoy/core
 
+## [0.12.5] - 2026-11-12
+
+### 🐛 Bug Fixes
+
+- fix: bump the production-dependencies group across 1 directory with 3 updates (#66)
+
+## bonvoy
+
+## [0.13.1] - 2026-11-12
+
+### 🐛 Bug Fixes
+
+- fix: bump the production-dependencies group across 1 directory with 3 updates (#66)
+
+
+## @bonvoy/core
+
+## [0.12.5] - 2026-11-12
+
+### 🐛 Bug Fixes
+
+- fix: bump the production-dependencies group across 1 directory with 3 updates (#66)
+
+
+## @bonvoy/core
+
 ## [0.12.4] - 2026-11-12
 
 ### 🐛 Bug Fixes

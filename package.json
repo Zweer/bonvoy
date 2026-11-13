@@ -48,7 +48,7 @@
     "prelint": "npm run build",
     "lint": "concurrently npm:lint:* --prefixColors auto",
     "postlint": "npm run clean",
-    "lint:engines": "ls-engines",
+    "lint:engines": "installed-check --engine-check",
     "lint:format": "biome check --write",
     "lint:lockfile": "lockfile-lint",
     "lint:package": "npmPkgJsonLint .",
@@ -70,12 +70,12 @@
     ]
   },
   "overrides": {
-    "axios": "^1.21.1"
+    "axios": "^1.21.1",
+    "minimatch": "^11.0.1"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "cosmiconfig": "^9.0.1",
-    "deepmerge": "^4.3.1",
     "execa": "^9.6.1",
     "jiti": "^2.7.0",
     "js-yaml": "^4.3.2"
@@ -97,9 +97,9 @@
     "bonvoy": "^0.13.2",
     "concurrently": "^10.0.7",
     "husky": "^9.1.7",
+    "installed-check": "^11.0.0",
     "lint-staged": "^17.6.0",
     "lockfile-lint": "^5.1.0",
-    "ls-engines": "^0.10.1",
     "memfs": "^4.80.0",
     "npm-package-json-lint": "^9.1.0",
     "npm-package-json-lint-config-default": "^8.0.1",
@@ -113,7 +113,7 @@
     "vitest": "^5.1.0"
   },
   "engines": {
-    "node": ">= 22.18"
+    "node": "^22.23.4 || ^24.15.0 || >=26.0.0"
   },
   "lockfile-lint": {
     "path": "package-lock.json",

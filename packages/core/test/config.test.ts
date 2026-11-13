@@ -237,7 +237,7 @@ describe('config', () => {
   });
 
   describe('mergeConfig', () => {
-    it('should merge configs with deepmerge', () => {
+    it('should merge configs with override winning', () => {
       const base = {
         versioning: 'independent' as const,
         changelog: {

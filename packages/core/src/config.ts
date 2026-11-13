@@ -1,5 +1,5 @@
 import { cosmiconfig } from 'cosmiconfig';
-import deepmerge from 'deepmerge';
+import { defu } from 'defu';
 import { parse as parseToml } from 'smol-toml';
 
 import { type BonvoyConfig, BonvoyConfigSchema } from './schema.js';
@@ -48,5 +48,6 @@ export async function loadConfig(
 }
 
 export function mergeConfig(base: BonvoyConfig, override: Partial<BonvoyConfig>): BonvoyConfig {
-  return deepmerge(base, override as BonvoyConfig) as BonvoyConfig;
+  // defu takes the higher-priority object first, so the override wins over the base.
+  return defu(override, base) as BonvoyConfig;
 }

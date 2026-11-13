@@ -1,6 +1,15 @@
 
 ## @bonvoy/core
 
+## [0.12.6] - 2026-11-13
+
+### 🐛 Bug Fixes
+
+- fix(deps): replace vulnerable deepmerge and ls-engines to clear Dependabot alerts (#71)
+
+
+## @bonvoy/core
+
 ## [0.12.5] - 2026-11-12
 
 ### 🐛 Bug Fixes

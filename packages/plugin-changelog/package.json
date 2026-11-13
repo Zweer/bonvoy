@@ -32,7 +32,7 @@
     "dist"
   ],
   "dependencies": {
-    "@bonvoy/core": "^0.12.6"
+    "@bonvoy/core": "^0.12.7"
   },
   "engines": {
     "node": ">=20.5"

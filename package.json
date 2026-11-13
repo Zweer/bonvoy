@@ -1,6 +1,6 @@
 {
   "name": "bonvoy-monorepo",
-  "version": "0.13.2",
+  "version": "0.12.7",
   "private": true,
   "description": "🚢 Plugin-based release automation tool for npm packages and monorepos",
   "keywords": [
@@ -84,7 +84,7 @@
     "@arethetypeswrong/core": "^0.18.5",
     "@astrojs/starlight": "^0.42.11",
     "@biomejs/biome": "^2.6.7",
-    "@bonvoy/core": "^0.12.6",
+    "@bonvoy/core": "^0.12.7",
     "@commitlint/cli": "^20.4.4",
     "@commitlint/config-conventional": "^20.4.4",
     "@tsconfig/node24": "^24.0.6",

@@ -43,17 +43,24 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 ## Why bonvoy?
 
-| Tool             | Problem                                     |
-| ---------------- | ------------------------------------------- |
-| semantic-release | Too automatic, complex plugin config        |
-| release-it       | No monorepo support (wontfix)               |
-| changesets       | Mandatory PR workflow, unpredictable bumps  |
-| release-please   | Complex config, PR-only workflow            |
-| auto             | Label-based, PR-dependent                   |
+<CardGrid>
+  <Card title="vs. the alternatives">
+    | Tool             | Problem                                     |
+    | ---------------- | ------------------------------------------- |
+    | semantic-release | Too automatic, complex plugin config        |
+    | release-it       | No monorepo support (wontfix)               |
+    | changesets       | Mandatory PR workflow, unpredictable bumps  |
+    | release-please   | Complex config, PR-only workflow            |
+    | auto             | Label-based, PR-dependent                   |
 
-bonvoy gives you the best of all worlds: **simple by default, powerful when you need it**.
+    bonvoy gives you the best of all worlds: **simple by default, powerful when you need it**.
+  </Card>
+  <Card title="Get releasing">
+    Install it and ship — no config file needed:
 
-```bash
-npm install -D bonvoy
-npx bonvoy shipit
-```
+    ```bash
+    npm install -D bonvoy
+    npx bonvoy shipit
+    ```
+  </Card>
+</CardGrid>

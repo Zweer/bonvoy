@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/schema.json"]
+    "includes": ["**", "!**/schema.json", "!docs/src/content/**", "!docs/dist/**"]
   },
   "formatter": {
     "enabled": true,

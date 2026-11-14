@@ -23,26 +23,29 @@ npm install -D @bonvoy/plugin-exec
 // bonvoy.config.js
 export default {
   plugins: [
-    ['@bonvoy/plugin-exec', {
-      beforePublish: 'npm run build',
-      afterRelease: 'echo "Released!" | slack-notify',
-    }]
-  ]
+    [
+      '@bonvoy/plugin-exec',
+      {
+        beforePublish: 'npm run build',
+        afterRelease: 'echo "Released!" | slack-notify',
+      },
+    ],
+  ],
 };
 ```
 
 ## Available Hooks
 
-| Hook | When |
-|------|------|
-| `beforeShipIt` | Before release starts |
-| `afterVersion` | After versions are bumped |
+| Hook              | When                        |
+| ----------------- | --------------------------- |
+| `beforeShipIt`    | Before release starts       |
+| `afterVersion`    | After versions are bumped   |
 | `beforeChangelog` | Before changelog generation |
-| `afterChangelog` | After changelog is written |
-| `beforePublish` | Before npm publish |
-| `afterPublish` | After npm publish |
-| `beforeRelease` | Before GitHub release |
-| `afterRelease` | After release completes |
+| `afterChangelog`  | After changelog is written  |
+| `beforePublish`   | Before npm publish          |
+| `afterPublish`    | After npm publish           |
+| `beforeRelease`   | Before GitHub release       |
+| `afterRelease`    | After release completes     |
 
 ## Examples
 
@@ -51,10 +54,13 @@ export default {
 ```javascript
 export default {
   plugins: [
-    ['@bonvoy/plugin-exec', {
-      beforePublish: 'npm run build',
-    }]
-  ]
+    [
+      '@bonvoy/plugin-exec',
+      {
+        beforePublish: 'npm run build',
+      },
+    ],
+  ],
 };
 ```
 
@@ -63,10 +69,13 @@ export default {
 ```javascript
 export default {
   plugins: [
-    ['@bonvoy/plugin-exec', {
-      afterRelease: 'curl -X POST https://hooks.slack.com/... -d "Released!"',
-    }]
-  ]
+    [
+      '@bonvoy/plugin-exec',
+      {
+        afterRelease: 'curl -X POST https://hooks.slack.com/... -d "Released!"',
+      },
+    ],
+  ],
 };
 ```
 
@@ -75,10 +84,13 @@ export default {
 ```javascript
 export default {
   plugins: [
-    ['@bonvoy/plugin-exec', {
-      beforePublish: 'npm run lint && npm run build && npm run test',
-    }]
-  ]
+    [
+      '@bonvoy/plugin-exec',
+      {
+        beforePublish: 'npm run lint && npm run build && npm run test',
+      },
+    ],
+  ],
 };
 ```
 

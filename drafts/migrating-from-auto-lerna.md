@@ -17,6 +17,7 @@ bonvoy has no lerna dependency. It reads npm workspaces directly from `package.j
 ### Phantom releases
 
 Two separate problems:
+
 1. auto would sometimes [create wrong version tags](https://github.com/intuit/auto/issues/596) in lerna monorepos
 2. lerna would [publish packages that hadn't changed](https://github.com/lerna/lerna/issues/1357) ([#912](https://github.com/lerna/lerna/issues/912))
 
@@ -25,6 +26,7 @@ bonvoy assigns commits to packages by file paths. If no files changed in a packa
 ### Label-based workflow
 
 auto uses GitHub labels to determine version bumps. `major`, `minor`, `patch` labels on PRs. This means:
+
 - Every PR needs a label (or the bot complains)
 - Someone has to decide the label (human judgment, not mechanical)
 - You need a PR for every release (no direct releases)
@@ -46,17 +48,17 @@ bonvoy works with or without PRs. `bonvoy shipit` releases from whatever commits
 
 ## Side by Side
 
-| | auto + lerna | bonvoy |
-|---|---|---|
-| **Monorepo** | Via lerna | Native (npm workspaces) |
-| **Version strategy** | Labels on PRs | Conventional commits |
-| **Changelog** | ✅ | ✅ |
-| **GitHub releases** | ✅ | ✅ |
-| **npm publish** | Via lerna | Built-in |
-| **PR required** | Yes | No |
-| **Canary releases** | Built-in | Not yet |
-| **Config** | `.autorc` + `lerna.json` | Zero config |
-| **Dependencies** | auto + lerna | bonvoy only |
+|                      | auto + lerna             | bonvoy                  |
+| -------------------- | ------------------------ | ----------------------- |
+| **Monorepo**         | Via lerna                | Native (npm workspaces) |
+| **Version strategy** | Labels on PRs            | Conventional commits    |
+| **Changelog**        | ✅                       | ✅                      |
+| **GitHub releases**  | ✅                       | ✅                      |
+| **npm publish**      | Via lerna                | Built-in                |
+| **PR required**      | Yes                      | No                      |
+| **Canary releases**  | Built-in                 | Not yet                 |
+| **Config**           | `.autorc` + `lerna.json` | Zero config             |
+| **Dependencies**     | auto + lerna             | bonvoy only             |
 
 ## Migration Steps
 
@@ -88,11 +90,11 @@ git push --tags
 
 This is the biggest change. Your team needs to write conventional commit messages:
 
-| Before (label) | After (commit) |
-|---|---|
+| Before (label)      | After (commit)                                        |
+| ------------------- | ----------------------------------------------------- |
 | `major` label on PR | `feat!: breaking change` or `BREAKING CHANGE:` footer |
-| `minor` label on PR | `feat: add feature` |
-| `patch` label on PR | `fix: fix bug` |
+| `minor` label on PR | `feat: add feature`                                   |
+| `patch` label on PR | `fix: fix bug`                                        |
 
 If your team already writes descriptive commit messages, this is mostly a formatting change.
 
@@ -122,12 +124,14 @@ You can remove the `major`, `minor`, `patch`, `skip-release`, `internal`, `docum
 ## Should You Migrate?
 
 **Yes, if:**
+
 - You're fighting lerna dependency issues
 - You're getting phantom releases
 - You want to use conventional commits instead of labels
 - You want to release without PRs sometimes
 
 **No, if:**
+
 - Your auto + lerna setup is stable (if it ain't broke...)
 - You prefer label-based version control over conventional commits
 - You need canary releases

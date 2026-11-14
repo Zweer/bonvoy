@@ -12,13 +12,13 @@ Here's how it works, and how you can add a plugin system to any tool.
 
 Node's `EventEmitter` is fine for fire-and-forget events. But for a plugin system, you need more:
 
-| Feature | EventEmitter | Tapable |
-|---------|-------------|---------|
-| Async support | Manual (callbacks) | Built-in (async/promise) |
-| Waterfall (pass data through plugins) | No | Yes |
-| Bail (stop on first result) | No | Yes |
-| Typed hooks | No | Yes (with TypeScript) |
-| Execution order guarantee | Insertion order | Insertion order + stages |
+| Feature                               | EventEmitter       | Tapable                  |
+| ------------------------------------- | ------------------ | ------------------------ |
+| Async support                         | Manual (callbacks) | Built-in (async/promise) |
+| Waterfall (pass data through plugins) | No                 | Yes                      |
+| Bail (stop on first result)           | No                 | Yes                      |
+| Typed hooks                           | No                 | Yes (with TypeScript)    |
+| Execution order guarantee             | Insertion order    | Insertion order + stages |
 
 The killer feature is **waterfall hooks**: data flows through each plugin, and each one can modify it before passing it to the next. This is how webpack transforms modules — and how bonvoy transforms configs, changelogs, and version bumps.
 
@@ -105,7 +105,7 @@ import { AsyncSeriesBailHook } from 'tapable';
 
 const resolve = new AsyncSeriesBailHook<[string], string>(['request']);
 
-resolve.tap('Cache', (req) => cache.get(req));       // returns if cached
+resolve.tap('Cache', (req) => cache.get(req)); // returns if cached
 resolve.tap('FileSystem', (req) => fs.readFile(req)); // runs only if cache missed
 ```
 
@@ -120,9 +120,9 @@ import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 class MyTool {
   hooks = {
-    beforeRun:  new AsyncSeriesHook<[Context]>(['context']),
-    transform:  new AsyncSeriesWaterfallHook<[Data]>(['data']),
-    afterRun:   new AsyncSeriesHook<[Context]>(['context']),
+    beforeRun: new AsyncSeriesHook<[Context]>(['context']),
+    transform: new AsyncSeriesWaterfallHook<[Data]>(['data']),
+    afterRun: new AsyncSeriesHook<[Context]>(['context']),
   };
 
   async run() {
@@ -197,14 +197,14 @@ import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 class Bonvoy {
   hooks = {
-    modifyConfig:      new AsyncSeriesWaterfallHook(['config']),
-    beforeShipIt:      new AsyncSeriesHook(['context']),
-    validateRepo:      new AsyncSeriesHook(['context']),
-    getVersion:        new AsyncSeriesWaterfallHook(['context']),
-    version:           new AsyncSeriesHook(['versionContext']),
+    modifyConfig: new AsyncSeriesWaterfallHook(['config']),
+    beforeShipIt: new AsyncSeriesHook(['context']),
+    validateRepo: new AsyncSeriesHook(['context']),
+    getVersion: new AsyncSeriesWaterfallHook(['context']),
+    version: new AsyncSeriesHook(['versionContext']),
     generateChangelog: new AsyncSeriesWaterfallHook(['changelogContext']),
-    publish:           new AsyncSeriesHook(['publishContext']),
-    makeRelease:       new AsyncSeriesHook(['releaseContext']),
+    publish: new AsyncSeriesHook(['publishContext']),
+    makeRelease: new AsyncSeriesHook(['releaseContext']),
     // ... more hooks
   };
 
@@ -241,8 +241,8 @@ export default class SlackPlugin implements BonvoyPlugin {
   apply(bonvoy) {
     bonvoy.hooks.afterRelease.tapPromise(this.name, async (context) => {
       const packages = context.packages
-        .filter(p => p.released)
-        .map(p => `${p.name}@${p.version}`)
+        .filter((p) => p.released)
+        .map((p) => `${p.name}@${p.version}`)
         .join(', ');
 
       await fetch(this.webhookUrl, {
@@ -264,9 +264,7 @@ Register it:
 import SlackPlugin from './plugins/slack.js';
 
 export default {
-  plugins: [
-    new SlackPlugin('https://hooks.slack.com/services/...'),
-  ],
+  plugins: [new SlackPlugin('https://hooks.slack.com/services/...')],
 };
 ```
 

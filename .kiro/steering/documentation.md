@@ -3,6 +3,7 @@
 ## Documentation Site
 
 bonvoy uses **VitePress** for documentation:
+
 - Location: `docs/`
 - Configuration: `docs/.vitepress/config.ts`
 - Deployed to: `https://zweer.github.io/bonvoy`
@@ -43,18 +44,21 @@ docs/
 ## Writing Style
 
 ### Voice & Tone
+
 - **Concise** — No fluff, get to the point
 - **Clear** — Simple language, avoid jargon
 - **Practical** — Every example should work as-is
 - **Helpful** — Anticipate questions, provide solutions
 
 ### Language
+
 - **English only** — All documentation in English
 - **Present tense** — "bonvoy generates" not "bonvoy will generate"
 - **Active voice** — "Run the command" not "The command should be run"
 - **Second person** — "You can configure" not "One can configure"
 
 ### Formatting
+
 - **Short paragraphs** — 2-3 sentences max
 - **Bullet points** — For lists and steps
 - **Code blocks** — For all commands and code
@@ -64,24 +68,28 @@ docs/
 ## Content Types
 
 ### Getting Started
+
 - Installation instructions
 - First release in < 5 minutes
 - Copy-paste examples
 - No configuration needed
 
 ### Configuration Reference
+
 - All options documented
 - Type information
 - Default values
 - Examples for each option
 
 ### CLI Reference
+
 - All commands and flags
 - Usage examples
 - Output examples
 - Exit codes
 
 ### Plugin Documentation
+
 - What the plugin does
 - Installation
 - Configuration options
@@ -89,12 +97,14 @@ docs/
 - Examples
 
 ### Guides (How-to)
+
 - Step-by-step instructions
 - Real-world scenarios
 - Troubleshooting tips
 - Best practices
 
 ### API Reference
+
 - Type signatures
 - Parameters and return values
 - Examples
@@ -103,7 +113,9 @@ docs/
 ## Markdown Conventions
 
 ### Code Blocks
+
 Always specify language:
+
 ````markdown
 ```bash
 npm install -D bonvoy
@@ -123,7 +135,9 @@ interface Config {
 ````
 
 ### Links
+
 Use descriptive text:
+
 ```markdown
 <!-- Good -->
 See the [configuration guide](./configuration.md) for details.
@@ -133,12 +147,15 @@ See [here](./configuration.md) for details.
 ```
 
 ### Emphasis
+
 - **Bold** for UI elements, commands, important terms
-- *Italic* for emphasis (use sparingly)
+- _Italic_ for emphasis (use sparingly)
 - `code` for inline code, file names, package names
 
 ### Admonitions
+
 VitePress supports custom containers:
+
 ```markdown
 ::: tip
 This is a helpful tip.
@@ -154,39 +171,42 @@ This is a critical warning.
 ```
 
 ### Tables
+
 Use for structured data:
+
 ```markdown
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option | Type     | Default    | Description  |
+| ------ | -------- | ---------- | ------------ |
 | `name` | `string` | `'bonvoy'` | Package name |
 ```
 
 ## Examples
 
 ### Good Examples
+
 - **Complete** — Can be copy-pasted and run
 - **Realistic** — Use real package names and scenarios
 - **Commented** — Explain non-obvious parts
 - **Tested** — Verify examples work
 
 Example:
+
 ```javascript
 // bonvoy.config.js
 export default {
   // Use independent versioning (each package has its own version)
   versioning: 'independent',
-  
+
   // Custom commit message with emoji
   commitMessage: 'chore: :bookmark: release',
-  
+
   // Enable AI-generated release notes
-  plugins: [
-    ['@bonvoy/plugin-ai', { provider: 'openai' }],
-  ],
+  plugins: [['@bonvoy/plugin-ai', { provider: 'openai' }]],
 };
 ```
 
 ### Bad Examples
+
 - Incomplete (missing imports, context)
 - Unrealistic (foo, bar, baz)
 - No explanation
@@ -210,18 +230,18 @@ npm install -D @bonvoy/plugin-name
 \`\`\`javascript
 // bonvoy.config.js
 export default {
-  plugins: [
-    ['@bonvoy/plugin-name', {
-      option: 'value',
-    }],
-  ],
+plugins: [
+['@bonvoy/plugin-name', {
+option: 'value',
+}],
+],
 };
 \`\`\`
 
 ## Configuration
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option   | Type     | Default     | Description  |
+| -------- | -------- | ----------- | ------------ |
 | `option` | `string` | `'default'` | What it does |
 
 ### Example
@@ -233,6 +253,7 @@ export default {
 ## Hooks
 
 This plugin taps into:
+
 - `hookName` — What it does at this hook
 
 ## Environment Variables
@@ -242,6 +263,7 @@ This plugin taps into:
 ## Troubleshooting
 
 ### Common Issue
+
 Solution with example.
 
 ## License
@@ -252,6 +274,7 @@ MIT
 ## README Files
 
 Each package has a README.md:
+
 - Short description
 - Installation
 - Basic usage
@@ -263,6 +286,7 @@ Keep it brief — full docs are on the site.
 ## Changelog
 
 Each package has CHANGELOG.md:
+
 - Generated automatically by bonvoy
 - Follows [Keep a Changelog](https://keepachangelog.com/) format
 - Grouped by type (Features, Bug Fixes, etc.)
@@ -273,6 +297,7 @@ Don't edit manually unless necessary.
 ## Blog Articles
 
 Articles in `docs/blog/`:
+
 - First-person voice ("I built", "I was frustrated")
 - Honest and practical
 - Real examples and code
@@ -281,12 +306,14 @@ Articles in `docs/blog/`:
 ## LLM-Optimized Documentation
 
 ### llms.txt and llms-full.txt
+
 - Generated via `scripts/generate-llms-txt.ts`
 - Auto-generated on `npm run docs:build`
 - Served at `/bonvoy/llms.txt` and `/bonvoy/llms-full.txt`
 - Optimized for LLM consumption (no navigation, no UI elements)
 
 ### Format
+
 - Plain text, markdown-like
 - Clear section headers
 - No HTML, no images
@@ -295,6 +322,7 @@ Articles in `docs/blog/`:
 ## Documentation Workflow
 
 ### Local Development
+
 ```bash
 npm run docs:dev              # Start dev server
 # Edit files in docs/
@@ -302,12 +330,14 @@ npm run docs:dev              # Start dev server
 ```
 
 ### Build and Preview
+
 ```bash
 npm run docs:build            # Build for production
 npm run docs:preview          # Preview production build
 ```
 
 ### Deployment
+
 - Automatic via GitHub Actions after release
 - Workflow: `.github/workflows/docs.yml`
 - Triggered by CI after successful release
@@ -315,12 +345,14 @@ npm run docs:preview          # Preview production build
 ## Updating Documentation
 
 ### When to Update
+
 - New feature added → add to docs
 - Breaking change → update migration guide
 - Bug fix → update troubleshooting if relevant
 - Config option added → update configuration reference
 
 ### Documentation PR Checklist
+
 - [ ] All new features documented
 - [ ] Examples tested and working
 - [ ] Links checked (no broken links)
@@ -331,11 +363,13 @@ npm run docs:preview          # Preview production build
 ## Screenshots and Videos
 
 ### When to Use
+
 - Complex UI workflows
 - Visual comparisons
 - Terminal output examples
 
 ### Guidelines
+
 - Use SVG for diagrams (not PNG/JPG)
 - Use asciinema for terminal recordings
 - Keep file sizes small
@@ -344,11 +378,13 @@ npm run docs:preview          # Preview production build
 ## Versioning Documentation
 
 ### Version-specific Docs
+
 - Document current version only
 - Note breaking changes in migration guide
 - Link to previous versions if needed
 
 ### Deprecation Notices
+
 ```markdown
 ::: warning DEPRECATED
 This option is deprecated since v2.0.0. Use `newOption` instead.
@@ -358,16 +394,19 @@ This option is deprecated since v2.0.0. Use `newOption` instead.
 ## External Links
 
 ### When to Link
+
 - Official documentation (npm, GitHub, etc.)
 - Related tools and libraries
 - Standards and specifications
 
 ### Link Format
+
 ```markdown
 [descriptive text](https://example.com)
 ```
 
 ### Keep Links Updated
+
 - Check for broken links regularly
 - Update when external docs move
 - Use stable URLs (not /latest/ or /master/)
@@ -375,6 +414,7 @@ This option is deprecated since v2.0.0. Use `newOption` instead.
 ## Accessibility
 
 ### Guidelines
+
 - Use semantic HTML in custom components
 - Provide alt text for images
 - Use descriptive link text (not "click here")
@@ -384,6 +424,7 @@ This option is deprecated since v2.0.0. Use `newOption` instead.
 ## SEO
 
 ### Best Practices
+
 - Descriptive page titles
 - Meta descriptions for key pages
 - Proper heading hierarchy
@@ -395,11 +436,13 @@ This option is deprecated since v2.0.0. Use `newOption` instead.
 ### Keep Documentation Dependencies Updated
 
 **CRITICAL**: Always use the **latest stable versions** of:
+
 - VitePress (currently v1.x)
 - Vue (VitePress dependency)
 - Markdown-it plugins
 
 ### Update Process
+
 ```bash
 cd docs
 npm outdated
@@ -411,6 +454,7 @@ npm run docs:preview  # Test preview
 ## Maintenance
 
 ### Regular Tasks
+
 - [ ] Check for broken links (monthly)
 - [ ] Update examples with latest syntax (on breaking changes)
 - [ ] Review and update FAQ (quarterly)
@@ -418,6 +462,7 @@ npm run docs:preview  # Test preview
 - [ ] Refresh screenshots (on UI changes)
 
 ### Metrics to Track
+
 - Page views (most/least popular pages)
 - Search queries (what users look for)
 - External links (where traffic comes from)
@@ -425,17 +470,17 @@ npm run docs:preview  # Test preview
 
 ## Style Guide Summary
 
-| Element | Style |
-|---------|-------|
-| **Headings** | Sentence case (not Title Case) |
-| **Code** | Inline: \`code\`, Block: \`\`\`language |
-| **Commands** | Always in code blocks with `bash` |
-| **File names** | Inline code: \`package.json\` |
-| **Package names** | Inline code: \`@bonvoy/core\` |
-| **Emphasis** | **Bold** for important, *italic* sparingly |
-| **Lists** | `-` for unordered, `1.` for ordered |
-| **Links** | Descriptive text, not "click here" |
-| **Line length** | No hard limit, break at natural points |
+| Element           | Style                                      |
+| ----------------- | ------------------------------------------ |
+| **Headings**      | Sentence case (not Title Case)             |
+| **Code**          | Inline: \`code\`, Block: \`\`\`language    |
+| **Commands**      | Always in code blocks with `bash`          |
+| **File names**    | Inline code: \`package.json\`              |
+| **Package names** | Inline code: \`@bonvoy/core\`              |
+| **Emphasis**      | **Bold** for important, _italic_ sparingly |
+| **Lists**         | `-` for unordered, `1.` for ordered        |
+| **Links**         | Descriptive text, not "click here"         |
+| **Line length**   | No hard limit, break at natural points     |
 
 ## Resources
 

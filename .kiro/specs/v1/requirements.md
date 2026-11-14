@@ -6,13 +6,13 @@
 
 ## Project Info
 
-| Item | Value |
-|------|-------|
-| **Name** | bonvoy |
-| **Tagline** | "Bon voyage to your releases!" |
-| **GitHub** | `Zweer/bonvoy` |
-| **npm org** | `@bonvoy` |
-| **CLI command** | `bonvoy` |
+| Item            | Value                          |
+| --------------- | ------------------------------ |
+| **Name**        | bonvoy                         |
+| **Tagline**     | "Bon voyage to your releases!" |
+| **GitHub**      | `Zweer/bonvoy`                 |
+| **npm org**     | `@bonvoy`                      |
+| **CLI command** | `bonvoy`                       |
 
 ## Overview
 
@@ -20,16 +20,16 @@
 
 ## Problems with Existing Tools
 
-| Tool | Issue |
-|------|-------|
-| **semantic-release** | Too automatic, plugin hell, complex config |
-| **release-it** | No native monorepo support (wontfix) |
-| **changesets** | PR workflow mandatory, unpredictable bumps |
-| **release-please** | PR workflow, complex config |
-| **bumpp** | No changelog, no GitHub releases, no monorepo |
-| **beachball** | Too complex, change files required |
-| **auto** | Label-based, PR-dependent |
-| **nx release** | Requires Nx ecosystem |
+| Tool                 | Issue                                         |
+| -------------------- | --------------------------------------------- |
+| **semantic-release** | Too automatic, plugin hell, complex config    |
+| **release-it**       | No native monorepo support (wontfix)          |
+| **changesets**       | PR workflow mandatory, unpredictable bumps    |
+| **release-please**   | PR workflow, complex config                   |
+| **bumpp**            | No changelog, no GitHub releases, no monorepo |
+| **beachball**        | Too complex, change files required            |
+| **auto**             | Label-based, PR-dependent                     |
+| **nx release**       | Requires Nx ecosystem                         |
 
 ## Core Design Principles
 
@@ -46,6 +46,7 @@
 ### Functional Requirements
 
 #### Versioning
+
 - ✅ **Independent versioning**: Each package maintains its own version
 - ✅ **Fixed versioning** (optional): All packages share same version
 - ✅ **Force version**: Set specific version for all/some packages (e.g., `2.2.0`)
@@ -53,6 +54,7 @@
 - ✅ **Root package versioning**: Configurable strategy (max of children, patch on any change, etc.)
 
 #### Changelog
+
 - ✅ **Per-package changelog**: Each package gets its own CHANGELOG.md
 - ✅ **Global changelog** (optional): Aggregated changelog at repo root
 - ✅ **Conventional commits only**: Only `feat:`, `fix:`, `perf:`, etc. included
@@ -60,6 +62,7 @@
 - ✅ **Multi-package commits**: Single commit can appear in multiple changelogs
 
 #### Workflows
+
 - ✅ **Direct release**: One command publishes everything
 - ✅ **PR-based release**: Create PR with version bumps + changelog (like changesets/release-please)
 - ✅ **Dry-run mode**: Preview all changes without executing
@@ -67,20 +70,24 @@
 - ✅ **Manual trigger**: Developer decides when to release
 
 #### Git Operations
+
 - ✅ **Commit**: Version bumps + changelog with configurable message
 - ✅ **Tags**: Per-package tags (e.g., `@scope/name@1.2.0`)
 - ✅ **Push**: Commits and tags to remote
 
 #### npm Operations
+
 - ✅ **Publish**: All changed packages to npm
 - ✅ **OIDC authentication**: No NPM_TOKEN needed in CI
 - ✅ **Internal dependencies**: Auto-update cross-package references
 
 #### GitHub Operations
+
 - ✅ **Releases**: Create GitHub release per package with changelog
 - ✅ **PR creation**: For PR-based workflow
 
 #### Pre-release Validation
+
 - ✅ **Tag existence check**: Verify git tags don't already exist before release
 - ✅ **GitHub release check**: Verify GitHub releases don't already exist
 - ✅ **npm version check**: Verify npm package version not already published
@@ -135,36 +142,36 @@ Based on intuit/auto's hook system:
 interface ReleaseHooks {
   // Configuration phase
   modifyConfig: Hook<[Config], Config>;
-  
+
   // Validation phase
   beforeShipIt: Hook<[Context], void>;
   validateRepo: Hook<[Context], void>;
-  
+
   // Version phase
   getVersion: Hook<[Context], SemverBump>;
   version: Hook<[VersionContext], void>;
   afterVersion: Hook<[VersionContext], void>;
-  
+
   // Changelog phase
   beforeChangelog: Hook<[ChangelogContext], void>;
   generateChangelog: Hook<[ChangelogContext], string>;
   afterChangelog: Hook<[ChangelogContext], void>;
-  
+
   // Publish phase
   beforePublish: Hook<[PublishContext], void>;
   publish: Hook<[PublishContext], void>;
   afterPublish: Hook<[PublishContext], void>;
-  
+
   // Release phase
   beforeRelease: Hook<[ReleaseContext], void>;
   makeRelease: Hook<[ReleaseContext], void>;
   afterRelease: Hook<[ReleaseContext], void>;
-  
+
   // PR workflow
   beforeCreatePR: Hook<[PRContext], void>;
   createPR: Hook<[PRContext], void>;
   afterCreatePR: Hook<[PRContext], void>;
-  
+
   // Rollback (on failure or manual)
   rollback: Hook<[RollbackContext], void>;
 }
@@ -211,6 +218,7 @@ bonvoy/                          # GitHub: Zweer/bonvoy
 ### Default vs Optional Plugins
 
 **Default plugins** (loaded automatically unless disabled):
+
 - `@bonvoy/plugin-conventional` - Parse conventional commits for version bump
 - `@bonvoy/plugin-git` - Commit, tag, push
 - `@bonvoy/plugin-npm` - Publish to npm with OIDC
@@ -218,11 +226,13 @@ bonvoy/                          # GitHub: Zweer/bonvoy
 - `@bonvoy/plugin-changelog` - Generate CHANGELOG.md
 
 **Optional plugins** (must be installed and configured):
+
 - `@bonvoy/plugin-gitlab` - GitLab releases instead of GitHub
 - `@bonvoy/plugin-exec` - Run custom shell commands
 - `@bonvoy/plugin-changeset` - Changeset-compatible workflow (see below)
 
 **Notification plugins** (optional, for release notifications):
+
 - `@bonvoy/plugin-notification` - Base class for notification plugins
 - `@bonvoy/plugin-slack` - Slack notifications (webhook or Bot API)
 - `@bonvoy/plugin-discord` - Discord notifications (webhook)
@@ -233,10 +243,10 @@ bonvoy/                          # GitHub: Zweer/bonvoy
 
 The version determination is pluggable:
 
-| Strategy | Plugin | Description |
-|----------|--------|-------------|
-| **Conventional** | `@bonvoy/plugin-conventional` (default) | Bump from conventional commit messages |
-| **Changeset** | `@bonvoy/plugin-changeset` | Track changes via `.changeset/*.md` or `.bonvoy/*.md` files |
+| Strategy         | Plugin                                  | Description                                                 |
+| ---------------- | --------------------------------------- | ----------------------------------------------------------- |
+| **Conventional** | `@bonvoy/plugin-conventional` (default) | Bump from conventional commit messages                      |
+| **Changeset**    | `@bonvoy/plugin-changeset`              | Track changes via `.changeset/*.md` or `.bonvoy/*.md` files |
 
 Strategies can be combined: conventional by default, with manual override when needed.
 
@@ -247,6 +257,7 @@ Strategies can be combined: conventional by default, with manual override when n
 #### File Locations
 
 Reads from both directories (for migration compatibility):
+
 - `.changeset/*.md` - Standard changeset location
 - `.bonvoy/*.md` - Bonvoy-native location
 
@@ -256,6 +267,7 @@ Uses changeset-compatible format (YAML frontmatter + Markdown):
 
 ```markdown
 ---
+
 "@scope/core": minor
 "@scope/utils": patch
 ---
@@ -270,6 +282,7 @@ Unlike standard changeset, bonvoy supports explicit versions:
 
 ```markdown
 ---
+
 "@scope/core": "2.0.0"
 "@scope/utils": minor
 ---
@@ -280,20 +293,23 @@ Breaking release with explicit version for core.
 #### Multi-file Behavior
 
 When multiple files reference the same package:
+
 - **Bump**: Takes the highest (major > minor > patch)
 - **Notes**: Concatenates all descriptions
 
 ```markdown
 <!-- .changeset/feature-a.md -->
 ---
-"@scope/core": minor
----
+
+## "@scope/core": minor
+
 Added feature A
 
 <!-- .changeset/feature-b.md -->
 ---
-"@scope/core": patch
----
+
+## "@scope/core": patch
+
 Fixed bug in feature B
 ```
 
@@ -347,24 +363,24 @@ interface BonvoyConfig {
   // Versioning
   versioning?: 'independent' | 'fixed';
   rootVersionStrategy?: 'max' | 'patch' | 'none';
-  
+
   // Git
-  commitMessage?: string;  // default: "chore: :bookmark: release"
-  tagFormat?: string;      // default: "{name}@{version}"
-  
+  commitMessage?: string; // default: "chore: :bookmark: release"
+  tagFormat?: string; // default: "{name}@{version}"
+
   // Changelog
   changelog?: {
-    global?: boolean;      // default: false
+    global?: boolean; // default: false
     sections?: Record<string, string>;
   };
-  
+
   // Workflow
   workflow?: 'direct' | 'pr';
-  baseBranch?: string;     // default: "main"
-  
+  baseBranch?: string; // default: "main"
+
   // Plugins
   plugins?: (string | [string, object])[];
-  
+
   // Hooks (inline)
   hooks?: Partial<ReleaseHooks>;
 }
@@ -405,7 +421,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump (patch/minor/major/x.y.z)'
+        description: "Version bump (patch/minor/major/x.y.z)"
         required: false
 
 jobs:
@@ -421,7 +437,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm test
       - run: npx bonvoy shipit ${{ github.event.inputs.bump }}
@@ -466,6 +482,7 @@ jobs:
 ## Implementation Phases
 
 ### Phase 1: Core + Essential Plugins (3-4 days) ✅ COMPLETED
+
 - [x] `@bonvoy/core` - Hook system, CLI, config loading, workspace detection
 - [x] `@bonvoy/cli` → renamed to `bonvoy` - CLI orchestration with shipit command
 - [x] `@bonvoy/plugin-conventional` - Conventional commits parser
@@ -473,12 +490,14 @@ jobs:
 - [x] `@bonvoy/plugin-git` - Commit, tag, push
 
 ### Phase 2: Publishing (2 days) ✅ COMPLETED
+
 - [x] `@bonvoy/plugin-npm` - Publish with OIDC
 - [x] Dry-run mode
 - [x] `@bonvoy/plugin-github` - GitHub releases
 - [x] JSON output for CI
 
 ### Phase 3: PR Workflow (2 days) ✅ COMPLETED
+
 - [x] PR creation in `@bonvoy/plugin-github`
 - [x] PR creation in `@bonvoy/plugin-gitlab` (MR)
 - [x] `prepare` command implementation
@@ -486,11 +505,13 @@ jobs:
 - [x] PR tracking via `.bonvoy/release-pr.json`
 
 ### Phase 4: Optional Plugins (2-3 days) ✅ COMPLETED
+
 - [x] `@bonvoy/plugin-exec` - Custom shell commands
 - [x] `@bonvoy/plugin-changeset` - Changeset-compatible workflow
 - [x] `@bonvoy/plugin-gitlab` - GitLab support
 
 ### Phase 5: Polish (1-2 days) ✅ COMPLETED
+
 - [x] Documentation (plugin READMEs)
 - [x] Error messages refinement
 - [x] Tests (100% coverage)
@@ -498,10 +519,10 @@ jobs:
 
 ---
 
-*Tool name: bonvoy*
-*Tagline: "Bon voyage to your releases!"*
-*GitHub: Zweer/bonvoy*
-*npm org: @bonvoy*
-*Decision made: 2026-01-07*
-*Status: Requirements complete*
-*Estimated effort: 10-13 days*
+_Tool name: bonvoy_
+_Tagline: "Bon voyage to your releases!"_
+_GitHub: Zweer/bonvoy_
+_npm org: @bonvoy_
+_Decision made: 2026-01-07_
+_Status: Requirements complete_
+_Estimated effort: 10-13 days_

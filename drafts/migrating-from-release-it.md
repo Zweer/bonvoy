@@ -35,18 +35,18 @@ bonvoy is CI-first. No prompts. Deterministic output. `--json` flag for machine-
 
 ## Side by Side
 
-| | release-it | bonvoy |
-|---|---|---|
-| **Monorepo** | No | Native |
-| **Conventional commits** | Plugin | Default |
-| **Changelog** | Plugin | Default |
-| **GitHub releases** | Built-in | Default |
-| **npm publish** | Built-in | Default |
-| **Interactive** | Yes (default) | No (CI-first) |
-| **Dry run** | `--dry-run` | `--dry-run` |
-| **PR workflow** | No | Yes |
-| **Custom hooks** | Shell commands | Plugin system (tapable) |
-| **Non-npm packages** | Yes | No (npm only) |
+|                          | release-it     | bonvoy                  |
+| ------------------------ | -------------- | ----------------------- |
+| **Monorepo**             | No             | Native                  |
+| **Conventional commits** | Plugin         | Default                 |
+| **Changelog**            | Plugin         | Default                 |
+| **GitHub releases**      | Built-in       | Default                 |
+| **npm publish**          | Built-in       | Default                 |
+| **Interactive**          | Yes (default)  | No (CI-first)           |
+| **Dry run**              | `--dry-run`    | `--dry-run`             |
+| **PR workflow**          | No             | Yes                     |
+| **Custom hooks**         | Shell commands | Plugin system (tapable) |
+| **Non-npm packages**     | Yes            | No (npm only)           |
 
 ## Migration Steps
 
@@ -89,10 +89,13 @@ Use bonvoy's exec plugin or inline hooks:
 // bonvoy.config.js
 export default {
   plugins: [
-    ['@bonvoy/plugin-exec', {
-      beforeShipIt: 'npm test',
-      afterRelease: 'echo "Released!"',
-    }],
+    [
+      '@bonvoy/plugin-exec',
+      {
+        beforeShipIt: 'npm test',
+        afterRelease: 'echo "Released!"',
+      },
+    ],
   ],
 };
 ```
@@ -119,11 +122,13 @@ After:
 ## Should You Migrate?
 
 **Yes, if:**
+
 - You have (or plan to have) a monorepo
 - You want conventional commits to drive releases automatically
 - You prefer CI-first over interactive workflows
 
 **No, if:**
+
 - You have a single package and like interactive releases
 - You release non-npm artifacts (Docker images, binaries, etc.)
 - Your current setup works and you don't need monorepo support

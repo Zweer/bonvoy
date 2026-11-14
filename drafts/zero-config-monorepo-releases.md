@@ -97,6 +97,7 @@ npx bonvoy shipit --dry-run
 ```
 
 bonvoy will:
+
 1. Find commits since the last tags
 2. Assign them to packages by file paths
 3. Calculate version bumps from conventional commit types
@@ -129,6 +130,7 @@ npx bonvoy shipit
 ```
 
 bonvoy will:
+
 - Update `package.json` versions
 - Generate `CHANGELOG.md` for each package
 - Commit with `chore: :bookmark: release`
@@ -145,7 +147,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump (patch/minor/major/x.y.z)'
+        description: "Version bump (patch/minor/major/x.y.z)"
         required: false
 
 jobs:
@@ -161,7 +163,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npx bonvoy shipit ${{ github.event.inputs.bump }}
         env:
@@ -189,10 +191,10 @@ bonvoy works without config, but you can customize everything:
 ```javascript
 // bonvoy.config.js
 export default {
-  versioning: 'fixed',           // all packages share same version
-  tagFormat: 'v{version}',       // simpler tags
-  changelog: { global: true },   // also generate root CHANGELOG.md
-  workflow: 'pr',                // PR-based instead of direct
+  versioning: 'fixed', // all packages share same version
+  tagFormat: 'v{version}', // simpler tags
+  changelog: { global: true }, // also generate root CHANGELOG.md
+  workflow: 'pr', // PR-based instead of direct
 };
 ```
 

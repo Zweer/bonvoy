@@ -25,9 +25,9 @@ npm install @bonvoy/plugin-gitlab
 // bonvoy.config.js
 export default {
   gitlab: {
-    token: process.env.GITLAB_TOKEN,       // default
-    host: 'https://gitlab.com',            // default, or self-hosted URL
-    projectId: 'my-group/my-project',      // optional, auto-detected
+    token: process.env.GITLAB_TOKEN, // default
+    host: 'https://gitlab.com', // default, or self-hosted URL
+    projectId: 'my-group/my-project', // optional, auto-detected
   },
 };
 ```
@@ -36,10 +36,10 @@ export default {
 
 This plugin taps into the following hooks:
 
-| Hook | Action |
-|------|--------|
-| `makeRelease` | Creates GitLab releases for published packages |
-| `createPR` | Creates a release MR with version bumps and changelog |
+| Hook          | Action                                                |
+| ------------- | ----------------------------------------------------- |
+| `makeRelease` | Creates GitLab releases for published packages        |
+| `createPR`    | Creates a release MR with version bumps and changelog |
 
 ## Requirements
 
@@ -55,16 +55,17 @@ The plugin auto-detects the project in this order:
 3. Git remote URL
 
 Supported URL formats:
+
 - `https://gitlab.com/group/project`
 - `https://gitlab.com/group/subgroup/project`
 - `git@gitlab.com:group/project.git`
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `GITLAB_TOKEN` | GitLab personal access token |
-| `GITLAB_HOST` | GitLab host URL (default: `https://gitlab.com`) |
+| Variable       | Description                                     |
+| -------------- | ----------------------------------------------- |
+| `GITLAB_TOKEN` | GitLab personal access token                    |
+| `GITLAB_HOST`  | GitLab host URL (default: `https://gitlab.com`) |
 
 ## MR Workflow
 

@@ -18,8 +18,11 @@ import { NotificationPlugin, NotificationMessage } from '@bonvoy/plugin-notifica
 
 class MyNotificationPlugin extends NotificationPlugin {
   name = 'my-notification';
-  
-  constructor(private webhookUrl: string, config = {}) {
+
+  constructor(
+    private webhookUrl: string,
+    config = {},
+  ) {
     super(config);
   }
 
@@ -42,17 +45,17 @@ All notification plugins share these options:
 ```typescript
 interface NotificationConfig {
   // When to send
-  onSuccess?: boolean;      // Send on successful release (default: true)
-  onFailure?: boolean;      // Send on failed release (default: false)
-  
+  onSuccess?: boolean; // Send on successful release (default: true)
+  onFailure?: boolean; // Send on failed release (default: false)
+
   // What to include
-  includeChangelog?: boolean;   // Include changelog (default: true)
-  includePackages?: boolean;    // Include package list (default: true)
-  includeLinks?: boolean;       // Include npm/GitHub links (default: true)
-  maxChangelogLength?: number;  // Truncate changelog (default: 500)
-  
+  includeChangelog?: boolean; // Include changelog (default: true)
+  includePackages?: boolean; // Include package list (default: true)
+  includeLinks?: boolean; // Include npm/GitHub links (default: true)
+  maxChangelogLength?: number; // Truncate changelog (default: 500)
+
   // Customization
-  titleTemplate?: string;   // Title with placeholders: {count}, {packages}
+  titleTemplate?: string; // Title with placeholders: {count}, {packages}
 }
 ```
 
@@ -62,16 +65,16 @@ The `NotificationMessage` object passed to `send()`:
 
 ```typescript
 interface NotificationMessage {
-  title: string;           // Formatted title
+  title: string; // Formatted title
   packages: Array<{
-    name: string;          // Package name
-    version: string;       // New version
-    changelog?: string;    // Changelog for this release
-    npmUrl?: string;       // Link to npm
-    githubUrl?: string;    // Link to GitHub release
+    name: string; // Package name
+    version: string; // New version
+    changelog?: string; // Changelog for this release
+    npmUrl?: string; // Link to npm
+    githubUrl?: string; // Link to GitHub release
   }>;
-  isSuccess: boolean;      // Whether release succeeded
-  timestamp: Date;         // When the release happened
+  isSuccess: boolean; // Whether release succeeded
+  timestamp: Date; // When the release happened
 }
 ```
 

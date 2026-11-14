@@ -20,10 +20,12 @@ Conventional changelogs are accurate but hard to scan. A list of `feat:`, `fix:`
 > now undoes all completed steps automatically.
 
 ### ✨ Features
+
 - add rollback & recovery for failed releases
 - show commit justification for each package bump
 
 ### 🐛 Bug Fixes
+
 - remove stale release-log.json and gitignore it
 - improve error messages for rollback status and npm OIDC
 ```
@@ -66,11 +68,11 @@ interface AiProvider {
 }
 ```
 
-| Provider | Endpoint | Auth | Response path |
-|----------|----------|------|---------------|
-| OpenAI | `POST /v1/chat/completions` | `OPENAI_API_KEY` | `choices[0].message.content` |
-| Anthropic | `POST /v1/messages` | `ANTHROPIC_API_KEY` | `content[0].text` |
-| Gemini | `POST /v1beta/models/{m}:generateContent` | `GEMINI_API_KEY` | `candidates[0].content.parts[0].text` |
+| Provider  | Endpoint                                  | Auth                | Response path                         |
+| --------- | ----------------------------------------- | ------------------- | ------------------------------------- |
+| OpenAI    | `POST /v1/chat/completions`               | `OPENAI_API_KEY`    | `choices[0].message.content`          |
+| Anthropic | `POST /v1/messages`                       | `ANTHROPIC_API_KEY` | `content[0].text`                     |
+| Gemini    | `POST /v1beta/models/{m}:generateContent` | `GEMINI_API_KEY`    | `candidates[0].content.parts[0].text` |
 
 ### Prompt
 
@@ -114,24 +116,23 @@ interface AiPluginConfig {
 
 ### Default Models
 
-| Provider | Default Model | Env Var |
-|----------|---------------|---------|
-| OpenAI | `gpt-4o-mini` | `OPENAI_API_KEY` |
+| Provider  | Default Model              | Env Var             |
+| --------- | -------------------------- | ------------------- |
+| OpenAI    | `gpt-4o-mini`              | `OPENAI_API_KEY`    |
 | Anthropic | `claude-sonnet-4-20250514` | `ANTHROPIC_API_KEY` |
-| Gemini | `gemini-2.0-flash` | `GEMINI_API_KEY` |
+| Gemini    | `gemini-2.0-flash`         | `GEMINI_API_KEY`    |
 
 ### Usage
 
 ```javascript
 // bonvoy.config.js
 export default {
-  plugins: [
-    ['@bonvoy/plugin-ai', { provider: 'openai' }],
-  ],
+  plugins: [['@bonvoy/plugin-ai', { provider: 'openai' }]],
 };
 ```
 
 Environment variable for API key:
+
 - OpenAI: `OPENAI_API_KEY`
 - Anthropic: `ANTHROPIC_API_KEY`
 - Bedrock: uses AWS credential chain (no key needed in CI with IAM role)
@@ -199,8 +200,8 @@ packages/plugin-ai/
 
 ---
 
-*Plugin: @bonvoy/plugin-ai*
-*Status: ✅ Implemented*
-*Priority: Medium*
-*Depends on: @bonvoy/core, @bonvoy/plugin-changelog*
-*Estimated effort: 1-2 days*
+_Plugin: @bonvoy/plugin-ai_
+_Status: ✅ Implemented_
+_Priority: Medium_
+_Depends on: @bonvoy/core, @bonvoy/plugin-changelog_
+_Estimated effort: 1-2 days_

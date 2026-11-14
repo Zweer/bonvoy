@@ -18,9 +18,9 @@ Every destructive operation is recorded incrementally to `.bonvoy/release-log.js
 
 ```typescript
 interface ActionEntry {
-  plugin: string;          // e.g. 'git', 'npm', 'github', 'gitlab'
-  action: string;          // e.g. 'commit', 'tag', 'push', 'publish', 'release'
-  timestamp: string;       // ISO 8601
+  plugin: string; // e.g. 'git', 'npm', 'github', 'gitlab'
+  action: string; // e.g. 'commit', 'tag', 'push', 'publish', 'release'
+  timestamp: string; // ISO 8601
   data: Record<string, unknown>; // Action-specific data for reversal
   status: 'completed' | 'failed';
 }
@@ -43,16 +43,16 @@ interface ReleaseLog {
 
 ### Reversible Actions
 
-| Plugin | Action | Rollback | Notes |
-|--------|--------|----------|-------|
-| npm | `publish` | `npm unpublish <pkg>@<version>` | **Runs first**. 72h limit. If fails → skip git rollback |
-| github | `release` | `DELETE /repos/{owner}/{repo}/releases/{id}` | Requires release ID in log |
-| gitlab | `release` | `DELETE /projects/{id}/releases/{tag}` | Requires project ID in log |
-| git | `commit` | `git reset HEAD~1 --hard` | **Runs last**. Skipped if npm unpublish failed |
-| git | `tag` (local) | `git tag -d <tag>` | Skipped if npm unpublish failed |
-| git | `push` (commits) | `git push --force-with-lease` | Skipped if npm unpublish failed |
-| git | `push` (tags) | `git push --delete origin <tag>` | Skipped if npm unpublish failed |
-| changelog | `write` | No-op | Covered by git reset |
+| Plugin    | Action           | Rollback                                     | Notes                                                   |
+| --------- | ---------------- | -------------------------------------------- | ------------------------------------------------------- |
+| npm       | `publish`        | `npm unpublish <pkg>@<version>`              | **Runs first**. 72h limit. If fails → skip git rollback |
+| github    | `release`        | `DELETE /repos/{owner}/{repo}/releases/{id}` | Requires release ID in log                              |
+| gitlab    | `release`        | `DELETE /projects/{id}/releases/{tag}`       | Requires project ID in log                              |
+| git       | `commit`         | `git reset HEAD~1 --hard`                    | **Runs last**. Skipped if npm unpublish failed          |
+| git       | `tag` (local)    | `git tag -d <tag>`                           | Skipped if npm unpublish failed                         |
+| git       | `push` (commits) | `git push --force-with-lease`                | Skipped if npm unpublish failed                         |
+| git       | `push` (tags)    | `git push --delete origin <tag>`             | Skipped if npm unpublish failed                         |
+| changelog | `write`          | No-op                                        | Covered by git reset                                    |
 
 ### Rollback Order
 
@@ -99,7 +99,7 @@ interface ReleaseHooks {
 
 interface RollbackContext extends Context {
   actionLog: ActionEntry[];
-  errors: Error[];       // Errors that triggered rollback
+  errors: Error[]; // Errors that triggered rollback
 }
 ```
 
@@ -153,22 +153,27 @@ bonvoy rollback --dry-run    # Preview what would be rolled back
 ## Edge Cases
 
 ### npm unpublish limitations
+
 - Only works within 72 hours of publish
 - Fails if other packages depend on the published version
 - Treated as **best-effort**: warn on failure, don't abort the rest of the rollback
 
 ### Partial rollback
+
 - If rollback itself fails (e.g., can't delete remote tag), log the failure and continue with remaining actions
 - Final status becomes `rollback-failed` with details of what couldn't be undone
 - User gets a clear list of what to fix manually
 
 ### No action log found
+
 - `bonvoy rollback` prints a clear error: "No release log found at .bonvoy/release-log.json"
 
 ### Already rolled back
+
 - If status is `rolled-back`, print "Already rolled back" and exit
 
 ### Stale log / previous run
+
 - Single file, overwritten at the start of each release
 - Before overwriting, if the previous log has status `in-progress`, shipit warns: "⚠️ Previous release may have failed — run `bonvoy rollback` first or use `--force`" and aborts
 - `--force` flag on shipit skips this check and overwrites
@@ -188,33 +193,38 @@ bonvoy rollback --force      # Skip confirmation prompt
 ## Implementation Plan
 
 ### Step 1: ActionLog in Core
+
 - Add `ActionLog` class to `@bonvoy/core`
 - Add `actionLog` to `Context` interface
 - Add `rollback` hook to `ReleaseHooks`
 - Write log to disk incrementally
 
 ### Step 2: Plugin Integration
+
 - `plugin-git`: record commit, tag, push actions + rollback handler
 - `plugin-npm`: record publish actions + rollback handler (best-effort unpublish)
 - `plugin-github`: record release creation + rollback handler (delete release)
 - `plugin-gitlab`: record release creation + rollback handler (delete release)
 
 ### Step 3: Auto-rollback in shipit
+
 - Wrap hook execution in try/catch
 - On error: trigger rollback, update log, re-throw
 
 ### Step 4: `bonvoy rollback` command
+
 - New command in `bonvoy` (CLI package)
 - Read log, initialize plugins, execute rollback
 - `--dry-run` and `--force` flags
 
 ### Step 5: Tests
+
 - Unit tests per plugin rollback handler
 - Integration test: simulate failure mid-release, verify rollback
 - Edge cases: npm unpublish failure, missing log, already rolled back
 
 ---
 
-*Feature: Rollback*
-*Status: ✅ Implemented*
-*Depends on: @bonvoy/core, all default plugins*
+_Feature: Rollback_
+_Status: ✅ Implemented_
+_Depends on: @bonvoy/core, all default plugins_

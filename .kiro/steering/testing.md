@@ -3,6 +3,7 @@
 ## Test Framework
 
 ### Vitest
+
 - All tests use **Vitest** (NOT Jest, Mocha, or others)
 - Configuration in `vitest.config.ts` at root
 - Run tests: `npm test` (requires `npm run build` first)
@@ -10,6 +11,7 @@
 - Coverage: `npm run test:coverage`
 
 ### Coverage Target
+
 - **100% coverage** — currently achieved, must be maintained
 - v8 coverage provider (faster, more accurate than istanbul)
 - Coverage includes: statements, branches, functions, lines
@@ -18,6 +20,7 @@
 ## Test Structure
 
 ### File Organization
+
 ```
 packages/<name>/
 ├── src/
@@ -28,11 +31,13 @@ packages/<name>/
 ```
 
 ### Test File Naming
+
 - `<name>.test.ts` for unit tests
 - `<name>.e2e.test.ts` for E2E tests
 - Match source file name (e.g., `git.ts` → `git.test.ts`)
 
 ### Test Structure
+
 ```typescript
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
@@ -48,10 +53,10 @@ describe('FeatureName', () => {
   it('should do something specific', () => {
     // Arrange
     const input = 'test';
-    
+
     // Act
     const result = doSomething(input);
-    
+
     // Assert
     expect(result).toBe('expected');
   });
@@ -69,6 +74,7 @@ describe('FeatureName', () => {
 ## Mocking
 
 ### When to Mock
+
 - External APIs (GitHub, GitLab, npm registry)
 - File system operations
 - Git commands
@@ -76,6 +82,7 @@ describe('FeatureName', () => {
 - Time-dependent operations
 
 ### When NOT to Mock
+
 - Internal functions (test the real implementation)
 - Simple utilities
 - Pure functions
@@ -83,6 +90,7 @@ describe('FeatureName', () => {
 ### Mock Patterns
 
 #### Mock with vi.mock()
+
 ```typescript
 import { vi } from 'vitest';
 
@@ -92,11 +100,12 @@ vi.mock('execa', () => ({
       return { stdout: 'mock git log output' };
     }
     return { stdout: '' };
-  })
+  }),
 }));
 ```
 
 #### Mock File System with memfs
+
 ```typescript
 import { vol } from 'memfs';
 import { vi } from 'vitest';
@@ -107,21 +116,23 @@ vi.mock('node:fs/promises');
 beforeEach(() => {
   vol.reset();
   vol.fromJSON({
-    '/project/package.json': JSON.stringify({ name: 'test', version: '1.0.0' })
+    '/project/package.json': JSON.stringify({ name: 'test', version: '1.0.0' }),
   });
 });
 ```
 
 #### Mock Octokit (GitHub API)
+
 ```typescript
 const mockOctokit = {
   repos: {
-    createRelease: vi.fn().mockResolvedValue({ data: { id: 123 } })
-  }
+    createRelease: vi.fn().mockResolvedValue({ data: { id: 123 } }),
+  },
 };
 ```
 
 ### Spy on Functions
+
 ```typescript
 const spy = vi.spyOn(console, 'log');
 doSomething();
@@ -132,17 +143,20 @@ spy.mockRestore();
 ## Test Types
 
 ### Unit Tests
+
 - Test individual functions/classes in isolation
 - Mock all external dependencies
 - Fast execution (< 1ms per test)
 - Example: `packages/core/test/config.test.ts`
 
 ### Integration Tests
+
 - Test multiple components together
 - Mock only external services (APIs, file system)
 - Example: `packages/plugin-git/test/git.test.ts`
 
 ### E2E Tests
+
 - Test complete workflows end-to-end
 - Located in `e2e/` directory at root
 - Mock git, npm, GitHub API (no real operations)
@@ -152,6 +166,7 @@ spy.mockRestore();
 ## Assertions
 
 ### Common Patterns
+
 ```typescript
 // Equality
 expect(result).toBe('exact match');
@@ -197,22 +212,25 @@ expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2');
 ## Test Data
 
 ### Fixtures
+
 - Keep test data close to tests
 - Use inline data for simple cases
 - Extract to separate files for complex data
 
 Example:
+
 ```typescript
 const mockCommit = {
   hash: 'abc123',
   message: 'feat: add feature',
   author: 'Test Author',
   date: '2026-01-01T00:00:00Z',
-  files: ['src/index.ts']
+  files: ['src/index.ts'],
 };
 ```
 
 ### Deterministic Data
+
 - Use fixed dates, hashes, IDs (no `Date.now()` or random values)
 - Makes tests reproducible
 - Example: `2026-01-01T00:00:00Z` instead of `new Date()`
@@ -220,41 +238,47 @@ const mockCommit = {
 ## Best Practices
 
 ### Test Naming
+
 - Use `should` or `must` in test names
 - Be specific: "should throw error when API key is missing"
 - Not: "test error handling"
 
 ### One Assertion per Test
+
 - Prefer multiple small tests over one large test
 - Makes failures easier to debug
 - Exception: related assertions (e.g., object shape)
 
 ### Arrange-Act-Assert
+
 ```typescript
 it('should format version tag', () => {
   // Arrange
   const pkg = { name: '@bonvoy/core', version: '1.0.0' };
-  
+
   // Act
   const tag = formatTag(pkg);
-  
+
   // Assert
   expect(tag).toBe('@bonvoy/core@1.0.0');
 });
 ```
 
 ### Avoid Test Interdependence
+
 - Each test must be independent
 - No shared state between tests
 - Use `beforeEach` for setup, not global variables
 
 ### Test Edge Cases
+
 - Empty arrays/strings
 - Null/undefined
 - Invalid input
 - Boundary values (0, -1, max)
 
 ### Don't Test Implementation Details
+
 - Test behavior, not internals
 - Bad: `expect(obj._privateMethod).toHaveBeenCalled()`
 - Good: `expect(obj.publicMethod()).toBe('result')`
@@ -262,22 +286,26 @@ it('should format version tag', () => {
 ## Performance
 
 ### Fast Tests
+
 - Unit tests should be < 1ms each
 - E2E tests can be slower (< 100ms)
 - Use `vi.useFakeTimers()` for time-dependent tests
 
 ### Parallel Execution
+
 - Vitest runs tests in parallel by default
 - Ensure tests don't conflict (no shared files, ports, etc.)
 
 ## Debugging Tests
 
 ### Run Single Test
+
 ```bash
 npm test -- test/specific.test.ts
 ```
 
 ### Run Single Test Case
+
 ```typescript
 it.only('should test this one', () => {
   // ...
@@ -285,11 +313,13 @@ it.only('should test this one', () => {
 ```
 
 ### Debug Output
+
 ```typescript
 console.log(JSON.stringify(result, null, 2));
 ```
 
 ### VS Code Debugging
+
 - Use Vitest extension for VS Code
 - Set breakpoints in test files
 - Run tests in debug mode

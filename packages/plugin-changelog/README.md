@@ -42,17 +42,20 @@ export default {
 // bonvoy.config.js
 export default {
   plugins: [
-    ['@bonvoy/plugin-changelog', {
-      global: true, // Generate global changelog at repo root
-      includeCommitHash: true, // Include commit hashes in entries
-      sections: {
-        feat: '🚀 New Features',
-        fix: '🔧 Bug Fixes',
-        perf: '⚡ Performance Improvements',
-        docs: '📚 Documentation',
-        breaking: '💥 Breaking Changes',
-      }
-    }]
+    [
+      '@bonvoy/plugin-changelog',
+      {
+        global: true, // Generate global changelog at repo root
+        includeCommitHash: true, // Include commit hashes in entries
+        sections: {
+          feat: '🚀 New Features',
+          fix: '🔧 Bug Fixes',
+          perf: '⚡ Performance Improvements',
+          docs: '📚 Documentation',
+          breaking: '💥 Breaking Changes',
+        },
+      },
+    ],
   ],
 };
 ```
@@ -72,19 +75,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-01-09
 
 ### ✨ Features
+
 - feat: add new API endpoint
 - feat(auth): implement OAuth2 support
 
 ### 🐛 Bug Fixes
+
 - fix: resolve memory leak in parser
 - fix(api): handle edge case in validation
 
 ### ⚡ Performance
+
 - perf: optimize database queries
 
 ## [1.1.0] - 2026-01-08
 
 ### ✨ Features
+
 - feat: add user management
 ```
 
@@ -98,14 +105,17 @@ When `global: true` is enabled, a global changelog is created at the repo root:
 ## @myorg/core
 
 ### ✨ Features
+
 - feat: add new API endpoint
 
 ### 🐛 Bug Fixes
+
 - fix: resolve memory leak
 
 ## @myorg/utils
 
 ### ✨ Features
+
 - feat: add utility functions
 ```
 
@@ -115,10 +125,10 @@ When `global: true` is enabled, a global changelog is created at the repo root:
 interface ChangelogConfig {
   // Generate global changelog at repo root
   global?: boolean; // default: false
-  
+
   // Section titles for different commit types
   sections?: Record<string, string>; // default: emoji sections
-  
+
   // Include commit hashes in changelog entries
   includeCommitHash?: boolean; // default: false
 }
@@ -171,6 +181,7 @@ git commit -m "fix(core): resolve parsing issue" packages/core/src/parser.ts
 ```
 
 The changelog plugin will:
+
 - Add the shared commit to both package changelogs
 - Add the core-specific commit only to @myorg/core changelog
 

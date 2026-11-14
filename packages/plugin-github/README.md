@@ -27,10 +27,10 @@ npm install @bonvoy/plugin-github
 export default {
   github: {
     token: process.env.GITHUB_TOKEN, // default
-    owner: 'my-org',                  // optional, auto-detected
-    repo: 'my-repo',                  // optional, auto-detected
-    draft: false,                     // default
-    prerelease: false,                // default, auto-detected from version
+    owner: 'my-org', // optional, auto-detected
+    repo: 'my-repo', // optional, auto-detected
+    draft: false, // default
+    prerelease: false, // default, auto-detected from version
   },
 };
 ```
@@ -39,10 +39,10 @@ export default {
 
 This plugin taps into the following hooks:
 
-| Hook | Action |
-|------|--------|
-| `makeRelease` | Creates GitHub releases for published packages |
-| `createPR` | Creates a release PR with version bumps and changelog |
+| Hook          | Action                                                |
+| ------------- | ----------------------------------------------------- |
+| `makeRelease` | Creates GitHub releases for published packages        |
+| `createPR`    | Creates a release PR with version bumps and changelog |
 
 ## Requirements
 
@@ -59,6 +59,7 @@ The plugin auto-detects the repository in this order:
 3. Git remote URL (`git remote get-url origin`)
 
 Supported URL formats:
+
 - `https://github.com/owner/repo`
 - `https://github.com/owner/repo.git`
 - `git@github.com:owner/repo.git`
@@ -74,6 +75,7 @@ When using `bonvoy prepare`, this plugin:
 ## Default Behavior
 
 This plugin is loaded automatically by bonvoy. It runs during:
+
 - `makeRelease` hook to create GitHub releases
 - `createPR` hook to create release PRs
 

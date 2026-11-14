@@ -27,9 +27,9 @@ npm install @bonvoy/plugin-npm
 export default {
   npm: {
     registry: 'https://registry.npmjs.org', // default
-    access: 'public',                        // default for scoped packages
-    provenance: true,                        // default in CI
-    skipExisting: true,                      // default
+    access: 'public', // default for scoped packages
+    provenance: true, // default in CI
+    skipExisting: true, // default
   },
 };
 ```
@@ -38,8 +38,8 @@ export default {
 
 This plugin taps into the following hooks:
 
-| Hook | Action |
-|------|--------|
+| Hook      | Action                             |
+| --------- | ---------------------------------- |
 | `publish` | Publishes packages to npm registry |
 
 ## Requirements

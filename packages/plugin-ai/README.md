@@ -13,9 +13,7 @@ npm install @bonvoy/plugin-ai
 ```javascript
 // bonvoy.config.js
 export default {
-  plugins: [
-    ['@bonvoy/plugin-ai', { provider: 'openai' }]
-  ]
+  plugins: [['@bonvoy/plugin-ai', { provider: 'openai' }]],
 };
 ```
 
@@ -36,9 +34,11 @@ The plugin adds a blockquote summary after the version header:
 > If a publish fails mid-way, bonvoy now undoes all completed steps automatically.
 
 ### ✨ Features
+
 - add rollback & recovery for failed releases
 
 ### 🐛 Bug Fixes
+
 - improve error messages for rollback status
 ```
 
@@ -48,32 +48,32 @@ The conventional changelog below remains unchanged.
 
 Three providers are supported, each using native `fetch` with zero extra dependencies.
 
-| Provider | Default Model | Env Var |
-|----------|---------------|---------|
-| `openai` | `gpt-4o-mini` | `OPENAI_API_KEY` |
+| Provider    | Default Model              | Env Var             |
+| ----------- | -------------------------- | ------------------- |
+| `openai`    | `gpt-4o-mini`              | `OPENAI_API_KEY`    |
 | `anthropic` | `claude-sonnet-4-20250514` | `ANTHROPIC_API_KEY` |
-| `gemini` | `gemini-2.0-flash` | `GEMINI_API_KEY` |
+| `gemini`    | `gemini-2.0-flash`         | `GEMINI_API_KEY`    |
 
 ```javascript
 // Anthropic
-['@bonvoy/plugin-ai', { provider: 'anthropic' }]
-
-// Gemini
-['@bonvoy/plugin-ai', { provider: 'gemini' }]
-
-// Custom model
-['@bonvoy/plugin-ai', { provider: 'openai', model: 'gpt-4o' }]
+['@bonvoy/plugin-ai', { provider: 'anthropic' }][
+  // Gemini
+  ('@bonvoy/plugin-ai', { provider: 'gemini' })
+][
+  // Custom model
+  ('@bonvoy/plugin-ai', { provider: 'openai', model: 'gpt-4o' })
+];
 ```
 
 ## Configuration
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `provider` | `'openai' \| 'anthropic' \| 'gemini'` | Yes | LLM provider |
-| `model` | `string` | No | Model name (uses provider default) |
-| `apiKey` | `string` | No | API key (defaults to env var) |
-| `promptTemplate` | `string` | No | Custom prompt with `{packageName}`, `{version}`, `{commitList}` placeholders |
-| `maxTokens` | `number` | No | Max response tokens (default: `200`) |
+| Option           | Type                                  | Required | Description                                                                  |
+| ---------------- | ------------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| `provider`       | `'openai' \| 'anthropic' \| 'gemini'` | Yes      | LLM provider                                                                 |
+| `model`          | `string`                              | No       | Model name (uses provider default)                                           |
+| `apiKey`         | `string`                              | No       | API key (defaults to env var)                                                |
+| `promptTemplate` | `string`                              | No       | Custom prompt with `{packageName}`, `{version}`, `{commitList}` placeholders |
+| `maxTokens`      | `number`                              | No       | Max response tokens (default: `200`)                                         |
 
 ## Behavior
 

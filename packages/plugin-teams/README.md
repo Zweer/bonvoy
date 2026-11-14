@@ -17,25 +17,29 @@ npm install @bonvoy/plugin-teams
 // bonvoy.config.js
 export default {
   plugins: [
-    ['@bonvoy/plugin-teams', {
-      webhookUrl: process.env.TEAMS_WEBHOOK_URL,
-    }]
-  ]
+    [
+      '@bonvoy/plugin-teams',
+      {
+        webhookUrl: process.env.TEAMS_WEBHOOK_URL,
+      },
+    ],
+  ],
 };
 ```
 
 ## Configuration
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `webhookUrl` | `string` | Yes | Teams webhook URL |
-| `onSuccess` | `boolean` | No | Send on success (default: `true`) |
-| `onFailure` | `boolean` | No | Send on failure (default: `false`) |
-| `includeChangelog` | `boolean` | No | Include changelog (default: `true`) |
+| Option             | Type      | Required | Description                         |
+| ------------------ | --------- | -------- | ----------------------------------- |
+| `webhookUrl`       | `string`  | Yes      | Teams webhook URL                   |
+| `onSuccess`        | `boolean` | No       | Send on success (default: `true`)   |
+| `onFailure`        | `boolean` | No       | Send on failure (default: `false`)  |
+| `includeChangelog` | `boolean` | No       | Include changelog (default: `true`) |
 
 ## Message Format
 
 Uses [MessageCard](https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference) format with:
+
 - Color-coded theme (green/red)
 - Package facts with links
 - Changelog sections

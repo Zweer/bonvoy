@@ -22,6 +22,7 @@ bonvoy was built for monorepos from day one. Workspace detection, per-package ch
 semantic-release is designed to release on every push to main. There's no "preview first" or "release when I'm ready." Every merge triggers a release.
 
 bonvoy gives you the choice:
+
 - `bonvoy shipit` — release now
 - `bonvoy shipit --dry-run` — preview first
 - `bonvoy prepare` — create a release PR instead
@@ -40,10 +41,13 @@ A typical semantic-release config:
     "@semantic-release/changelog",
     ["@semantic-release/npm", { "npmPublish": true }],
     ["@semantic-release/github", { "assets": [] }],
-    ["@semantic-release/git", {
-      "assets": ["CHANGELOG.md", "package.json"],
-      "message": "chore(release): ${nextRelease.version}"
-    }]
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md", "package.json"],
+        "message": "chore(release): ${nextRelease.version}"
+      }
+    ]
   ]
 }
 ```
@@ -61,18 +65,18 @@ Let's be honest:
 
 ## Side by Side
 
-| | semantic-release | bonvoy |
-|---|---|---|
-| **Monorepo** | Community plugins | Native |
-| **Conventional commits** | ✅ | ✅ |
-| **Changelog** | Plugin | Default |
-| **GitHub releases** | Plugin | Default |
-| **npm publish** | Plugin | Default |
-| **Config needed** | Yes (plugins list) | No |
-| **Release trigger** | Automatic (on push) | Manual or automatic |
-| **Dry run** | `--dry-run` | `--dry-run` |
-| **PR workflow** | No | Yes |
-| **Branch strategies** | Advanced | Basic (main branch) |
+|                          | semantic-release    | bonvoy              |
+| ------------------------ | ------------------- | ------------------- |
+| **Monorepo**             | Community plugins   | Native              |
+| **Conventional commits** | ✅                  | ✅                  |
+| **Changelog**            | Plugin              | Default             |
+| **GitHub releases**      | Plugin              | Default             |
+| **npm publish**          | Plugin              | Default             |
+| **Config needed**        | Yes (plugins list)  | No                  |
+| **Release trigger**      | Automatic (on push) | Manual or automatic |
+| **Dry run**              | `--dry-run`         | `--dry-run`         |
+| **PR workflow**          | No                  | Yes                 |
+| **Branch strategies**    | Advanced            | Basic (main branch) |
 
 ## Migration Steps
 
@@ -131,18 +135,20 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump (patch/minor/major/x.y.z)'
+        description: "Version bump (patch/minor/major/x.y.z)"
         required: false
 ```
 
 ## Should You Migrate?
 
 **Yes, if:**
+
 - You have a monorepo (or plan to)
 - You want control over release timing
 - You're tired of configuring 6 plugins for basic functionality
 
 **No, if:**
+
 - You want fully automatic releases on every push
 - You need advanced branch strategies (beta/next channels)
 - You're happy with your current setup

@@ -12,7 +12,7 @@ Why I Built Yet Another Release Tool for npm
 
 ## Body
 
-```
+````
 I spent years fighting with auto + lerna, semantic-release, release-it, release-please, and changesets. They all had the same problems: phantom releases, no monorepo support, or mandatory workflows I didn't want.
 
 So I built bonvoy — a plugin-based release tool that:
@@ -26,7 +26,7 @@ Example:
 ```bash
 npm install -D bonvoy
 npx bonvoy shipit
-```
+````
 
 That's it. It reads your git history, calculates version bumps from conventional commits, generates changelogs, publishes to npm, and creates GitHub releases.
 
@@ -37,6 +37,7 @@ GitHub: https://github.com/Zweer/bonvoy
 Docs: https://zweer.github.io/bonvoy
 
 If you've ever been frustrated by monorepo releases, I'd love to hear your story. And if you try it, let me know what breaks — I'm using it to release itself.
+
 ```
 
 ## Flair
@@ -52,3 +53,4 @@ Select: **"Article"** or **"Show & Tell"**
 - Respond to technical questions with details
 - Accept constructive criticism
 - Don't reply "thanks!" to every comment
+```

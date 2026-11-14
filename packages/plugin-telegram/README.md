@@ -18,24 +18,27 @@ npm install @bonvoy/plugin-telegram
 // bonvoy.config.js
 export default {
   plugins: [
-    ['@bonvoy/plugin-telegram', {
-      botToken: process.env.TELEGRAM_BOT_TOKEN,
-      chatId: process.env.TELEGRAM_CHAT_ID,
-    }]
-  ]
+    [
+      '@bonvoy/plugin-telegram',
+      {
+        botToken: process.env.TELEGRAM_BOT_TOKEN,
+        chatId: process.env.TELEGRAM_CHAT_ID,
+      },
+    ],
+  ],
 };
 ```
 
 ## Configuration
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `botToken` | `string` | Yes | Telegram Bot Token from BotFather |
-| `chatId` | `string` | Yes | Chat/Group/Channel ID |
-| `parseMode` | `string` | No | Message format: `HTML`, `Markdown`, `MarkdownV2` (default: `HTML`) |
-| `disableWebPagePreview` | `boolean` | No | Disable link previews (default: `true`) |
-| `onSuccess` | `boolean` | No | Send on success (default: `true`) |
-| `onFailure` | `boolean` | No | Send on failure (default: `false`) |
+| Option                  | Type      | Required | Description                                                        |
+| ----------------------- | --------- | -------- | ------------------------------------------------------------------ |
+| `botToken`              | `string`  | Yes      | Telegram Bot Token from BotFather                                  |
+| `chatId`                | `string`  | Yes      | Chat/Group/Channel ID                                              |
+| `parseMode`             | `string`  | No       | Message format: `HTML`, `Markdown`, `MarkdownV2` (default: `HTML`) |
+| `disableWebPagePreview` | `boolean` | No       | Disable link previews (default: `true`)                            |
+| `onSuccess`             | `boolean` | No       | Send on success (default: `true`)                                  |
+| `onFailure`             | `boolean` | No       | Send on failure (default: `false`)                                 |
 
 ## Environment Variables
 

@@ -13,6 +13,18 @@ on:
         type: string
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - run: npm ci
+      - run: npm run build
+      - run: npx biome check
+      - run: npm run lint:typecheck
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -32,7 +44,7 @@ jobs:
       - run: npm test
 
   release:
-    needs: test
+    needs: [lint, test]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:

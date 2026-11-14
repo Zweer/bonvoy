@@ -19,12 +19,14 @@ A recurring issue: release-please [randomly stops creating PRs](https://github.c
 ### PR-only workflow
 
 release-please only works through PRs. There's no "just release now" command. Every release requires:
+
 1. Push commits to main
 2. Wait for release-please to create/update a PR
 3. Review and merge the PR
 4. Wait for CI to publish
 
 Sometimes you just want to ship a fix. bonvoy gives you both:
+
 - `bonvoy shipit` — release now
 - `bonvoy prepare` — create a release PR (like release-please)
 
@@ -43,18 +45,18 @@ bonvoy: zero config for the common case.
 
 ## Side by Side
 
-| | release-please | bonvoy |
-|---|---|---|
-| **Monorepo** | Yes (manifest) | Yes (workspaces) |
-| **Conventional commits** | ✅ | ✅ |
-| **Changelog** | ✅ | ✅ |
-| **GitHub releases** | ✅ | ✅ |
-| **npm publish** | Separate step | Built-in |
-| **PR workflow** | Only option | Optional |
-| **Direct release** | No | Yes |
-| **Config** | 2 JSON files | Zero config |
-| **Languages** | Many | npm only |
-| **GitHub Action** | Required | Optional |
+|                          | release-please | bonvoy           |
+| ------------------------ | -------------- | ---------------- |
+| **Monorepo**             | Yes (manifest) | Yes (workspaces) |
+| **Conventional commits** | ✅             | ✅               |
+| **Changelog**            | ✅             | ✅               |
+| **GitHub releases**      | ✅             | ✅               |
+| **npm publish**          | Separate step  | Built-in         |
+| **PR workflow**          | Only option    | Optional         |
+| **Direct release**       | No             | Yes              |
+| **Config**               | 2 JSON files   | Zero config      |
+| **Languages**            | Many           | npm only         |
+| **GitHub Action**        | Required       | Optional         |
 
 ## Migration Steps
 
@@ -119,12 +121,14 @@ release-please may have left open "chore: release" PRs. Close them — bonvoy wi
 ## Should You Migrate?
 
 **Yes, if:**
+
 - You've been bitten by the GitHub Action breaking changes
 - You want the option to release without PRs
 - You only release npm packages
 - You want simpler configuration
 
 **No, if:**
+
 - You release non-npm packages (Java, Python, Go)
 - The PR-only workflow is exactly what you want
 - Your release-please setup is stable and working

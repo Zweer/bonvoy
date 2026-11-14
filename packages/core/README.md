@@ -54,7 +54,7 @@ console.log(config.versioning); // 'independent' | 'fixed'
 import { detectWorkspaces } from '@bonvoy/core';
 
 const packages = await detectWorkspaces('/path/to/monorepo');
-console.log(packages.map(p => p.name));
+console.log(packages.map((p) => p.name));
 ```
 
 ## Hook System

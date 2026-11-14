@@ -41,16 +41,19 @@ export default {
 // bonvoy.config.js
 export default {
   plugins: [
-    ['@bonvoy/plugin-conventional', {
-      preset: 'conventional', // 'angular' | 'conventional' | 'atom' | 'custom'
-      types: {
-        // Only used when preset: 'custom'
-        feat: 'minor',
-        fix: 'patch',
-        breaking: 'major',
-        perf: 'patch',
-      }
-    }]
+    [
+      '@bonvoy/plugin-conventional',
+      {
+        preset: 'conventional', // 'angular' | 'conventional' | 'atom' | 'custom'
+        types: {
+          // Only used when preset: 'custom'
+          feat: 'minor',
+          fix: 'patch',
+          breaking: 'major',
+          perf: 'patch',
+        },
+      },
+    ],
   ],
 };
 ```
@@ -59,12 +62,12 @@ export default {
 
 ### Angular Preset (default)
 
-| Type | Bump | Example |
-|------|------|---------|
-| `feat` | `minor` | `feat: add new API endpoint` |
-| `fix` | `patch` | `fix: resolve memory leak` |
-| `perf` | `patch` | `perf: optimize database queries` |
-| `feat!` | `major` | `feat!: remove deprecated API` |
+| Type              | Bump    | Example                                    |
+| ----------------- | ------- | ------------------------------------------ |
+| `feat`            | `minor` | `feat: add new API endpoint`               |
+| `fix`             | `patch` | `fix: resolve memory leak`                 |
+| `perf`            | `patch` | `perf: optimize database queries`          |
+| `feat!`           | `major` | `feat!: remove deprecated API`             |
 | `BREAKING CHANGE` | `major` | Any commit with `BREAKING CHANGE:` in body |
 
 ### Breaking Changes
@@ -104,21 +107,25 @@ git commit -m "test: add unit tests"              # → no bump
 ## Presets
 
 ### Angular (default)
+
 - `feat` → minor
-- `fix` → patch  
+- `fix` → patch
 - `perf` → patch
 
 ### Conventional
+
 - `feat` → minor
 - `fix` → patch
 - `perf` → patch
 
 ### Atom
+
 - `:sparkles:` → minor
 - `:bug:` → patch
 - `:racehorse:` → patch
 
 ### Custom
+
 Define your own commit types and their corresponding bumps.
 
 ## Monorepo Support
@@ -148,7 +155,7 @@ const plugin = new ConventionalPlugin({
   types: {
     feat: 'minor',
     fix: 'patch',
-  }
+  },
 });
 ```
 

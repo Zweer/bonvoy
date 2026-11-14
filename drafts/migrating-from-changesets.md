@@ -104,16 +104,16 @@ That's it. Next time you run `bonvoy shipit`, it picks up all conventional commi
 
 ## Side by Side
 
-| | Changesets | bonvoy |
-|---|---|---|
-| **Track changes** | `.changeset/*.md` files | Conventional commits |
-| **Decide bump** | Manual (in changeset file) | Automatic (from commit type) |
-| **Release trigger** | Merge release PR | `bonvoy shipit` (or PR workflow) |
-| **PR requirement** | Always | Optional |
-| **Config files** | `.changeset/config.json` | None (zero-config) |
-| **Bot comments** | Yes (on every PR) | No |
-| **Monorepo** | ✅ | ✅ |
-| **Changelog** | ✅ | ✅ |
+|                     | Changesets                 | bonvoy                           |
+| ------------------- | -------------------------- | -------------------------------- |
+| **Track changes**   | `.changeset/*.md` files    | Conventional commits             |
+| **Decide bump**     | Manual (in changeset file) | Automatic (from commit type)     |
+| **Release trigger** | Merge release PR           | `bonvoy shipit` (or PR workflow) |
+| **PR requirement**  | Always                     | Optional                         |
+| **Config files**    | `.changeset/config.json`   | None (zero-config)               |
+| **Bot comments**    | Yes (on every PR)          | No                               |
+| **Monorepo**        | ✅                         | ✅                               |
+| **Changelog**       | ✅                         | ✅                               |
 
 ## What I Gained
 
@@ -132,12 +132,14 @@ That's it. Next time you run `bonvoy shipit`, it picks up all conventional commi
 ## Should You Migrate?
 
 **Yes, if:**
+
 - Your team already uses conventional commits
 - You're tired of creating changeset files
 - You want the option to release without a PR
 - You value simplicity over explicit control
 
 **No, if:**
+
 - Your team doesn't use conventional commits (and doesn't want to)
 - You need reviewers to approve version bumps explicitly
 - You're happy with your current workflow

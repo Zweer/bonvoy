@@ -14,6 +14,7 @@
 ### 1. Single Package - First Release
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "0.0.0" }
 No workspaces
@@ -21,11 +22,13 @@ No git tags
 ```
 
 **Commits:**
+
 - `feat: add authentication`
 - `fix: resolve memory leak`
 - `docs: update README`
 
 **Expected:**
+
 - Version: `0.0.0` → `0.1.0` (minor bump from feat)
 - Changelog includes: feat, fix (no docs)
 - 1 package to release
@@ -35,6 +38,7 @@ No git tags
 ### 2. Monorepo - Independent Versioning
 
 **Setup:**
+
 ```
 Workspaces: @test/core, @test/utils, @test/cli
 Versions: 1.0.0, 0.5.0, 0.2.0
@@ -42,11 +46,13 @@ Last tag: @test/core@1.0.0
 ```
 
 **Commits:**
+
 - `feat: add new API` (files: `packages/core/src/api.ts`)
 - `fix: helper bug` (files: `packages/utils/src/helper.ts`)
 - `docs: update readme` (files: `README.md`)
 
 **Expected:**
+
 - `@test/core`: `1.0.0` → `1.1.0` (minor)
 - `@test/utils`: `0.5.0` → `0.5.1` (patch)
 - `@test/cli`: no changes
@@ -57,14 +63,17 @@ Last tag: @test/core@1.0.0
 ### 3. Breaking Change - Major Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.5.2" }
 ```
 
 **Commits:**
+
 - `feat!: remove deprecated API`
 
 **Expected:**
+
 - Version: `1.5.2` → `2.0.0` (major)
 - Changelog section: "💥 Breaking Changes"
 
@@ -73,16 +82,19 @@ package.json: { name: "test-pkg", version: "1.5.2" }
 ### 4. No Semantic Commits
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 ```
 
 **Commits:**
+
 - `chore: update dependencies`
 - `style: format code`
 - `docs: fix typo`
 
 **Expected:**
+
 - No version bump
 - No packages to release
 - Output: "No packages to release"
@@ -92,15 +104,18 @@ package.json: { name: "test-pkg", version: "1.0.0" }
 ### 5. Force Version Override
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 CLI args: shipit 2.5.0
 ```
 
 **Commits:**
+
 - `feat: new feature`
 
 **Expected:**
+
 - Version: `1.0.0` → `2.5.0` (forced, ignores conventional)
 - Changelog still generated from commits
 
@@ -109,15 +124,18 @@ CLI args: shipit 2.5.0
 ### 6. Multi-Package Commit
 
 **Setup:**
+
 ```
 Workspaces: @test/core, @test/utils
 Versions: 1.0.0, 1.0.0
 ```
 
 **Commits:**
+
 - `feat: shared types` (files: `packages/core/src/types.ts`, `packages/utils/src/types.ts`)
 
 **Expected:**
+
 - Both packages: `1.0.0` → `1.1.0`
 - Same commit appears in both changelogs
 
@@ -126,12 +144,14 @@ Versions: 1.0.0, 1.0.0
 ### 7. Dry Run Mode
 
 **Setup:**
+
 ```
 Any scenario
 CLI args: shipit --dry-run
 ```
 
 **Expected:**
+
 - No filesystem writes
 - No git commands executed (commit, tag, push)
 - Output shows what would happen
@@ -144,14 +164,17 @@ CLI args: shipit --dry-run
 ### 8. Pre-1.0 - Fix Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "0.5.0" }
 ```
 
 **Commits:**
+
 - `fix: resolve bug`
 
 **Expected:**
+
 - Version: `0.5.0` → `0.5.1` (patch)
 
 ---
@@ -159,14 +182,17 @@ package.json: { name: "test-pkg", version: "0.5.0" }
 ### 9. Pre-1.0 - Feat Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "0.5.0" }
 ```
 
 **Commits:**
+
 - `feat: add feature`
 
 **Expected:**
+
 - Version: `0.5.0` → `0.6.0` (minor)
 
 ---
@@ -174,14 +200,17 @@ package.json: { name: "test-pkg", version: "0.5.0" }
 ### 10. Pre-1.0 - Breaking Change
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "0.5.0" }
 ```
 
 **Commits:**
+
 - `feat!: breaking change`
 
 **Expected:**
+
 - Version: `0.5.0` → `1.0.0` (major, graduates to 1.0)
 
 ---
@@ -189,14 +218,17 @@ package.json: { name: "test-pkg", version: "0.5.0" }
 ### 11. Pre-1.0 - Perf Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "0.5.0" }
 ```
 
 **Commits:**
+
 - `perf: optimize queries`
 
 **Expected:**
+
 - Version: `0.5.0` → `0.5.1` (patch, perf = patch)
 
 ---
@@ -206,14 +238,17 @@ package.json: { name: "test-pkg", version: "0.5.0" }
 ### 12. Post-1.0 - Fix Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.5.2" }
 ```
 
 **Commits:**
+
 - `fix: resolve bug`
 
 **Expected:**
+
 - Version: `1.5.2` → `1.5.3` (patch)
 
 ---
@@ -221,14 +256,17 @@ package.json: { name: "test-pkg", version: "1.5.2" }
 ### 13. Post-1.0 - Feat Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.5.2" }
 ```
 
 **Commits:**
+
 - `feat: add feature`
 
 **Expected:**
+
 - Version: `1.5.2` → `1.6.0` (minor)
 
 ---
@@ -236,14 +274,17 @@ package.json: { name: "test-pkg", version: "1.5.2" }
 ### 14. Post-1.0 - Breaking Change
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.5.2" }
 ```
 
 **Commits:**
+
 - `feat!: breaking change`
 
 **Expected:**
+
 - Version: `1.5.2` → `2.0.0` (major)
 
 ---
@@ -251,14 +292,17 @@ package.json: { name: "test-pkg", version: "1.5.2" }
 ### 15. Post-1.0 - Perf Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.5.2" }
 ```
 
 **Commits:**
+
 - `perf: optimize queries`
 
 **Expected:**
+
 - Version: `1.5.2` → `1.5.3` (patch)
 
 ---
@@ -268,16 +312,19 @@ package.json: { name: "test-pkg", version: "1.5.2" }
 ### 16. Multiple Bump Types - Highest Wins
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 ```
 
 **Commits:**
+
 - `fix: bug fix`
 - `feat: new feature`
 - `feat!: breaking change`
 
 **Expected:**
+
 - Version: `1.0.0` → `2.0.0` (major wins)
 - Changelog has all three sections
 
@@ -286,11 +333,13 @@ package.json: { name: "test-pkg", version: "1.0.0" }
 ### 17. BREAKING CHANGE in Body
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 ```
 
 **Commits:**
+
 ```
 feat: new API
 
@@ -298,6 +347,7 @@ BREAKING CHANGE: Old API removed
 ```
 
 **Expected:**
+
 - Version: `1.0.0` → `2.0.0` (major)
 - Breaking change detected from body
 
@@ -306,15 +356,18 @@ BREAKING CHANGE: Old API removed
 ### 18. Scoped Commits
 
 **Setup:**
+
 ```
 Workspaces: @test/core, @test/utils
 ```
 
 **Commits:**
+
 - `feat(core): add API`
 - `fix(utils): resolve bug`
 
 **Expected:**
+
 - Commits assigned to correct packages by scope
 - Both packages bumped appropriately
 
@@ -323,15 +376,18 @@ Workspaces: @test/core, @test/utils
 ### 19. No Changes Since Last Tag
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 Last tag: test-pkg@1.0.0
 ```
 
 **Commits:**
+
 - (none since tag)
 
 **Expected:**
+
 - No packages to release
 - Output: "No changes since last release"
 
@@ -340,17 +396,20 @@ Last tag: test-pkg@1.0.0
 ### 20. Mixed Semantic and Non-Semantic
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 ```
 
 **Commits:**
+
 - `feat: new feature`
 - `chore: update deps`
 - `style: format`
 - `fix: bug fix`
 
 **Expected:**
+
 - Version: `1.0.0` → `1.1.0` (minor from feat)
 - Changelog includes only feat, fix
 
@@ -361,15 +420,18 @@ package.json: { name: "test-pkg", version: "1.0.0" }
 ### 21. Force Patch Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 CLI args: shipit patch
 ```
 
 **Commits:**
+
 - `feat: new feature` (would be minor)
 
 **Expected:**
+
 - Version: `1.0.0` → `1.0.1` (forced patch)
 
 ---
@@ -377,15 +439,18 @@ CLI args: shipit patch
 ### 22. Force Minor Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 CLI args: shipit minor
 ```
 
 **Commits:**
+
 - `fix: bug` (would be patch)
 
 **Expected:**
+
 - Version: `1.0.0` → `1.1.0` (forced minor)
 
 ---
@@ -393,15 +458,18 @@ CLI args: shipit minor
 ### 23. Force Major Bump
 
 **Setup:**
+
 ```
 package.json: { name: "test-pkg", version: "1.0.0" }
 CLI args: shipit major
 ```
 
 **Commits:**
+
 - `fix: bug` (would be patch)
 
 **Expected:**
+
 - Version: `1.0.0` → `2.0.0` (forced major)
 
 ---
@@ -409,15 +477,18 @@ CLI args: shipit major
 ### 24. Specific Package Selection
 
 **Setup:**
+
 ```
 Workspaces: @test/core, @test/utils, @test/cli
 CLI args: shipit --package @test/core
 ```
 
 **Commits:**
+
 - `feat: feature in all packages` (files in all packages)
 
 **Expected:**
+
 - Only `@test/core` released
 - Other packages ignored
 
@@ -440,7 +511,7 @@ vi.mock('execa', () => ({
     if (cmd === 'npm' && args[0] === 'query') {
       return { stdout: JSON.stringify(mockWorkspaces) };
     }
-  })
+  }),
 }));
 
 // Mock fs for package.json
@@ -449,7 +520,7 @@ vi.mock('node:fs', () => ({
     if (path.includes('package.json')) {
       return JSON.stringify(mockPackageJson);
     }
-  })
+  }),
 }));
 ```
 
@@ -470,19 +541,22 @@ function createMockWorkspace(name: string, version: string, path: string) {
 ## Priority
 
 **Phase 1 (MVP):**
+
 - ✅ Scenarios 1-4, 7 (core functionality)
 - ✅ Scenarios 8-15 (version bump permutations)
 
 **Phase 2 (Complete):**
+
 - ✅ Scenarios 5-6 (advanced features)
 - ✅ Scenarios 16-20 (edge cases)
 - ✅ Scenarios 21-24 (CLI arguments)
 
 **Phase 3 (Polish):**
+
 - Error scenarios (invalid semver, git failures, etc.)
 - Performance tests (large monorepos)
 - Integration with real git (optional)
 
 ---
 
-*Status: ✅ Implemented (24 scenarios across 6 test files)*
+_Status: ✅ Implemented (24 scenarios across 6 test files)_

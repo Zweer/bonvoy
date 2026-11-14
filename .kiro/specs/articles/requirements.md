@@ -5,12 +5,14 @@
 ## Editorial Line
 
 ### Voice & Tone
+
 - **First person** — "I built", "I was frustrated", "here's what I did"
 - **Honest** — admit limits, don't oversell. "bonvoy isn't for everyone"
 - **Practical** — every article has copy-paste working code
 - **Concise** — no 5-paragraph intros. Get to the point
 
 ### Publishing
+
 - **Cadence**: 1 article per week
 - **Day**: Tuesday or Wednesday morning (peak engagement on dev.to)
 - **Cross-post**: X/Twitter thread the day after each article
@@ -64,41 +66,49 @@ Years of frustration releasing packages in monorepos, both at work and personal 
 ## Articles
 
 ### Article 1: "Why I built yet another release tool for npm" ✅ LIVE
+
 - **Location**: `docs/blog/why-i-built-bonvoy.md`
 - **Goal**: emotional connection, make readers say "I have this problem too!"
 - **Target**: dev.to + Reddit r/javascript
 
 ### Article 2: "Zero-config monorepo releases in 2 minutes" 📝 DRAFT
+
 - **Location**: `drafts/zero-config-monorepo-releases.md`
 - **Goal**: show simplicity, drive installs
 - **Target**: dev.to + Medium
 
 ### Article 3: "I migrated from changesets to bonvoy" 📝 DRAFT
+
 - **Location**: `drafts/migrating-from-changesets.md`
 - **Goal**: capture frustrated changesets users
 - **Target**: dev.to + Medium
 
 ### Article 4: "Plugin system with tapable" 📝 DRAFT
+
 - **Location**: `drafts/plugin-system-with-tapable.md`
 - **Goal**: technical credibility, attract advanced devs
 - **Target**: dev.to + Hacker News
 
 ### Article 5: "Migrating from semantic-release" 📝 DRAFT
+
 - **Location**: `drafts/migrating-from-semantic-release.md`
 - **Goal**: capture the largest user base
 - **Target**: dev.to + Medium
 
 ### Article 6: "Migrating from release-it" 📝 DRAFT
+
 - **Location**: `drafts/migrating-from-release-it.md`
 - **Goal**: capture single-package users moving to monorepo
 - **Target**: dev.to + Medium
 
 ### Article 7: "Migrating from release-please" 📝 DRAFT
+
 - **Location**: `drafts/migrating-from-release-please.md`
 - **Goal**: capture users frustrated by GitHub Action chaos
 - **Target**: dev.to + Medium
 
 ### Article 8: "Migrating from auto + lerna" 📝 DRAFT
+
 - **Location**: `drafts/migrating-from-auto-lerna.md`
 - **Goal**: capture users stuck with lerna dependency issues
 - **Target**: dev.to + Medium
@@ -107,13 +117,13 @@ Years of frustration releasing packages in monorepos, both at work and personal 
 
 ## Promotion Channels
 
-| Channel | Type | When |
-|---------|------|------|
-| dev.to | Articles | Primary — no paywall, JS community |
-| Medium | Articles | Secondary — broader reach |
-| Reddit | Launch post + articles | r/node, r/javascript, r/typescript |
-| X/Twitter | Thread + demo GIF | Day after each article |
-| Hacker News | "Show HN" | After article 4 (technical) |
+| Channel     | Type                   | When                               |
+| ----------- | ---------------------- | ---------------------------------- |
+| dev.to      | Articles               | Primary — no paywall, JS community |
+| Medium      | Articles               | Secondary — broader reach          |
+| Reddit      | Launch post + articles | r/node, r/javascript, r/typescript |
+| X/Twitter   | Thread + demo GIF      | Day after each article             |
+| Hacker News | "Show HN"              | After article 4 (technical)        |
 
 ## Assets Needed
 
@@ -124,6 +134,7 @@ Years of frustration releasing packages in monorepos, both at work and personal 
 ## Publishing Workflow
 
 To publish a draft:
+
 1. `mv drafts/<article>.md docs/blog/`
 2. Add entry to sidebar in `docs/.vitepress/config.ts`
 3. Commit and push

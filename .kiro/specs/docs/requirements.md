@@ -6,6 +6,7 @@
 ## Tool: VitePress
 
 VitePress is the natural choice:
+
 - Same ecosystem (Vite, Vitest, tsdown — all Vite-based)
 - Used by Vue, Vite, Vitest, Rolldown, Pinia — proven for JS/TS tool docs
 - Markdown-first, zero config to start
@@ -91,6 +92,7 @@ docs/
 ## Blog Section
 
 Articles live on the docs site at `/blog/` for SEO benefits:
+
 - Google indexes under our domain → authority for the whole site
 - Canonical URL is ours — dev.to/Medium are cross-posts
 - Internal links between articles and docs → mutual SEO boost

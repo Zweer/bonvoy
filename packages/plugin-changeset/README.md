@@ -26,7 +26,7 @@ export default {
   plugins: [
     '@bonvoy/plugin-changeset',
     // NOTE: Do NOT use with @bonvoy/plugin-conventional
-  ]
+  ],
 };
 ```
 
@@ -36,6 +36,7 @@ Create files in `.changeset/` or `.bonvoy/` with YAML frontmatter:
 
 ```markdown
 ---
+
 "@scope/core": minor
 "@scope/utils": patch
 ---
@@ -51,8 +52,8 @@ Unlike standard changeset, you can specify exact versions:
 
 ```markdown
 ---
-"@scope/core": "2.0.0"
----
+
+## "@scope/core": "2.0.0"
 
 Breaking release with new API.
 ```
@@ -64,18 +65,21 @@ When multiple files reference the same package:
 ```markdown
 <!-- .changeset/feature-a.md -->
 ---
-"@scope/core": minor
----
+
+## "@scope/core": minor
+
 Added feature A
 
 <!-- .changeset/feature-b.md -->
 ---
-"@scope/core": patch
----
+
+## "@scope/core": patch
+
 Fixed bug B
 ```
 
 Result:
+
 - **Bump**: Takes highest (`minor` wins over `patch`)
 - **Notes**: Concatenates all descriptions
 
@@ -84,10 +88,13 @@ Result:
 ```javascript
 export default {
   plugins: [
-    ['@bonvoy/plugin-changeset', {
-      deleteAfterRelease: true,  // default: true
-    }]
-  ]
+    [
+      '@bonvoy/plugin-changeset',
+      {
+        deleteAfterRelease: true, // default: true
+      },
+    ],
+  ],
 };
 ```
 

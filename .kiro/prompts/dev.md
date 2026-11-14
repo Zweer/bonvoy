@@ -5,6 +5,7 @@ You are the **bonvoy Development Agent**. You help develop and maintain bonvoy �
 ## 🎯 Project Mission
 
 Build a **flexible, plugin-based release tool** in TypeScript that:
+
 - Works out-of-the-box for npm + GitHub projects
 - Supports monorepos with npm workspaces
 - Uses conventional commits for automatic versioning
@@ -16,22 +17,23 @@ Build a **flexible, plugin-based release tool** in TypeScript that:
 
 **ALWAYS refer to these specs for context** (all in `.kiro/specs/`):
 
-| Spec | Content |
-|------|---------|
-| `v1/requirements.md` | Core requirements, architecture, plugin system, hooks, config schema, CLI |
-| `v2/requirements.md` | Roadmap: notifications, AI release notes, LLM docs, status --all, CI docs deploy |
-| `rollback/requirements.md` | Action log, automatic/manual rollback, reversible actions per plugin |
-| `e2e/requirements.md` | 24 E2E test scenarios with expected inputs/outputs |
-| `docs/requirements.md` | VitePress documentation site structure and deployment |
-| `articles/requirements.md` | Blog articles plan, editorial line, publishing workflow |
+| Spec                                | Content                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `v1/requirements.md`                | Core requirements, architecture, plugin system, hooks, config schema, CLI                                                |
+| `v2/requirements.md`                | Roadmap: notifications, AI release notes, LLM docs, status --all, CI docs deploy                                         |
+| `rollback/requirements.md`          | Action log, automatic/manual rollback, reversible actions per plugin                                                     |
+| `e2e/requirements.md`               | 24 E2E test scenarios with expected inputs/outputs                                                                       |
+| `docs/requirements.md`              | VitePress documentation site structure and deployment                                                                    |
+| `articles/requirements.md`          | Blog articles plan, editorial line, publishing workflow                                                                  |
 | `community-plugins/requirements.md` | Future plugins: integrations (sentry, email, jira, linear, s3) + registries (jsr, docker, pypi, cargo, etc.) — on demand |
-| `ai-notes/requirements.md` | AI release notes plugin spec (OpenAI, Anthropic, Gemini) |
+| `ai-notes/requirements.md`          | AI release notes plugin spec (OpenAI, Anthropic, Gemini)                                                                 |
 
 Additional references: `README.md`, `docs/**` (VitePress site), `drafts/**` (article drafts).
 
 ## 🏗️ Architecture
 
 ### Design Principles
+
 - **Plugin-first**: Core is an event bus (tapable), functionality via plugins
 - **Sensible defaults**: Works without config for common cases
 - **Monorepo-native**: npm workspaces support built-in
@@ -41,6 +43,7 @@ Additional references: `README.md`, `docs/**` (VitePress site), `drafts/**` (art
 ### Package Structure
 
 Each package follows the same layout:
+
 ```
 packages/<name>/
 ├── src/           # Source code (TypeScript, ES modules)
@@ -51,6 +54,7 @@ packages/<name>/
 ```
 
 15 packages total:
+
 - **core** — Hook system (tapable), config loading (cosmiconfig + Zod), workspace detection, types, action log
 - **cli** — CLI orchestration: `shipit`, `prepare`, `rollback`, `status`, `changelog` commands
 - **plugin-conventional** (default) — Parse conventional commits → semver bump
@@ -82,16 +86,17 @@ Every destructive operation is recorded to `.bonvoy/release-log.json` as it happ
 
 ## 🔧 Build & Tooling
 
-| Tool | Purpose | Config |
-|------|---------|--------|
-| **tsdown** | Build (workspace mode, dts, sourcemap) | `tsdown.config.ts` |
-| **vitest** | Tests (v8 coverage, 100% target) | `vitest.config.ts` |
-| **biome** | Lint + format (single quotes, 100 line width) | `biome.json` |
-| **husky** | Git hooks (commitlint, lint-staged) | `.husky/` |
-| **VitePress** | Documentation site | `docs/.vitepress/config.ts` |
-| **GitHub Actions** | CI + docs deployment | `.github/workflows/` |
+| Tool               | Purpose                                       | Config                      |
+| ------------------ | --------------------------------------------- | --------------------------- |
+| **tsdown**         | Build (workspace mode, dts, sourcemap)        | `tsdown.config.ts`          |
+| **vitest**         | Tests (v8 coverage, 100% target)              | `vitest.config.ts`          |
+| **biome**          | Lint + format (single quotes, 100 line width) | `biome.json`                |
+| **husky**          | Git hooks (commitlint, lint-staged)           | `.husky/`                   |
+| **VitePress**      | Documentation site                            | `docs/.vitepress/config.ts` |
+| **GitHub Actions** | CI + docs deployment                          | `.github/workflows/`        |
 
 Key scripts:
+
 - `npm run build` — tsdown (all packages)
 - `npm test` — vitest run (requires build first)
 - `npm run test:coverage` — vitest with v8 coverage
@@ -101,6 +106,7 @@ Key scripts:
 ## 💡 Development Guidelines
 
 ### TypeScript
+
 - **Strict mode** always
 - **ES modules** with `.js` extensions in imports
 - **Explicit types** on parameters and returns
@@ -108,6 +114,7 @@ Key scripts:
 - **Minimal code**: only what's necessary
 
 ### Testing
+
 - **Vitest** for all tests
 - **100% coverage** currently achieved — maintain it
 - **Mock** git, npm, GitHub/GitLab API (never real calls)
@@ -115,12 +122,14 @@ Key scripts:
 - **memfs** for filesystem mocking
 
 ### Code Quality
+
 - **Biome** for linting and formatting (not ESLint/Prettier)
 - **Minimal dependencies**
 - **Small, focused packages**
 - **Zod** for config validation (schema exported as `packages/core/schema.json`)
 
 ### Key Dependencies
+
 - `tapable` — Hook system
 - `semver` — Version manipulation
 - `@octokit/rest` — GitHub API
@@ -155,6 +164,7 @@ Manual rollback available via `bonvoy rollback`.
 ```
 
 Examples from the repo:
+
 ```
 feat: :sparkles: add rollback & recovery for failed releases
 fix(cli): :bug: sync package-lock.json and root deps after version bumps

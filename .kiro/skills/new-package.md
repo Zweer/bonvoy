@@ -3,11 +3,13 @@
 ## 1. Detect project structure
 
 Check if the project uses:
+
 - npm workspaces (`package.json` has `"workspaces"` field)
 - pnpm workspaces (`pnpm-workspace.yaml` exists)
 - Yarn workspaces (`package.json` has `"workspaces"` field + `yarn.lock`)
 
 Determine:
+
 - Package manager (npm, pnpm, yarn)
 - Workspace pattern (e.g., `packages/*`)
 - Naming convention (scoped like `@org/name` or unscoped)
@@ -15,6 +17,7 @@ Determine:
 ## 2. Read existing package metadata
 
 From root `package.json` or an existing package, extract:
+
 - `author` (name and email)
 - `license` (e.g., MIT, Apache-2.0)
 - `repository` (type and URL)
@@ -53,9 +56,7 @@ Example: `packages/<name>/{src,test}` or `apps/<name>/{src,test}`
     ".": "./dist/index.js",
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "dependencies": {},
   "engines": {
     "node": ">=<version from root or existing package>"
@@ -64,6 +65,7 @@ Example: `packages/<name>/{src,test}` or `apps/<name>/{src,test}`
 ```
 
 **Dependency syntax**:
+
 - **npm**: Use `^` for internal deps (e.g., `"@org/core": "^1.0.0"`)
 - **pnpm**: Use `workspace:*` for internal deps
 - **Yarn**: Use `workspace:^` for internal deps

@@ -42,6 +42,7 @@ Scope is optional for cross-cutting changes (docs, chore at root level).
 **Always use text codes** (`:sparkles:`), **never actual emoji** (✨).
 
 Common gitmoji:
+
 - `:sparkles:` — New feature
 - `:bug:` — Bug fix
 - `:zap:` — Performance
@@ -59,12 +60,14 @@ Common gitmoji:
 ## Body
 
 **Always include a detailed body** with multiple lines explaining:
+
 1. What was changed
 2. Why it was changed
 3. Any important context or side effects
 4. Related issues or PRs
 
 Example:
+
 ```
 feat(cli): :sparkles: add rollback command
 

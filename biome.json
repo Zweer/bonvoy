@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.7/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,17 +7,19 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/schema.json", "!docs/src/content/**", "!docs/dist/**"]
+    "includes": ["**", "!**/schema.json", "!docs/src/content", "!docs/dist", "!**/CHANGELOG.md"]
   },
   "formatter": {
     "enabled": true,
     "useEditorconfig": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
     "lineWidth": 100
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noUnknownAtRules": "off"
       }

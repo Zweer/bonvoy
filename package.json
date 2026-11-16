@@ -78,7 +78,7 @@
     "cosmiconfig": "^9.0.1",
     "execa": "^9.6.1",
     "jiti": "^2.7.0",
-    "js-yaml": "^4.3.2"
+    "js-yaml": "^5.5.0"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.5",

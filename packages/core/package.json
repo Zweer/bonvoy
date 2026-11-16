@@ -33,7 +33,7 @@
     "schema.json"
   ],
   "dependencies": {
-    "cosmiconfig": "^9.0.1",
+    "cosmiconfig": "^10.0.1",
     "defu": "^6.1.7",
     "smol-toml": "^1.9.1",
     "tapable": "^2.3.3",

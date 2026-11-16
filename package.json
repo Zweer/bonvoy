@@ -85,7 +85,7 @@
     "@astrojs/starlight": "^0.42.11",
     "@biomejs/biome": "^2.6.7",
     "@bonvoy/core": "^0.12.7",
-    "@commitlint/cli": "^20.4.4",
+    "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^20.4.4",
     "@tsconfig/node24": "^24.0.6",
     "@types/js-yaml": "^4.0.9",
